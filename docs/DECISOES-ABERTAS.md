@@ -23,6 +23,8 @@ Cada item tem uma **proposta padrão** já aplicada na spec e nos testes. Respon
 | 17 | Quem executa | headless `loop-longrun.sh` com Codex `gpt-6-astra` (20 ciclos × 30 min, 8 G, estagnação 3); alternativa `/goal` no Codex TUI ou no Claude Code | o atende-clinica fechou em 7 ciclos com 93 testes; este tem 98 e mais superfície (SVGs), por isso 20 ciclos |
 | 18 | MP4 / HyperFrames | `tools/render-exercicios` é escrito pelo agente e **executado pelo humano** (precisa de rede para o `npx` e de Chromium); `verificar-independente.py` confere se estiver instalado, senão "pulado"; MP4 fora do Git | o loop não tem rede; render é passo de build |
 | 19 | GitHub / VPS | não criar agora; deploy pelo README; repo local | ação externa → você confirma |
+| 20 ⚠ | Palavras de alerta que colidem com fala comum | mantidas `caiu`, `queda`, `inchou` como palavra inteira: "a dor caiu bastante" ou "o inchaço baixou" abrem fila **alta** (falso alarme, sem dano clínico). Alternativa: tirar `caiu`/`queda` da lista ou exigir contexto (`eu cai`, `levei uma queda`) — isso muda a §6 regra 2 e `test_alerta_clinico_por_palavra_inteira` | achado da validação de 05/10: falso positivo é mais barato que falso negativo; **o fisioterapeuta decide** |
+| 21 | Alerta de abandono: identificação da "sequência" | o alerta é reemitido quando `alerta_abandono` é anterior ao `inicio` do último `realizado` (§24). Presença marcada **depois** do alerta para um horário **anterior** a ele não reinicia a sequência (caso raro: equipe marcando presença atrasada) | simples e determinístico; se incomodar, v2 guarda o id do último realizado alertado |
 
 ## Perguntas que só você responde
 

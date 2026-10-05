@@ -38,7 +38,11 @@ def test_env_exemplo_tem_todas_as_variaveis_sem_segredo_real():
 
 def test_readme_explica_deploy_e_mantem_a_secao_do_dono():
     r = ler("README.md")
-    assert "Deploy na VPS" in r and "Como rodar no seu ambiente" in r
+    assert "Como rodar no seu ambiente" in r
+    # só o corpo da seção "## Deploy na VPS" (até o próximo "## "): a seção do dono já cita PUBLIC_URL etc.
+    m = re.search(r"^##\s+Deploy na VPS\s*$(.*?)(?=^##\s|\Z)", r, re.M | re.S)
+    assert m, "falta a seção '## Deploy na VPS' (seção 19)"
+    deploy = m.group(1)
     for trecho in ("/webhook/evolution/", "MESSAGES_UPSERT", "setWebhook", "secret_token", "./atende backup",
                    "PUBLIC_URL", "EXERCICIOS_MP4_DIR", "render-exercicios"):
-        assert trecho in r, trecho
+        assert trecho in deploy, trecho
