@@ -1,5 +1,13 @@
 # atende-fisioterapia
 
+**🇧🇷 [Português](README.md) · 🇺🇸 [English](README.en.md) · 🇪🇸 [Español](README.es.md)**
+
+[![Atende Fisioterapia](guia/assets/banner.jpg)](https://inematds.github.io/atende-fisioterapia/guia/)
+
+## 📖 Guia de uso
+
+Landing e guia passo a passo (PT/EN/ES): **https://inematds.github.io/atende-fisioterapia/guia/** · [English](https://inematds.github.io/atende-fisioterapia/guia/en/) · [Español](https://inematds.github.io/atende-fisioterapia/guia/es/)
+
 Atendimento ao paciente de **uma clínica de fisioterapia**, em Python 3 só com a biblioteca padrão e SQLite: agenda de avaliação e sessões, confirmação automática, lista de espera, **plano de tratamento** (sessões previstas × realizadas, alerta de abandono e de reavaliação), **exercícios domiciliares prescritos** com biblioteca de 12 exercícios animados (SVG; MP4 pelo HyperFrames para o WhatsApp), lembrete diário opt-in, registro de **adesão e dor** com alerta clínico, FAQ, fila humana, emergência (192), campanhas com trava do COFFITO e LGPD de dado de saúde, cadastros, gestão de agenda, backup, WhatsApp pela Evolution API, equipe pelo Telegram, exportação para o Painel de Recuperação do Raio-X de Margem e entrega em Docker para VPS.
 
 O contrato completo está em `docs/ESPECIFICACAO.md`. O chat do paciente fica em `/`, a página da equipe em `/equipe` e cada exercício em `/exercicios/<id>`. O bot nunca dá orientação clínica: explica só o que o fisioterapeuta prescreveu e passa o resto para a equipe.
