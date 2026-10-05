@@ -1,0 +1,34 @@
+# Decisões abertas — fisio-v1
+
+Cada item tem uma **proposta padrão** já aplicada na spec e nos testes. Responder "ok em tudo" destrava a execução. Se mudar algo que afete o contrato (marcado ⚠), ajusto `docs/ESPECIFICACAO.md` e os testes **antes** de congelar o hash.
+
+| # | Decisão | Proposta padrão | Por quê |
+|---|---|---|---|
+| 1 | Nome do projeto / repo | `atende-fisioterapia` (pasta e futuro repo `inematds/atende-fisioterapia`) | regra: repo = nome da pasta |
+| 2 ⚠ | Linguagem | **Python 3, só biblioteca padrão** (`http.server` + `sqlite3`), igual ao atende-clinica | reaproveita o molde pronto; testes são caixa-preta (HTTP/CLI), então outra pilha não os invalida — mas aí ajusto `verificar-limites.sh`, `goal.md` e `prompt.md` antes de congelar |
+| 3 | Canais | chat web + WhatsApp pela Evolution (simulado quando não configurado); equipe pelo Telegram | mesma resposta do atende-clinica (05/10) |
+| 4 ⚠ | Retorno | **sem `retorno_dias` por serviço**: o retorno (reavaliação) nasce quando o plano de tratamento é concluído, em `última sessão + reavaliacao_dias` (30) | na fisio o retorno é a reavaliação ao fim do pacote; um mecanismo só evita dois avisos sobre a mesma coisa |
+| 5 ⚠ | Alerta de abandono | `abandono_faltas: 2` faltas seguidas num plano ativo → alerta à equipe (Telegram + `/api/alertas`); **o paciente não recebe mensagem automática** | contato de retomada é decisão clínica/humana; o Raio-X mede "tratamento indicado que não começa/continua" como orçamento |
+| 6 ⚠ | Pacote acabando | `reavaliacao_sessoes: 2` restantes → alerta à equipe (uma vez por plano); o aviso ao paciente vem só pelo retorno do item 4 | separa "alerta para a equipe agir" de "mensagem ao paciente" |
+| 7 ⚠ | Lembrete de exercício | **opt-in pelo paciente no chat** (`lembrete 19:00`, `sem lembrete`); a equipe pode desligar/mudar a hora pela API; hora padrão `19:00`; um lembrete por dia, só nos dias prescritos | o adendo pede opt-in; lembrete é tutela da saúde (sem consentimento de marketing), mas a hora é escolha do paciente |
+| 8 ⚠ | Registro de adesão | **um registro por dia** (`fiz` / `não fiz` / `dor 0–10`, último vence), não por exercício; adesão semanal = dias feitos ÷ dias previstos (de segunda a domingo, do início da prescrição até hoje inclusive) | "fiz" por exercício exigiria o paciente responder item a item pelo WhatsApp; por dia é o que uma pessoa de 60 anos responde |
+| 9 ⚠ | Dor e sinais de alerta | `dor_alerta: 7` (dor ≥ 7 → fila humana alta); palavras de alerta como palavra inteira: dormência, dormente, formigamento, perda de força, sem força, perdi a força, febre, irradia, irradiando, queda, caiu, tombo, inchaço, inchou, inchado, não consigo andar, não consigo mexer, perdi o controle; resposta cita o fisioterapeuta e o 192, nunca orienta | lista inspirada em sinais de alarme comuns em fisioterapia; **o fisioterapeuta da clínica confirma a lista e o limiar** |
+| 10 ⚠ | Exercícios do exemplo | 12 exercícios (ponte, alongamento de isquiotibiais, rotação de ombro com bastão, pêndulo de Codman, retração cervical, gato-camelo, agachamento na parede, elevação de calcanhar, abdução de quadril deitado, prancha modificada, bird-dog, mobilidade de tornozelo) com passos, erros comuns, cuidados, contraindicações e "pare se" escritos por mim como exemplo | **conteúdo clínico é do fisioterapeuta**: revisar antes de usar com paciente real; a biblioteca é editável pela API |
+| 11 ⚠ | Animação | SVG com animação **só CSS** (`@keyframes`), sem SMIL e sem script, durações de 1/2/4 s; MP4 de 4 s, 720×720, pelo HyperFrames (adaptador CSS) | o HyperFrames avança animação CSS e não tem adaptador SMIL; durações divisoras de 4 s fecham o loop no vídeo |
+| 12 ⚠ | O que o bot explica | só exercícios **prescritos** ao paciente; fora disso, "fale com seu fisioterapeuta" + atendente. Páginas `/exercicios/<id>` são públicas (sem dado pessoal) | o adendo pede isso; a página pública permite mandar link por WhatsApp sem login |
+| 13 ⚠ | Campanhas | tabela do atende-clinica + código `depoimento` para COFFITO (art. 10, V: imagem/carta de agradecimento para autopromoção); fixture `coffito` | única regra nova com fonte na pesquisa do Raio-X |
+| 14 | Raio-X | além dos 5 valores do atende-clinica, exporta `atendimentos_mes_recorrente`, `orcamentos_mes` (planos criados) e `aprovacao_atual_pct` (planos com ≥ 1 sessão realizada); `obs: "atende-fisioterapia"` | ids reais de `setores/clinica.js`; o comentário do pacote diz que fisio "pode passar de 2" em recorrência |
+| 15 | Uma clínica por instalação | `--dados DIR`; um container por clínica | igual ao molde |
+| 16 | Idioma | só PT no v1 | EN/ES depois, pelo processo trilíngue |
+| 17 | Quem executa | headless `loop-longrun.sh` com Codex `gpt-6-astra` (20 ciclos × 30 min, 8 G, estagnação 3); alternativa `/goal` no Codex TUI ou no Claude Code | o atende-clinica fechou em 7 ciclos com 93 testes; este tem 98 e mais superfície (SVGs), por isso 20 ciclos |
+| 18 | MP4 / HyperFrames | `tools/render-exercicios` é escrito pelo agente e **executado pelo humano** (precisa de rede para o `npx` e de Chromium); `verificar-independente.py` confere se estiver instalado, senão "pulado"; MP4 fora do Git | o loop não tem rede; render é passo de build |
+| 19 | GitHub / VPS | não criar agora; deploy pelo README; repo local | ação externa → você confirma |
+
+## Perguntas que só você responde
+
+- Tem uma **clínica de fisioterapia real** para o piloto (horários, serviços, exercícios que ela realmente prescreve)? Se sim, troco o `exemplos/clinica.json` e os 12 exercícios pelos dela.
+- Quem **revisa o conteúdo clínico** (12 exercícios, palavras de alerta, limiar de dor) antes de ir para paciente? Posso deixar um checklist na página `/equipe`.
+- O paciente que abandona deve receber **alguma mensagem automática** (hoje não: só a equipe é avisada)? Se sim, é ⚠ (spec §24 e um teste).
+- Os vídeos MP4: renderizar **na sua máquina** e copiar para a VPS, ou instalar Node/Chromium na VPS e rodar lá?
+- Página `/equipe` só funcional (padrão) ou já com o visual INEMA?
+- Isto é **produto para implantar em clínicas** (kit do Raio-X) ou **projeto aberto/curso**? Muda o que vem depois do v1 (guia, licença, deploy), não o v1.

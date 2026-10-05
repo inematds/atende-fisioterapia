@@ -1,0 +1,137 @@
+{
+  "nome": "Fisio Movimento",
+  "conselho": "coffito",
+  "token": "TROQUE-ESTE-TOKEN",
+  "passo_min": 30,
+  "antecedencia_min_horas": 2,
+  "janela_dias": 14,
+  "confirmacao_horas": 48,
+  "retorno_aviso_dias": 7,
+  "abandono_faltas": 2,
+  "reavaliacao_sessoes": 2,
+  "reavaliacao_dias": 30,
+  "dor_alerta": 7,
+  "lembrete_hora_padrao": "19:00",
+  "feriados": ["2026-10-12"],
+  "horarios": {
+    "seg": [["08:00", "12:00"], ["14:00", "18:00"]],
+    "ter": [["08:00", "12:00"], ["14:00", "18:00"]],
+    "qua": [["08:00", "12:00"], ["14:00", "18:00"]],
+    "qui": [["08:00", "12:00"], ["14:00", "18:00"]],
+    "sex": [["08:00", "12:00"], ["14:00", "18:00"]],
+    "sab": [["08:00", "12:00"]],
+    "dom": []
+  },
+  "profissionais": [
+    {"id": "carla", "nome": "Carla Souza", "servicos": ["avaliacao", "sessao", "rpg"]},
+    {"id": "diego", "nome": "Diego Lima", "servicos": ["avaliacao", "sessao"]}
+  ],
+  "servicos": [
+    {"id": "avaliacao", "nome": "Avaliação fisioterapêutica", "duracao_min": 60},
+    {"id": "sessao", "nome": "Sessão de fisioterapia", "duracao_min": 30},
+    {"id": "rpg", "nome": "RPG", "duracao_min": 60}
+  ],
+  "faq": [
+    {"id": "convenios", "perguntas": ["vocês aceitam convênio", "quais convênios atendem"], "resposta": "Atendemos Unimed e particular."},
+    {"id": "endereco", "perguntas": ["qual o endereço da clínica", "onde fica a clínica"], "resposta": "Rua das Flores, 100, sala 5, Batel, Curitiba."},
+    {"id": "estacionamento", "perguntas": ["tem estacionamento"], "resposta": "Temos convênio com o estacionamento ao lado (1 hora grátis)."}
+  ],
+  "exercicios": [
+    {
+      "id": "ponte", "nome": "Ponte", "apelidos": ["ponte de glúteo", "elevação de quadril"], "regiao": "lombar e quadril",
+      "passos": ["Deite de costas, joelhos dobrados e pés apoiados na largura do quadril.", "Contraia o abdômen e os glúteos.", "Levante o quadril até alinhar joelhos, quadril e ombros.", "Segure 2 segundos e desça devagar."],
+      "erros_comuns": ["Arquear demais a lombar no topo.", "Empurrar o chão com os braços."],
+      "cuidados": ["Suba só até onde não houver dor na lombar."],
+      "contraindicacoes": ["Dor lombar aguda com irradiação para a perna.", "Pós-operatório de quadril ou coluna sem liberação do fisioterapeuta."],
+      "pare_se": ["Dor aguda na lombar.", "Formigamento ou dormência na perna."]
+    },
+    {
+      "id": "alongamento-isquiotibiais", "nome": "Alongamento de isquiotibiais", "apelidos": ["alongamento da parte de trás da coxa", "alongamento de posterior de coxa", "isquiotibiais"], "regiao": "posterior da coxa",
+      "passos": ["Sente na beira de uma cadeira firme e estique uma perna à frente, calcanhar no chão e ponta do pé para cima.", "Mantenha as costas retas e incline o tronco à frente a partir do quadril.", "Sinta o alongamento atrás da coxa e segure 20 a 30 segundos.", "Troque de perna."],
+      "erros_comuns": ["Curvar as costas em vez de inclinar pelo quadril.", "Forçar até sentir dor."],
+      "cuidados": ["Alongue até uma tensão confortável, sem balançar."],
+      "contraindicacoes": ["Lesão muscular recente na coxa.", "Ciática em fase aguda."],
+      "pare_se": ["Dor aguda ou pontada atrás da coxa.", "Dor que desce pela perna até o pé."]
+    },
+    {
+      "id": "rotacao-ombro-bastao", "nome": "Rotação de ombro com bastão", "apelidos": ["rotação externa com bastão", "exercício do bastão", "cabo de vassoura"], "regiao": "ombro",
+      "passos": ["Em pé ou sentado, segure um bastão (cabo de vassoura) com as duas mãos, cotovelos colados ao corpo e dobrados a 90 graus.", "Com o braço bom, empurre o bastão para o lado, girando o braço em tratamento para fora.", "Vá até onde não houver dor e segure 2 segundos.", "Volte devagar ao centro."],
+      "erros_comuns": ["Afastar o cotovelo do corpo.", "Girar o tronco para compensar."],
+      "cuidados": ["O braço em tratamento fica relaxado; quem faz força é o outro."],
+      "contraindicacoes": ["Luxação de ombro recente.", "Pós-operatório sem liberação para rotação."],
+      "pare_se": ["Dor aguda no ombro.", "Sensação de que o ombro vai sair do lugar."]
+    },
+    {
+      "id": "pendulo-codman", "nome": "Pêndulo de Codman", "apelidos": ["pêndulo", "exercício do pêndulo", "codman"], "regiao": "ombro",
+      "passos": ["Apoie a mão boa numa mesa e incline o tronco à frente.", "Deixe o braço em tratamento pendurado, relaxado.", "Balance o corpo devagar para o braço desenhar círculos pequenos.", "Faça 10 círculos para cada lado."],
+      "erros_comuns": ["Usar a força do ombro para girar o braço.", "Fazer círculos grandes demais."],
+      "cuidados": ["O movimento vem do corpo, não do ombro."],
+      "contraindicacoes": ["Fratura de ombro ou braço não consolidada.", "Tontura ao inclinar o tronco."],
+      "pare_se": ["Dor aguda no ombro.", "Tontura ou enjoo."]
+    },
+    {
+      "id": "retracao-cervical", "nome": "Retração cervical", "apelidos": ["queixo para dentro", "retração do pescoço", "chin tuck"], "regiao": "cervical",
+      "passos": ["Sente com as costas apoiadas e olhe para a frente.", "Leve o queixo para trás, como se fizesse papada, sem inclinar a cabeça.", "Segure 3 segundos.", "Relaxe e repita."],
+      "erros_comuns": ["Inclinar a cabeça para baixo.", "Levantar os ombros."],
+      "cuidados": ["Movimento pequeno e suave."],
+      "contraindicacoes": ["Dor cervical aguda com dormência nos braços.", "Instabilidade cervical diagnosticada."],
+      "pare_se": ["Dor que irradia para o braço.", "Tontura ou visão turva."]
+    },
+    {
+      "id": "gato-camelo", "nome": "Gato-camelo", "apelidos": ["gato e camelo", "gato camelo", "mobilidade de coluna de quatro apoios"], "regiao": "coluna",
+      "passos": ["Fique de quatro apoios, mãos sob os ombros e joelhos sob o quadril.", "Solte o ar e arredonde as costas para cima, olhando para o umbigo (gato).", "Puxe o ar e deixe a barriga descer, levantando o olhar (camelo).", "Alterne devagar."],
+      "erros_comuns": ["Movimento rápido demais.", "Dobrar os cotovelos."],
+      "cuidados": ["Vá só até o limite confortável em cada direção."],
+      "contraindicacoes": ["Dor aguda em punhos ou joelhos que impeça os quatro apoios.", "Hérnia de disco em fase aguda com dor na perna."],
+      "pare_se": ["Dor aguda na coluna.", "Dormência em braços ou pernas."]
+    },
+    {
+      "id": "agachamento-parede", "nome": "Agachamento na parede", "apelidos": ["agachamento isométrico", "cadeirinha", "agachamento"], "regiao": "joelho e quadril",
+      "passos": ["Encoste as costas na parede, pés afastados dela e na largura do quadril.", "Deslize o corpo para baixo até os joelhos dobrarem, no máximo 90 graus.", "Mantenha os joelhos alinhados com os pés.", "Segure o tempo indicado e suba devagar."],
+      "erros_comuns": ["Joelhos ultrapassando a ponta dos pés.", "Descer além de 90 graus."],
+      "cuidados": ["Comece com pouco tempo e aumente aos poucos."],
+      "contraindicacoes": ["Dor aguda no joelho com inchaço.", "Pós-operatório de joelho sem liberação de carga."],
+      "pare_se": ["Dor aguda no joelho.", "Sensação de falseio ou instabilidade."]
+    },
+    {
+      "id": "elevacao-calcanhar", "nome": "Elevação de calcanhar", "apelidos": ["ponta de pé", "elevação de panturrilha", "panturrilha"], "regiao": "tornozelo e panturrilha",
+      "passos": ["Em pé, apoie as mãos numa parede ou cadeira.", "Suba na ponta dos pés devagar.", "Segure 2 segundos no alto.", "Desça devagar até o calcanhar tocar o chão."],
+      "erros_comuns": ["Subir e descer rápido.", "Desviar o peso para fora do pé."],
+      "cuidados": ["Use o apoio só para equilíbrio, não para empurrar."],
+      "contraindicacoes": ["Ruptura do tendão de Aquiles em recuperação sem liberação.", "Fratura de tornozelo não consolidada."],
+      "pare_se": ["Dor aguda no tendão de Aquiles ou na panturrilha.", "Perda de equilíbrio."]
+    },
+    {
+      "id": "abducao-quadril-deitado", "nome": "Abdução de quadril deitado", "apelidos": ["elevação lateral da perna", "abdução de quadril", "perna de lado"], "regiao": "quadril",
+      "passos": ["Deite de lado, pernas esticadas e alinhadas com o tronco.", "Contraia o abdômen.", "Levante a perna de cima devagar, até uns 30 centímetros, sem girar o quadril.", "Desça devagar."],
+      "erros_comuns": ["Girar o quadril para trás.", "Levantar a perna com impulso."],
+      "cuidados": ["A ponta do pé aponta para a frente, não para cima."],
+      "contraindicacoes": ["Pós-operatório de quadril sem liberação.", "Dor aguda na lateral do quadril (bursite em crise)."],
+      "pare_se": ["Dor aguda no quadril.", "Dor que desce pela perna."]
+    },
+    {
+      "id": "prancha-modificada", "nome": "Prancha modificada", "apelidos": ["prancha de joelhos", "prancha com joelhos apoiados", "prancha"], "regiao": "abdômen e core",
+      "passos": ["Apoie antebraços e joelhos no chão, cotovelos sob os ombros.", "Contraia o abdômen e alinhe ombros, quadril e joelhos.", "Segure o tempo indicado respirando normalmente.", "Descanse e repita."],
+      "erros_comuns": ["Deixar o quadril cair ou subir demais.", "Prender a respiração."],
+      "cuidados": ["Pare antes de perder o alinhamento."],
+      "contraindicacoes": ["Dor lombar aguda.", "Gestação avançada ou diástase sem orientação."],
+      "pare_se": ["Dor na lombar.", "Tremor que impeça manter o alinhamento."]
+    },
+    {
+      "id": "bird-dog", "nome": "Bird-dog", "apelidos": ["bird dog", "cão pássaro", "cachorro pássaro", "braço e perna opostos"], "regiao": "coluna e core",
+      "passos": ["Fique de quatro apoios, mãos sob os ombros e joelhos sob o quadril.", "Contraia o abdômen e estique o braço direito à frente e a perna esquerda atrás, sem girar o tronco.", "Segure 3 segundos.", "Volte e troque o lado."],
+      "erros_comuns": ["Levantar o braço ou a perna acima da linha do tronco.", "Girar o quadril."],
+      "cuidados": ["Se perder o equilíbrio, faça só o braço ou só a perna."],
+      "contraindicacoes": ["Dor aguda em punhos ou joelhos.", "Dor lombar aguda com irradiação."],
+      "pare_se": ["Dor na lombar.", "Dormência ou formigamento."]
+    },
+    {
+      "id": "mobilidade-tornozelo", "nome": "Mobilidade de tornozelo", "apelidos": ["alfabeto com o pé", "círculos com o tornozelo", "tornozelo"], "regiao": "tornozelo",
+      "passos": ["Sente com a perna apoiada e o pé solto no ar.", "Desenhe círculos grandes com a ponta do pé, movendo só o tornozelo.", "Faça 10 círculos para cada lado.", "Depois, aponte o pé para cima e para baixo 10 vezes."],
+      "erros_comuns": ["Mover a perna inteira em vez do tornozelo.", "Forçar além do limite de dor."],
+      "cuidados": ["Movimento lento e completo."],
+      "contraindicacoes": ["Fratura de tornozelo não consolidada.", "Entorse grave nos primeiros dias sem liberação."],
+      "pare_se": ["Dor aguda no tornozelo.", "Inchaço que aumenta durante o exercício."]
+    }
+  ]
+}

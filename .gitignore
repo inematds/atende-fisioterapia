@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.db
+*.sqlite*
+/dados/
+.loop.lock
+.env
+/backups/
+*.mp4
+/node_modules/
