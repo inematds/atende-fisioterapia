@@ -82,7 +82,8 @@ def test_alerta_de_abandono_por_faltas_seguidas(api):
     sessao("2026-10-08T10:00", False)
     assert api.rodar()["alertas"] == 1            # nova sequência, novo alerta
     assert api.post(f"/api/alertas/{al['id']}/resolver")[1]["status"] == "resolvido"
-    assert [x["id"] for x in alertas(api)] == [al["id"] + 1]
+    [novo] = alertas(api)                                       # só o da nova sequência fica aberto
+    assert novo["id"] != al["id"] and novo["tipo"] == "abandono" and novo["plano_id"] == p["id"]
     assert api.post("/api/alertas/9999/resolver")[0] == 404
 
 

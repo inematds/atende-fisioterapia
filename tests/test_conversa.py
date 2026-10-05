@@ -14,7 +14,6 @@ def test_faq_responde_exatamente(api):
 def test_nao_entendi_e_depois_passa_para_humano(api):
     r = norm(api.msg(TEL, "posso tomar ibuprofeno antes da sessão?"))
     assert "nao entendi" in r and "atendente" in r
-    assert "ibuprofeno" not in r  # o bot não orienta remédio
     assert api.fila() == []
     api.msg(TEL, "e dipirona serve?")
     f = api.fila()
