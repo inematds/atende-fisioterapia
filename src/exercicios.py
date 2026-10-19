@@ -89,3 +89,38 @@ def recurso(c, rota):
             raise Erro(404, 'Arquivo indisponível')
         return ('image/svg+xml' if extensao == 'svg' else 'video/mp4'), conteudo
     return 'text/html; charset=utf-8', pagina(c, ident)
+
+
+def conversar(c, paciente, texto, processadas=None):
+    """Explica apenas itens ativos prescritos; o maior termo casado vence."""
+    from .conversa import contem, normalizar, enviar
+    from .prescricoes import obter as prescricao, link
+    catalogo = [e for e in c.catalogo('exercicios') if e['ativo']]
+    escolhido, tamanho = None, 0
+    for e in catalogo:
+        for termo in [e['nome'], *e.get('apelidos', [])]:
+            termo = normalizar(termo)
+            palavras = len(termo.split())
+            if palavras > tamanho and contem(texto, termo):
+                escolhido, tamanho = e, palavras
+    if escolhido is None and not any(contem(texto, t) for t in ('exercicio', 'exercicios')):
+        return None
+    receita = prescricao(c, paciente['id']) if paciente else None
+    ids = {i['exercicio'] for i in receita['itens']} if receita else set()
+    negativa = 'Fale com seu fisioterapeuta. Se precisar, peça um atendente.'
+    if escolhido is None:
+        itens = {e['id']: e for e in catalogo}
+        linhas = [f"- {itens[i['exercicio']]['nome']} — {link(i['exercicio'])}"
+                  for i in receita['itens'] if i['exercicio'] in itens] if receita else []
+        return '\n'.join(linhas) or negativa
+    if escolhido['id'] not in ids:
+        return negativa
+    resposta = '\n'.join([escolhido['nome'],
+        *[f'{n}. {passo}' for n, passo in enumerate(escolhido['passos'], 1)],
+        'Pare se: ' + '; '.join(escolhido.get('pare_se', [])), link(escolhido['id'])])
+    enviar(c, paciente['id'], 'explicacao', resposta,
+           exercicio_id=escolhido['id'], historico=False)
+    # O webhook não repete o envio que a caixa de saída já tentou (ou bloqueou).
+    if processadas is not None:
+        processadas.append(resposta)
+    return resposta

@@ -5,7 +5,7 @@ import unicodedata
 from datetime import datetime, timedelta
 
 from .core import Erro, agora, telefone
-from . import integracoes, planos, prescricoes
+from . import integracoes, planos, prescricoes, exercicios
 
 
 def normalizar(texto):
@@ -33,6 +33,8 @@ def iniciar(c):
         CREATE TABLE IF NOT EXISTS retornos (id INTEGER PRIMARY KEY, agendamento_id INTEGER UNIQUE,
             paciente_id INTEGER, servico TEXT, data TEXT, avisado INTEGER NOT NULL DEFAULT 0);
     ''')
+    if 'exercicio_id' not in {r[1] for r in c.db.execute('PRAGMA table_info(saida)')}:
+        c.db.execute('ALTER TABLE saida ADD COLUMN exercicio_id TEXT')
 
 
 def paciente_tel(c, tel):
@@ -46,15 +48,16 @@ def registrar(c, tel, direcao, texto, quando=None):
                  (p['id'] if p else None, tel, direcao, texto, (quando or agora()).isoformat(timespec='minutes')))
 
 
-def enviar(c, pid, tipo, texto, agendamento_id=None, oferta=None, quando=None):
+def enviar(c, pid, tipo, texto, agendamento_id=None, oferta=None, quando=None, exercicio_id=None, historico=True):
     p = c.paciente(pid)
     if p['nao_contatar'] or not p['telefone']:
         return 0
-    ident = c.db.execute('''INSERT INTO saida(tipo,telefone,paciente_id,texto,agendamento_id,quando,oferta)
-        VALUES (?,?,?,?,?,?,?)''', (tipo, p['telefone'], pid, texto, agendamento_id,
-        (quando or agora()).isoformat(timespec='minutes'), json.dumps(oferta) if oferta else None)).lastrowid
+    ident = c.db.execute('''INSERT INTO saida(tipo,telefone,paciente_id,texto,agendamento_id,quando,oferta,exercicio_id)
+        VALUES (?,?,?,?,?,?,?,?)''', (tipo, p['telefone'], pid, texto, agendamento_id,
+        (quando or agora()).isoformat(timespec='minutes'), json.dumps(oferta) if oferta else None, exercicio_id)).lastrowid
     integracoes.entregar(c, ident)
-    registrar(c, p['telefone'], 'saida', texto, quando)
+    if historico:
+        registrar(c, p['telefone'], 'saida', texto, quando)
     return 1
 
 
@@ -126,21 +129,21 @@ def opcoes_servicos(c):
             'texto': '\n'.join(f"{i} - {s['nome']}" for i, s in enumerate(ss, 1))}
 
 
-def conversar(c, numero, texto):
+def conversar(c, numero, texto, processadas=None):
     tel = telefone(numero)
     if not isinstance(texto, str):
         raise Erro(400, 'Texto obrigatório')
     registrar(c, tel, 'entrada', texto)
     r = c.db.execute('SELECT dados FROM sessoes WHERE telefone=?', (tel,)).fetchone()
     estado = json.loads(r[0]) if r else {}
-    respostas = decidir(c, tel, texto, estado)
+    respostas = decidir(c, tel, texto, estado, processadas)
     c.db.execute('INSERT INTO sessoes VALUES (?,?) ON CONFLICT(telefone) DO UPDATE SET dados=excluded.dados', (tel, json.dumps(estado)))
     for resposta in respostas:
         registrar(c, tel, 'saida', resposta)
     return respostas
 
 
-def decidir(c, tel, texto, estado):
+def decidir(c, tel, texto, estado, processadas=None):
     t = normalizar(texto)
     p = paciente_tel(c, tel)
     emergencias = ('dor no peito', 'falta de ar', 'desmaio', 'desmaiou', 'sangramento', 'sangrando', 'convulsao', 'suicidio', 'me matar', 'avc', 'infarto')
@@ -239,6 +242,10 @@ def decidir(c, tel, texto, estado):
             c.db.execute('UPDATE saida SET respondida=1 WHERE id=?', (pendente['id'],))
             return [acao]
     resposta = prescricoes.conversar(c, p, texto, t, pendente)
+    if resposta is not None:
+        estado['falhas'] = 0
+        return [resposta]
+    resposta = exercicios.conversar(c, p, t, processadas)
     if resposta is not None:
         estado['falhas'] = 0
         return [resposta]

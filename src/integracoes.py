@@ -30,19 +30,27 @@ def postar(url, corpo, headers=None):
         return False, {}
 
 
-def whatsapp(numero, texto):
+def whatsapp(numero, texto, exercicio_id=None):
     base = os.environ.get('EVOLUTION_URL')
     if not base:
         return 'simulado'
-    ok, _ = postar(base.rstrip('/') + '/message/sendText/' + os.environ.get('EVOLUTION_INSTANCIA', ''),
-                   {'number': numero.lstrip('+'), 'text': texto},
-                   {'apikey': os.environ.get('EVOLUTION_API_KEY', '')})
+    rota = '/message/sendText/'
+    corpo = {'number': numero.lstrip('+'), 'text': texto}
+    if exercicio_id and os.environ.get('PUBLIC_URL'):
+        from .exercicios import caminho
+        from .prescricoes import link
+        if caminho(exercicio_id, 'mp4').is_file():
+            rota = '/message/sendMedia/'
+            corpo = {'number': numero.lstrip('+'), 'mediatype': 'video',
+                     'media': link(exercicio_id) + '.mp4', 'caption': texto}
+    ok, _ = postar(base.rstrip('/') + rota + os.environ.get('EVOLUTION_INSTANCIA', ''),
+                   corpo, {'apikey': os.environ.get('EVOLUTION_API_KEY', '')})
     return 'enviado' if ok else 'pendente'
 
 
 def entregar(c, ident):
     m = c.db.execute('SELECT * FROM saida WHERE id=?', (ident,)).fetchone()
-    status = whatsapp(m['telefone'], m['texto'])
+    status = whatsapp(m['telefone'], m['texto'], m['exercicio_id'])
     c.db.execute('UPDATE saida SET status=? WHERE id=?', (status, ident))
     return status
 
@@ -124,13 +132,17 @@ def evolution(c, b):
     c.db.execute('INSERT INTO evolution_recebidas VALUES (?)', (ident,))
     msg = data.get('message') or {}
     texto = msg.get('conversation') or (msg.get('extendedTextMessage') or {}).get('text')
+    processadas = []
     if isinstance(texto, str) and texto:
-        respostas = conversar(c, numero, texto)
+        respostas = conversar(c, numero, texto, processadas)
     else:
         respostas = ['Por enquanto só consigo ler mensagens de texto.']
         registrar(c, numero, 'saida', respostas[0])
     for resposta in respostas:
-        whatsapp(numero, resposta)
+        if resposta in processadas:
+            processadas.remove(resposta)
+        else:
+            whatsapp(numero, resposta)
 
 
 def receber_telegram(c, b):

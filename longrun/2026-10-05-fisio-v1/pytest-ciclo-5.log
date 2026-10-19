@@ -1,0 +1,98 @@
+...............F..............................FFFF...................... [ 73%]
+..........................                                               [100%]
+=================================== FAILURES ===================================
+_________________________________ test_paginas _________________________________
+
+api = <conftest.Cliente object at 0xe3ecc40d1f70>
+
+    def test_paginas(api):
+        st, html = api.get("/", token=None)
+        assert st == 200 and 'id="chat"' in html
+        st, html = api.get("/equipe", token=None)
+>       assert st == 200
+E       assert 401 == 200
+
+tests/test_basico.py:37: AssertionError
+_______________________________ test_dockerfile ________________________________
+
+    def test_dockerfile():
+>       d = ler("Dockerfile")
+            ^^^^^^^^^^^^^^^^^
+
+tests/test_docker.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+nome = 'Dockerfile'
+
+    def ler(nome):
+        p = RAIZ / nome
+>       assert p.exists(), f"falta {nome}"
+E       AssertionError: falta Dockerfile
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/nmaldaner/projetos/atende-fisioterapia/Dockerfile').exists
+
+tests/test_docker.py:12: AssertionError
+_________________________________ test_compose _________________________________
+
+    def test_compose():
+>       c = ler("docker-compose.yml")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_docker.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+nome = 'docker-compose.yml'
+
+    def ler(nome):
+        p = RAIZ / nome
+>       assert p.exists(), f"falta {nome}"
+E       AssertionError: falta docker-compose.yml
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/nmaldaner/projetos/atende-fisioterapia/docker-compose.yml').exists
+
+tests/test_docker.py:12: AssertionError
+___________ test_env_exemplo_tem_todas_as_variaveis_sem_segredo_real ___________
+
+    def test_env_exemplo_tem_todas_as_variaveis_sem_segredo_real():
+>       e = ler(".env.exemplo")
+            ^^^^^^^^^^^^^^^^^^^
+
+tests/test_docker.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+nome = '.env.exemplo'
+
+    def ler(nome):
+        p = RAIZ / nome
+>       assert p.exists(), f"falta {nome}"
+E       AssertionError: falta .env.exemplo
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/nmaldaner/projetos/atende-fisioterapia/.env.exemplo').exists
+
+tests/test_docker.py:12: AssertionError
+_____________ test_readme_explica_deploy_e_mantem_a_secao_do_dono ______________
+
+    def test_readme_explica_deploy_e_mantem_a_secao_do_dono():
+        r = ler("README.md")
+        assert "Como rodar no seu ambiente" in r
+        # só o corpo da seção "## Deploy na VPS" (até o próximo "## "): a seção do dono já cita PUBLIC_URL etc.
+        m = re.search(r"^##\s+Deploy na VPS\s*$(.*?)(?=^##\s|\Z)", r, re.M | re.S)
+        assert m, "falta a seção '## Deploy na VPS' (seção 19)"
+        deploy = m.group(1)
+        for trecho in ("/webhook/evolution/", "MESSAGES_UPSERT", "setWebhook", "secret_token", "./atende backup",
+                       "PUBLIC_URL", "EXERCICIOS_MP4_DIR", "render-exercicios"):
+>           assert trecho in deploy, trecho
+E           AssertionError: /webhook/evolution/
+E           assert '/webhook/evolution/' in '\n(Seção escrita pelo implementador conforme a seção 19 da especificação: compose, proxy HTTPS, registro dos webhooks da Evolution e do Telegram com os segredos, backup diário no cron, endereço público e pasta dos vídeos.)\n'
+
+tests/test_docker.py:48: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_basico.py::test_paginas - assert 401 == 200
+FAILED tests/test_docker.py::test_dockerfile - AssertionError: falta Dockerfile
+FAILED tests/test_docker.py::test_compose - AssertionError: falta docker-comp...
+FAILED tests/test_docker.py::test_env_exemplo_tem_todas_as_variaveis_sem_segredo_real
+FAILED tests/test_docker.py::test_readme_explica_deploy_e_mantem_a_secao_do_dono
+5 failed, 93 passed in 38.23s
