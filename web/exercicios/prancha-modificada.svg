@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="titulo">
+<title id="titulo">Prancha modificada</title>
+<style>
+.tronco{animation:estabiliza 4s ease-in-out infinite}@keyframes estabiliza{0%,100%{d:path("M130 252 L213 284 L282 316")}50%{d:path("M130 252 L213 272 L282 316")}}
+.apoio{stroke:#8a9e96;stroke-width:4}.instrumento{stroke:#ac6329;stroke-width:6}
+@media(prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}
+</style>
+<rect width="400" height="400" rx="12" fill="#fff"/>
+<path d="M35 337 H365" stroke="#c5d1cb" stroke-width="3"/>
+<g fill="none" stroke="#203c3a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="102" cy="233" r="19"/><path class="tronco" d="M130 252 L213 284 L282 316"/><path d="M130 252 L126 315 L78 315 M282 316 L335 295"/>
+</g>
+</svg>

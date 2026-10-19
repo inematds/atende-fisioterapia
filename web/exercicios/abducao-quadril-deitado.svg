@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="titulo">
+<title id="titulo">Abdução de quadril deitado</title>
+<style>
+.perna{transform-origin:194px 287px;animation:abduzir 4s ease-in-out infinite}@keyframes abduzir{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-28deg)}}
+.apoio{stroke:#8a9e96;stroke-width:4}.instrumento{stroke:#ac6329;stroke-width:6}
+@media(prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}
+</style>
+<rect width="400" height="400" rx="12" fill="#fff"/>
+<path d="M35 337 H365" stroke="#c5d1cb" stroke-width="3"/>
+<g fill="none" stroke="#203c3a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="68" cy="279" r="19"/><path d="M92 284 L194 287 L330 309 M100 290 L132 317 L159 317"/><g class="perna"><path d="M194 287 L323 287 L340 279"/></g>
+</g>
+</svg>

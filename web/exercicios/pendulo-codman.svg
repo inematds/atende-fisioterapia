@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="titulo">
+<title id="titulo">Pêndulo de Codman</title>
+<style>
+.pendulo{transform-origin:221px 181px;animation:pendulo 2s ease-in-out infinite}@keyframes pendulo{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(14deg)}}
+.apoio{stroke:#8a9e96;stroke-width:4}.instrumento{stroke:#ac6329;stroke-width:6}
+@media(prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}
+</style>
+<rect width="400" height="400" rx="12" fill="#fff"/>
+<path d="M35 337 H365" stroke="#c5d1cb" stroke-width="3"/>
+<g fill="none" stroke="#203c3a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<path class="apoio" d="M270 220 H365 M290 220 V330 M350 220 V330"/><circle cx="249" cy="160" r="19"/><path d="M229 181 L155 233 L125 327 M155 233 L183 327 M223 185 L268 215 L307 215"/><g class="pendulo"><path d="M221 181 L214 235 L214 289"/></g>
+</g>
+</svg>

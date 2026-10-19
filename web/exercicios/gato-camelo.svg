@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="titulo">
+<title id="titulo">Gato-camelo</title>
+<style>
+.coluna{animation:coluna 4s ease-in-out infinite}@keyframes coluna{0%,100%{d:path("M130 219 Q205 168 275 219")}50%{d:path("M130 219 Q205 254 275 219")}}.olhar{transform-origin:130px 219px;animation:olhar 4s ease-in-out infinite}@keyframes olhar{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}
+.apoio{stroke:#8a9e96;stroke-width:4}.instrumento{stroke:#ac6329;stroke-width:6}
+@media(prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}
+</style>
+<rect width="400" height="400" rx="12" fill="#fff"/>
+<path d="M35 337 H365" stroke="#c5d1cb" stroke-width="3"/>
+<g fill="none" stroke="#203c3a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<path class="coluna" d="M130 219 Q205 168 275 219"/><g class="olhar"><path d="M130 219 L110 207"/><circle cx="91" cy="200" r="18"/></g><path d="M130 219 L130 321 L107 321 M275 219 L276 288 L323 288"/>
+</g>
+</svg>

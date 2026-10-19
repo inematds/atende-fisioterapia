@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="titulo">
+<title id="titulo">Bird-dog</title>
+<style>
+.braco{transform-origin:141px 222px;animation:alcanca 4s ease-in-out infinite}@keyframes alcanca{0%,100%{transform:rotate(0deg)}50%{transform:rotate(88deg)}}.perna{transform-origin:258px 222px;animation:estende 4s ease-in-out infinite}@keyframes estende{0%,100%{d:path("M258 222 L258 285 L315 285")}50%{d:path("M258 222 L310 222 L365 222")}}
+.apoio{stroke:#8a9e96;stroke-width:4}.instrumento{stroke:#ac6329;stroke-width:6}
+@media(prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}
+</style>
+<rect width="400" height="400" rx="12" fill="#fff"/>
+<path d="M35 337 H365" stroke="#c5d1cb" stroke-width="3"/>
+<g fill="none" stroke="#203c3a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="113" cy="201" r="18"/><path d="M133 219 L258 222 M149 224 L149 316 L124 316 M253 225 L253 301 L299 301"/><g class="braco"><path d="M141 222 L141 311"/></g><path class="perna" d="M258 222 L258 285 L315 285"/>
+</g>
+</svg>

@@ -8,10 +8,22 @@ import sys
 from urllib.parse import parse_qs, urlsplit
 
 from .core import Clinica, Erro, ROOT
-from . import conversa, gestao, cadastros, backup, integracoes, planos
+from . import conversa, gestao, cadastros, backup, integracoes, planos, exercicios
 
 
 def rotear(c, metodo, rota, q, b):
+    m = re.fullmatch(r'/api/exercicios(?:/([^/]+))?', rota)
+    if m:
+        ident = m[1]
+        if metodo == 'GET' and ident is None:
+            return 200, {'exercicios': exercicios.listar(c)}
+        if metodo == 'POST' and ident is None:
+            return 201, exercicios.salvar(c, b)
+        if metodo == 'PUT' and ident is not None:
+            return 200, exercicios.salvar(c, b, ident)
+        if metodo == 'DELETE' and ident is not None:
+            exercicios.salvar(c, {'ativo': False}, ident)
+            return 200, {'ativo': False}
     if rota == '/api/planos':
         if metodo == 'POST':
             return 201, planos.criar(c, b)
@@ -165,6 +177,7 @@ def main():
         def processar(self):
             url = urlsplit(self.path)
             arquivos = {'/': ('index.html', 'text/html'), '/recepcao': ('recepcao.html', 'text/html'),
+                        '/web/exercicio.css': ('exercicio.css', 'text/css'),
                         '/web/style.css': ('style.css', 'text/css'), '/web/chat.js': ('chat.js', 'text/javascript'),
                         '/web/recepcao.js': ('recepcao.js', 'text/javascript')}
             if self.command == 'GET' and url.path in arquivos:
@@ -179,8 +192,20 @@ def main():
                 self.end_headers()
                 self.wfile.write(conteudo)
                 return
-            publico = (self.command == 'GET' and url.path in ('/', '/recepcao', '/api/saude', '/api/servicos', '/api/horarios')) or (self.command == 'POST' and url.path == '/api/mensagens')
+            publico = (self.command == 'GET' and url.path in ('/', '/recepcao', '/api/saude', '/api/servicos', '/api/exercicios', '/api/horarios')) or (self.command == 'POST' and url.path == '/api/mensagens')
             try:
+                if self.command == 'GET' and url.path.startswith('/exercicios/'):
+                    with clinica.lock:
+                        tipo, conteudo = exercicios.recurso(clinica, url.path)
+                    self.send_response(200)
+                    self.send_header('Content-Type', tipo)
+                    self.send_header('Content-Length', str(len(conteudo)))
+                    self.send_header('X-Content-Type-Options', 'nosniff')
+                    self.send_header('Cache-Control', 'no-store')
+                    self.send_header('Content-Security-Policy', "default-src 'none'; img-src 'self'; style-src 'self' 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'")
+                    self.end_headers()
+                    self.wfile.write(conteudo)
+                    return
                 if self.command == 'POST' and integracoes.autorizar(url.path, self.headers):
                     publico = True
                 if not publico and not hmac.compare_digest(self.headers.get('X-Token', '').encode(), str(clinica.cfg['token']).encode()):

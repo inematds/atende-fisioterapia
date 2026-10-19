@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="titulo">
+<title id="titulo">Agachamento na parede</title>
+<style>
+.corpo{animation:desliza 4s ease-in-out infinite}@keyframes desliza{0%,100%{transform:translateY(0)}50%{transform:translateY(38px)}}.pernas{animation:dobra 4s ease-in-out infinite}@keyframes dobra{0%,100%{d:path("M140 226 L207 264 L221 329")}50%{d:path("M140 264 L221 264 L221 329")}}
+.apoio{stroke:#8a9e96;stroke-width:4}.instrumento{stroke:#ac6329;stroke-width:6}
+@media(prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}
+</style>
+<rect width="400" height="400" rx="12" fill="#fff"/>
+<path d="M35 337 H365" stroke="#c5d1cb" stroke-width="3"/>
+<g fill="none" stroke="#203c3a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<path class="apoio" d="M112 55 V335"/><g class="corpo"><circle cx="140" cy="108" r="20"/><path d="M140 132 V226 M140 155 L182 202 L210 202"/></g><path class="pernas" d="M140 226 L207 264 L221 329"/><path d="M213 329 H248"/>
+</g>
+</svg>

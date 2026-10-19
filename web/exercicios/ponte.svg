@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="titulo">
+<title id="titulo">Ponte</title>
+<style>
+.tronco{animation:ponte 4s ease-in-out infinite}@keyframes ponte{0%,100%{d:path("M95 304 L215 304 L267 262 L310 326")}50%{d:path("M95 304 L205 260 L267 262 L310 326")}}
+.apoio{stroke:#8a9e96;stroke-width:4}.instrumento{stroke:#ac6329;stroke-width:6}
+@media(prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}
+</style>
+<rect width="400" height="400" rx="12" fill="#fff"/>
+<path d="M35 337 H365" stroke="#c5d1cb" stroke-width="3"/>
+<g fill="none" stroke="#203c3a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="70" cy="304" r="18"/><path class="tronco" d="M95 304 L215 304 L267 262 L310 326"/><path d="M105 310 L158 326 M292 328 L326 328"/>
+</g>
+</svg>

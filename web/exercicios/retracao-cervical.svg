@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="titulo">
+<title id="titulo">Retração cervical</title>
+<style>
+.cabeca{animation:retrair 4s ease-in-out infinite}@keyframes retrair{0%,100%{transform:translateX(0)}50%{transform:translateX(-17px)}}
+.apoio{stroke:#8a9e96;stroke-width:4}.instrumento{stroke:#ac6329;stroke-width:6}
+@media(prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}
+</style>
+<rect width="400" height="400" rx="12" fill="#fff"/>
+<path d="M35 337 H365" stroke="#c5d1cb" stroke-width="3"/>
+<g fill="none" stroke="#203c3a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<path class="apoio" d="M155 180 V270 H248 M163 270 V330 M238 270 V330"/><path d="M190 161 V252 L254 252 L254 327 M194 183 L220 235 L257 235"/><g class="cabeca"><path d="M190 161 L204 133"/><circle cx="208" cy="109" r="24"/><path d="M231 110 L239 118 L230 122"/></g>
+</g>
+</svg>

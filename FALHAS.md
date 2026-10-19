@@ -2,6 +2,7 @@
 
 | data | o que quebrou | menor correção | prompt \| infra |
 |---|---|---|---|
+| 2026-10-19 | Biblioteca e páginas inexistentes deixavam 7 testes de catálogo/recursos falhando | adicionar módulo de biblioteca, rotas públicas e 12 SVGs; reutilizar catálogo persistido | infra |
 | 2026-10-19 | Agenda rejeitava todo plano e tarefas não geravam alertas/retorno de conclusão | adicionar módulo de planos, vínculo e transição de presença; derivar contagens da agenda e marcar sequência alertada | infra |
 | 2026-10-19 | Molde aceitava presença repetida e gerava retorno por serviço, incompatíveis com fisioterapia | guard 409 na presença e remover geração por retorno_dias; retorno de plano fica para próxima etapa | prompt |
 | 2026-10-05 | validação independente: §6 regra 6 (`exercicio`) dizia só "registra dor" — número puro ≥ `dor_alerta` não abria fila alta nem citava fisioterapeuta/192, e `test_dor_forte_abre_fila_alta_e_numero_puro_so_com_pendencia` exige os dois; "sem resposta" da pendência não estava definido | regra 6: número puro "com os mesmos efeitos da regra 8"; "sem resposta" definido por tipo (`agendado` / `ofertado` / sem registro de dor no dia) | prompt |

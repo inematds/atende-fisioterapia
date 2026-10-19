@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="titulo">
+<title id="titulo">Rotação de ombro com bastão</title>
+<style>
+.antebracos{animation:bastao 4s ease-in-out infinite}@keyframes bastao{0%,100%{transform:translateX(0) scaleX(1)}50%{transform:translateX(24px) scaleX(1.05)}}
+.apoio{stroke:#8a9e96;stroke-width:4}.instrumento{stroke:#ac6329;stroke-width:6}
+@media(prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}
+</style>
+<rect width="400" height="400" rx="12" fill="#fff"/>
+<path d="M35 337 H365" stroke="#c5d1cb" stroke-width="3"/>
+<g fill="none" stroke="#203c3a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="200" cy="85" r="20"/><path d="M200 110 V245 M200 135 L157 152 L157 207 M200 135 L243 152 L243 207 M200 245 L169 329 M200 245 L231 329"/><g class="antebracos"><path d="M157 207 L180 224 M243 207 L220 224"/><path class="instrumento" d="M145 224 H266"/></g>
+</g>
+</svg>

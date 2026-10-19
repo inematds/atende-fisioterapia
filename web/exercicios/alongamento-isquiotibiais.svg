@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="titulo">
+<title id="titulo">Alongamento de isquiotibiais</title>
+<style>
+.inclina{transform-origin:155px 240px;animation:inclina 4s ease-in-out infinite}@keyframes inclina{0%,100%{transform:rotate(0deg)}50%{transform:rotate(22deg)}}
+.apoio{stroke:#8a9e96;stroke-width:4}.instrumento{stroke:#ac6329;stroke-width:6}
+@media(prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}
+</style>
+<rect width="400" height="400" rx="12" fill="#fff"/>
+<path d="M35 337 H365" stroke="#c5d1cb" stroke-width="3"/>
+<g fill="none" stroke="#203c3a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<path class="apoio" d="M105 252 H190 M115 252 V330 M180 252 V330"/><g class="inclina"><circle cx="155" cy="122" r="19"/><path d="M155 147 V240 M155 170 L199 223 L230 232"/></g><path d="M155 240 L203 280 L207 326 L230 326 M155 240 L310 319 L320 296"/>
+</g>
+</svg>

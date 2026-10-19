@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="titulo">
+<title id="titulo">Mobilidade de tornozelo</title>
+<style>
+.pe{transform-origin:292px 263px;animation:tornozelo 4s ease-in-out infinite}@keyframes tornozelo{0%,100%{transform:rotate(-18deg)}25%{transform:rotate(0deg) scaleX(.8)}50%{transform:rotate(26deg)}75%{transform:rotate(0deg) scaleX(1.1)}}
+.apoio{stroke:#8a9e96;stroke-width:4}.instrumento{stroke:#ac6329;stroke-width:6}
+@media(prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}
+</style>
+<rect width="400" height="400" rx="12" fill="#fff"/>
+<path d="M35 337 H365" stroke="#c5d1cb" stroke-width="3"/>
+<g fill="none" stroke="#203c3a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<path class="apoio" d="M95 250 H172 M109 250 V329 M162 250 V329 M235 280 H290 M250 280 V329"/><circle cx="130" cy="110" r="20"/><path d="M130 134 V239 L211 249 L292 263 M133 158 L166 218 L201 228 M137 243 L176 294 L175 328"/><g class="pe"><path d="M292 263 L320 246"/></g>
+</g>
+</svg>

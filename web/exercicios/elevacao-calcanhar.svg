@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="titulo">
+<title id="titulo">Elevação de calcanhar</title>
+<style>
+.corpo{animation:elevar 2s ease-in-out infinite}@keyframes elevar{0%,100%{transform:translateY(0)}50%{transform:translateY(-17px)}}.pe{transform-origin:248px 329px;animation:ponta 2s ease-in-out infinite}@keyframes ponta{0%,100%{transform:rotate(0deg)}50%{transform:rotate(24deg)}}
+.apoio{stroke:#8a9e96;stroke-width:4}.instrumento{stroke:#ac6329;stroke-width:6}
+@media(prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}
+</style>
+<rect width="400" height="400" rx="12" fill="#fff"/>
+<path d="M35 337 H365" stroke="#c5d1cb" stroke-width="3"/>
+<g fill="none" stroke="#203c3a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<path class="apoio" d="M290 80 V335"/><g class="corpo"><circle cx="206" cy="95" r="20"/><path d="M206 119 V230 L206 324 M206 147 L250 175 L284 175"/></g><g class="pe"><path d="M206 324 L248 329"/></g>
+</g>
+</svg>

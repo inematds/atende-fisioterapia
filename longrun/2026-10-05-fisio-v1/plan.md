@@ -1,9 +1,9 @@
 # Plano
 
 ## Estratégia atual
-70/98 testes aprovados. Planos, alertas e indicadores integrados à base; avançar nos recursos domiciliares antes da interface e entrega.
+77/98 testes aprovados. Biblioteca e arquivos públicos implementados; avançar nas prescrições e registros domiciliares, depois interface e entrega.
 
 ## Próximos 3 passos
-1. Implementar biblioteca CRUD, rotas públicas e páginas, com os 12 SVGs em animação CSS e movimentos próprios; validar suíte completa.
-2. Implementar prescrição, preferências, lembretes, adesão/dor e explicação prescrita; completar LGPD e Evolution sendMedia; validar suíte completa.
-3. Completar /equipe, Docker/compose/env/README e escrever tools/render-exercicios sem executar. Rodar suíte e limites; só marcar concluído com 98 passed e LIMITES OK.
+1. Implementar seções 22–23: prescrição completa, preferências persistentes por paciente, lembrete opt-in diário, registros de adesão/dor e agregados; integrar regras de conversa e LGPD. Rodar suíte completa.
+2. Implementar explicação somente de exercício prescrito, desambiguação por termo mais longo e Evolution sendMedia com fallback sendText, sem duplicação de saída. Completar /equipe com ações reais.
+3. Completar Docker/compose/env/README e escrever tools/render-exercicios sem executar. Rodar suíte e limites; só marcar concluído com 98 passed e LIMITES OK.
