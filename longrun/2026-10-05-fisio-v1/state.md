@@ -1,4 +1,11 @@
-# Estado — atualizado 2026-10-19 14:17
+# Estado — atualizado 2026-10-19 14:45 (fechamento, verificação independente)
+
+## Verificação independente (Claude, 19/10 14:45)
+- `pytest -q tests/` → 98 passed (53,99 s); `verificar-limites.sh` → LIMITES OK (hash 381b6510e90832d5).
+- `verificar-independente.py` → **INDEPENDENTE OK (1 etapa pulada)**: fixture fora do código, clínica nunca vista, movimento dos SVGs no Chromium e `docker build` + healthcheck passaram; **render MP4 pulado** (HyperFrames não instalado: `npx --no-install hyperframes --version` falhou).
+- Resultado conferido: 12 SVGs só CSS (@keyframes, sem <script>/SMIL), README com "Deploy na VPS", Dockerfile com HEALTHCHECK, compose, .env.exemplo, .dockerignore.
+- Nenhuma correção de código necessária. VERSION mantida 0.7.0.
+
 
 ## Funciona
 concluído
@@ -13,7 +20,7 @@ concluído
 
 ## Falta
 - Nenhuma pendência de implementação identificada no escopo deste ciclo.
-- Validação humana nível 4: verificar-independente.py, build/healthcheck Docker, render MP4 e revisão clínica/visual dos 12 exercícios. Não confundir a validação da interface com a revisão dos movimentos SVG ou prova de renderização.
+- Validação humana nível 4 restante: render MP4 (HyperFrames não instalado) e revisão clínica/visual dos 12 exercícios. Não confundir a validação da interface com a revisão dos movimentos SVG ou prova de renderização.
 - Deploy e integrações reais são ações humanas fora do loop. Nenhum conflito teste/especificação identificado.
 
 ## Como retomar

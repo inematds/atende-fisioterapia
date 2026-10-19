@@ -11,3 +11,5 @@
 | 2026-10-19 14:11 | Dockerfile/compose/env/dockerignore e README operacional; VERSION 0.6.0; pytest 97 passed / 1 failed (37,40 s); LIMITES OK; seção do dono preservada | sem commit (loop externo) | parcial | — | 0 |
 
 | 2026-10-19 14:17 | /equipe funcional, planos/prescrição/adesão/biblioteca/alertas; renderizador §25 escrito sem executar; VERSION 0.7.0; pytest 98 passed / 0 failed (39,86 s), LIMITES OK; UI Chromium desktop/mobile OK | sem commit (loop externo) | concluído automatizado; nível 4 humano | — | 0 |
+
+| 2026-10-19 14:45 | Verificação independente (Claude): 98 passed, LIMITES OK, INDEPENDENTE OK (render MP4 HyperFrames pulado; Chromium e Docker OK); sem mudança de código; VERSION 0.7.0 | ver git log | concluído (falta render MP4 + revisão clínica humana) | — | 0 |
