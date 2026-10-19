@@ -197,7 +197,7 @@ def main():
     class Handler(BaseHTTPRequestHandler):
         def processar(self):
             url = urlsplit(self.path)
-            arquivos = {'/': ('index.html', 'text/html'), '/recepcao': ('recepcao.html', 'text/html'),
+            arquivos = {'/': ('index.html', 'text/html'), '/recepcao': ('recepcao.html', 'text/html'), '/equipe': ('recepcao.html', 'text/html'),
                         '/web/exercicio.css': ('exercicio.css', 'text/css'),
                         '/web/style.css': ('style.css', 'text/css'), '/web/chat.js': ('chat.js', 'text/javascript'),
                         '/web/recepcao.js': ('recepcao.js', 'text/javascript')}

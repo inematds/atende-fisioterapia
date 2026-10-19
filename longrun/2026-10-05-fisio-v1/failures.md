@@ -12,3 +12,6 @@
 
 | 2026-10-19 14:11 | 5 falhas anteriores → completar entrega §19 → 97 passed / 1 failed (test_paginas: /equipe retorna 401) | Docker/env/README; nenhum conflito de contrato | avanço de 4 testes; LIMITES OK | infra |
 | 2026-10-19 14:11 | Leitura presumiu tests/test_entrega.py e tools existentes → localizar com rg --files → tests/test_docker.py lido; tools pendente | corrigir descoberta e registrar lição | resolvido | prompt |
+
+| 2026-10-19 | Script temporário de navegador usou seletor CSS inválido button[type!=button] → trocar por button:not([type=button]) → repetir validação local | corrigir seletor do verificador, sem mudar aplicação | em validação | prompt |
+| 2026-10-19 14:17 | test_paginas: /equipe 401 → servir HTML público e ligar interface às APIs autenticadas → 98 passed / 0 failed; seletor do verificador corrigido, UI OK; tail inicial corrigido para -n | correções locais; nenhum conflito de contrato | resolvido | prompt / infra |

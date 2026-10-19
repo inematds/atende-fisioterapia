@@ -1,25 +1,22 @@
-# Estado — atualizado 2026-10-19 14:11
+# Estado — atualizado 2026-10-19 14:17
 
 ## Funciona
-- Base serve/SQLite/auth, agenda concorrente, conversa/FAQ/emergência/alertas clínicos, confirmação/espera, cadastros/bloqueios/backup, campanhas, planos e alertas de abandono/reavaliação, indicadores Raio-X e transportes opcionais.
-- Biblioteca persistente com CRUD, páginas públicas e 12 SVGs CSS; recursos MP4 locais. Revisão clínica e visual no navegador continuam humanas.
-- Prescrição: criação validada, substituição mantendo histórico inativo e preferências do paciente, GET/DELETE, envio síncrono e bloqueio nao_contatar. Migração de pacientes existentes; pacientes novos recebem hora padrão e opt-in falso.
-- Lembrete opt-in por chat/API, validação de hora original, itens do dia e um envio por data; caixa de saída e histórico usam agora da rodada. Regras 6–8 registram adesão/dor no dia do processo; dor forte abre humano alta com aviso ao Telegram.
-- Adesão semanal/geral calculada da prescrição ativa, registros persistentes com atualização independente de fez/dor. LGPD exporta prescrição/registros/preferências; remoção inativa prescrição, desliga lembrete e apaga registros.
-- Regra 9: explica somente exercício ativo prescrito, normaliza nomes/apelidos, escolhe termo mais longo (empate por catálogo) e lista os prescritos. Explicação gera saída própria; não vira pendência de dor.
-- Evolution envia explicação por sendMedia quando há MP4 local e PUBLIC_URL, ou sendText; ID do exercício persistido permite reenvio após reinício. Webhook e histórico não duplicam a resposta; nao_contatar bloqueia a saída.
-- Entrega §19: Dockerfile Python padrão com HEALTHCHECK, compose com dados/backups persistentes e vídeos montados somente para leitura, .env.exemplo com 10 variáveis vazias, .dockerignore e README operacional. Seção do dono preservada byte a byte. Build Docker não executado (restrição do ciclo).
-- VERSION 0.6.0. Suíte completa: **97 passed / 1 failed**, 37,40 s; log `longrun/2026-10-05-fisio-v1/pytest-ciclo-6.log`. Única falha: test_paginas, /equipe responde 401.
-- **LIMITES OK**, hash 381b6510e90832d5, 98 testes; git diff --check OK. Sem chamadas externas, Docker, render ou commit.
+concluído
+
+- VERSION 0.7.0. Suíte completa: **98 passed / 0 failed**, 39,86 s (`pytest-ciclo-7.log`). **LIMITES OK**: hash 381b6510e90832d5, 98 testes, contrato e escopo preservados.
+- Base Python padrão/SQLite/auth, agenda concorrente e persistente, conversa/FAQ/emergência, confirmação/espera, planos/conclusão/retorno, alertas, campanhas, LGPD, cadastros/bloqueios/backup e Raio-X.
+- Biblioteca com CRUD, páginas públicas e 12 SVGs CSS; prescrição, opt-in, lembrete, adesão/dor, alerta clínico, explicação restrita ao prescrito e Evolution sendMedia/fallback/reenvio. Telegram inclui /alertas. Integrações testadas somente contra servidor falso local.
+- /equipe pública com APIs autenticadas: agenda, pacientes, profissionais, serviços, FAQ, bloqueios, fila humana/responder/encerrar, saída, campanhas, indicadores; planos, prescrição por itens, preferências, adesão/histórico de dor, biblioteca e resolução de alertas. /recepcao é alias da mesma interface. Removido retorno_dias do molde.
+- Navegador local: login, cadastro de paciente/plano, envio de prescrição, adesão, geração/resolução de alerta, cadastro de exercício e logout passaram. Sem erros JS e sem overflow horizontal em 390 px. Capturas desktop/mobile e resultado em ui-ciclo-7.log. Detector da interface sem achados; node --check, compileall e git diff --check OK.
+- tools/render-exercicios escrito conforme §25: composição CSS temporária, npx render, ffprobe, timeout, linha por exercício, saída não zero em falha e preservação de MP4 anterior até validação. **Não executado**; apenas análise sintática Python.
+- Docker/compose/env/README entregues; seção “Como rodar no seu ambiente” preservada byte a byte frente a HEAD. Nenhum commit, API real, npx/npm/docker ou rede externa executado.
 
 ## Falta
-- /equipe pública, dados autenticados e ações reais (única falha); /recepcao ainda vem do molde.
-- Escrever tools/render-exercicios conforme §25; NÃO executar. Não está coberto pela suíte de 98 testes, mas faz parte do resultado.
-- Atualizar os avisos de pendência no README quando equipe/renderizador forem implementados.
-- Revisão visual/clínica e build Docker continuam sendo validação humana de nível 4. Nenhum conflito teste/especificação identificado.
+- Nenhuma pendência de implementação identificada no escopo deste ciclo.
+- Validação humana nível 4: verificar-independente.py, build/healthcheck Docker, render MP4 e revisão clínica/visual dos 12 exercícios. Não confundir a validação da interface com a revisão dos movimentos SVG ou prova de renderização.
+- Deploy e integrações reais são ações humanas fora do loop. Nenhum conflito teste/especificação identificado.
 
 ## Como retomar
-1. Ler goal → state → plan → canal → fins progress/failures. Especificação inteira, conftest e fixture lidos neste ciclo.
-2. Implementar /equipe conforme §13–15 e §20–24: rota pública e operações autenticadas nas APIs existentes. Não basta adicionar os IDs ao HTML.
-3. Escrever tools/render-exercicios (§25), sem executar; remover os avisos de pendência correspondentes no README.
-4. Rodar suíte inteira e limites; só marcar concluído com 98 passed, LIMITES OK e toda a spec implementada. Atualizar registros; sem commits nem rede externa. ciclo-6.log, loop.log e teste-final.log pertencem ao loop externo; não editar.
+1. Ler goal → state → plan → canal → fins de progress/failures. Spec inteira, conftest e fixture lidos.
+2. Critérios automatizados concluídos; não executar Docker/render ou integrações reais neste loop. Encaminhar ao humano a validação nível 4.
+3. Se houver correção solicitada, reproduzir localmente, preservar arquivos congelados e repetir suíte/limites. O loop externo cuida de commits e dos arquivos loop.log, teste-final.log e ciclo-7.log.

@@ -23,3 +23,6 @@ Formato: `- AAAA-MM-DD HH:MM · fato|aprendizado|glossário|armadilha · texto`
 
 - 2026-10-19 14:11 · fato · Ciclo 6: 97 passed / 1 failed (37,40 s), LIMITES OK. Só falha test_paginas: /equipe responde 401. Docker/env/README escritos; build não executado. Seção do dono comparada byte a byte com HEAD e preservada.
 - 2026-10-19 14:11 · armadilha · README sinaliza equipe/renderizador pendentes em dois pontos; atualizar ao implementá-los. Compose monta web/exercicios em /app/web/exercicios; EXERCICIOS_MP4_DIR é caminho dentro do container. Tarefas exigem agendador externo autenticado.
+
+- 2026-10-19 14:17 · fato · Ciclo 7 fecha 98 passed (39,86 s) e LIMITES OK. /equipe mapeia web/recepcao.html; JS compartilhado inclui fisioterapia. Navegador real passou fluxos de paciente/plano/prescrição/adesão/alerta/biblioteca/logout; capturas e ui-ciclo-7.log no longrun.
+- 2026-10-19 14:17 · armadilha · Renderizador foi somente escrito e analisado sintaticamente; nunca executado neste ciclo. Build Docker/render/revisão dos SVGs são nível 4 humano. Playwright disponível globalmente em .npm-global/lib/node_modules, Chromium local 1234; não é dependência da aplicação.

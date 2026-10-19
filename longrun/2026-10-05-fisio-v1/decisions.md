@@ -13,3 +13,6 @@
 | 2026-10-19 14:08 | Coluna migrada saida.exercicio_id; entrega e reenvio escolhem sendMedia pelo arquivo e PUBLIC_URL; respostas processadas são informadas ao webhook | preservar reenvio após reinício, evitar envio duplo e respeitar nao_contatar; histórico fica com conversar | inferir ID pelo texto ou enviar novamente no webhook |
 
 | 2026-10-19 14:11 | Compose usa bind mounts dados/backups e web/exercicios somente leitura; Dockerfile cria /dados e usa healthcheck Python | persistência, backup por cron e MP4 copiados sem rebuild; sem dependências Python | dados efêmeros ou instalação de curl |
+
+| 2026-10-19 14:17 | Expandir interface existente e servir /equipe e /recepcao pelo mesmo HTML; token só em memória; itens de prescrição em formulário e rascunho limpo ao trocar paciente | reaproveitar cadastros e ações existentes; evitar prescrição no paciente errado | segundo painel duplicado ou editor JSON de prescrição |
+| 2026-10-19 14:17 | Renderizador produz MP4 temporário e só substitui destino após ffprobe; timeout 600 s render/30 s probe; composição sem script | preservar vídeo anterior em falha e respeitar §25/build humano | render no servidor ou sobrescrita antes da validação |

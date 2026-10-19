@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+"""Build humano dos MP4. Requer Node, HyperFrames, Chromium e FFmpeg.
+
+Não é importado pelo servidor. A primeira chamada do npx pode acessar a rede.
+"""
+import argparse
+import math
+from pathlib import Path
+import re
+import subprocess
+import tempfile
+import xml.etree.ElementTree as ET
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def renderizar(origem, destino):
+    svg = origem.read_text(encoding='utf-8')
+    ET.fromstring(svg)  # Não passar XML inválido ao renderizador.
+    with tempfile.TemporaryDirectory(prefix='atende-exercicio-') as pasta:
+        pasta = Path(pasta)
+        # SVG inline preserva seus keyframes CSS; sem scripts ou mídia externa.
+        svg = re.sub(r'^\s*<\?xml[^>]*\?>', '', svg)
+        html = ('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">'
+                '<title>Exercício</title><style>body{margin:0;background:#fff}'
+                '#root{position:relative;width:100%;height:100%}'
+                '#root svg{position:absolute;inset:0;width:100%;height:100%}'
+                '</style></head><body><div id="root" data-composition-id="exercicio" '
+                'data-start="0" data-width="720" data-height="720" data-duration="4">'
+                + svg + '</div></body></html>')
+        (pasta / 'index.html').write_text(html, encoding='utf-8')
+        # Destino temporário no mesmo filesystem: falhas preservam o MP4 anterior.
+        with tempfile.TemporaryDirectory(prefix='.render-', dir=destino.parent) as saida:
+            video = Path(saida) / destino.name
+            with (pasta / 'render.log').open('w+') as log:
+                proc = subprocess.run(
+                    ['npx', 'hyperframes', 'render', str(pasta), '--output', str(video),
+                     '--quality', 'looks', '--fps', '30'],
+                    stdout=log, stderr=subprocess.STDOUT, timeout=600, check=False)
+                if proc.returncode:
+                    log.seek(0, 2)
+                    log.seek(max(0, log.tell() - 2000))
+                    raise ValueError('render: ' + ' '.join(log.read().split())[-600:])
+            probe = subprocess.run(
+                ['ffprobe', '-v', 'error', '-show_entries',
+                 'format=duration:stream=width,height', '-of', 'default=nw=1', str(video)],
+                capture_output=True, text=True, timeout=30, check=True)
+            campos = {}
+            for linha in probe.stdout.splitlines():
+                if '=' in linha:
+                    chave, valor = linha.split('=', 1)
+                    campos.setdefault(chave, []).append(valor)
+            duracao = float(campos.get('duration', ['nan'])[0])
+            if (not math.isfinite(duracao) or not 3.9 <= duracao <= 4.1
+                    or campos.get('width') != ['720'] or campos.get('height') != ['720']):
+                raise ValueError('MP4 fora do contrato: duração 3,9–4,1 s, 720×720')
+            video.replace(destino)
+            return duracao
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--so', metavar='ID')
+    parser.add_argument('--saida', type=Path, default=ROOT / 'web' / 'exercicios')
+    args = parser.parse_args()
+    origem = ROOT / 'web' / 'exercicios'
+    if args.so and not re.fullmatch(r'[a-z0-9-]+', args.so):
+        print('falhou seleção identificador inválido')
+        return 1
+    arquivos = [origem / (args.so + '.svg')] if args.so else sorted(origem.glob('*.svg'))
+    if not arquivos:
+        print('falhou seleção nenhum SVG encontrado')
+        return 1
+    try:
+        destino = args.saida.resolve()
+        destino.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        print(f'falhou saída {exc}')
+        return 1
+    falhou = False
+    for arquivo in arquivos:
+        try:
+            duracao = renderizar(arquivo, destino / (arquivo.stem + '.mp4'))
+            print(f'ok {arquivo.stem} {duracao:.3f}s', flush=True)
+        except (OSError, ValueError, ET.ParseError, subprocess.SubprocessError) as exc:
+            print(f'falhou {arquivo.stem} {exc}', flush=True)
+            falhou = True
+    return int(falhou)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
