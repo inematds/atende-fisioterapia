@@ -1,9 +1,9 @@
-# Plano (reescrever, não acumular)
+# Plano
 
 ## Estratégia atual
-Plano pronto (spec + 98 testes congeláveis + travas); implementação ainda não começou. O implementador parte do molde `~/projetos/atende-clinica` (mesma pilha) e acrescenta as seções 20–25 da spec. Ordem: base → agenda → conversa → confirmação/espera → planos/alertas → biblioteca + páginas + 12 SVGs → prescrição/lembrete/adesão/dor → campanhas → LGPD → raiox → cadastros/bloqueios/backup → Evolution → Telegram → Docker/README → /equipe → tools/render-exercicios (escrito, não executado).
+Base do molde importada e adaptada, 56/98 testes passando. Avançar pelas diferenças de fisioterapia, preservando contrato e testes. UI do molde é provisória.
 
-## Próximos passos
-1. Dono responde `docs/DECISOES-ABERTAS.md`, faz o commit e roda `longrun/2026-10-05-fisio-v1/congelar.sh`.
-2. Inicia o loop headless (`~/projetos/execucao-longa/tools/loop-longrun.sh longrun/2026-10-05-fisio-v1`) ou cola o `/goal` (ver `prompt-goal-*.md`).
-3. Depois do "concluído": `python3 longrun/2026-10-05-fisio-v1/verificar-independente.py`, abrir `/`, `/equipe` e `/exercicios/ponte`, revisar o conteúdo clínico dos 12 exercícios e rodar `tools/render-exercicios`.
+## Próximos 3 passos
+1. Implementar planos (seção 20), vínculo da agenda, presença/conclusão e retorno (8); alertas de abandono/reavaliação (24) e Telegram /alertas. Validar suíte completa.
+2. Implementar catálogo/páginas/SVGs, prescrição, lembrete, adesão/dor e explicações; ampliar LGPD/Raio-X e Evolution sendMedia. Validar suíte completa.
+3. Completar /equipe, Docker/compose/env/README e escrever tools/render-exercicios sem executar. Rodar suíte e limites; somente com 98 passed e LIMITES OK marcar concluído.
