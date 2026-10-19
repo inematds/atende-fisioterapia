@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Atende Fisioterapia — plan kit for a physical therapy clinic: treatment plan, animated exercises, adherence and a Telegram team desk</title>
-<meta name="description" content="Open plan kit for a physical therapy clinic patient-care system: specification, 98 acceptance tests, guardrails and prompts for an agent (Claude Code or Codex) to build it in your own environment. The system is not implemented yet.">
+<title>Atende Fisioterapia — open patient-care system for a physical therapy clinic: treatment plan, animated exercises, adherence and a Telegram team desk</title>
+<meta name="description" content="Open, ready-to-run patient-care system for a physical therapy clinic (v0.7.0, 98 of 98 tests): scheduling, treatment plan, animated home exercises, adherence and pain, WhatsApp through Evolution and a Telegram team desk. Runs locally with ./atende serve and on a VPS with Docker.">
 <link rel="alternate" hreflang="pt-BR" href="https://inematds.github.io/atende-fisioterapia/guia/">
 <link rel="alternate" hreflang="en" href="https://inematds.github.io/atende-fisioterapia/guia/en/">
 <link rel="alternate" hreflang="es" href="https://inematds.github.io/atende-fisioterapia/guia/es/">
@@ -114,7 +114,7 @@
     <a class="sec" href="#oque">What it is</a>
     <a class="sec" href="#fluxo">How it works</a>
     <a class="sec" href="#guia">User guide</a>
-    <a class="sec" href="#kit">What's in the kit</a>
+    <a class="sec" href="#kit">What's in the repo</a>
     <a class="sec" href="#roadmap">Roadmap</a>
     <span class="lang"><a href="../">PT</a><a class="on" href="./">EN</a><a href="../es/">ES</a></span>
     <button class="tgl" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">🌙</button>
@@ -126,9 +126,9 @@
   <div class="glow"></div>
   <div class="wrap">
     <div>
-      <span class="chip">Plan kit · physical therapy clinic · open source</span>
-      <h1>The complete plan for patients to <span class="amb">keep going</span> with treatment</h1>
-      <p class="lead">Specification, 98 acceptance tests, guardrails and prompts for an agent to build, in your own environment, the patient care system of a physical therapy clinic: evaluation and session scheduling, a treatment plan with a dropout alert, home exercises with a reminder, adherence and pain, and a Telegram team desk. The bot never gives clinical advice. <strong>The system is not implemented yet: this repository is the plan, and you run the implementation.</strong></p>
+      <span class="chip">Ready system · v0.7.0 · 98/98 tests · open source</span>
+      <h1>The complete system for patients to <span class="amb">keep going</span> with treatment</h1>
+      <p class="lead">The patient care system of a physical therapy clinic, implemented and tested: evaluation and session scheduling, a treatment plan with a dropout alert, home exercises with a reminder, adherence and pain, and a Telegram team desk. The bot never gives clinical advice. <strong>Ready to run: <code>./atende serve</code> on your machine or Docker on your VPS.</strong></p>
       <div class="cta">
         <a class="btn" href="#guia">Start the guide</a>
         <a class="btn ghost" href="https://github.com/inematds/atende-fisioterapia" target="_blank" rel="noopener">View on GitHub</a>
@@ -140,13 +140,13 @@
 
 <section id="oque"><div class="wrap">
   <span class="chip">What it is</span>
-  <h2>A kit to hand to the agent: from the contract to 98 green tests</h2>
-  <p class="sub">There is no finished app here. There is the contract for what the app must do, the test battery that proves it and the guardrails that stop the agent from cheating. The builder is Claude Code or Codex, running on your machine, on your subscription. The sibling <a href="https://inematds.github.io/atende-clinica/guia/en/" target="_blank" rel="noopener">Atende Clínica</a>, which served as the mold, was made exactly this way and closed 93 of 93 tests.</p>
+  <h2>A ready system, built from the contract to 98 green tests</h2>
+  <p class="sub">The app is in the repository and passes the 98 acceptance tests. It was built by an agent (Codex, on a subscription) from a contract written before the code, a frozen test battery and guardrails that blocked shortcuts; an independent verification then checked the result against a clinic the agent had never seen. The sibling <a href="https://inematds.github.io/atende-clinica/guia/en/" target="_blank" rel="noopener">Atende Clínica</a>, which served as the mold, was made the same way and closed 93 of 93 tests.</p>
   <figure style="margin:0 0 26px;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px -30px #000"><img src="../assets/banner-grade-en.jpg" alt="Treatment plan with a dropout alert, animated home exercises, opt-in reminder, adherence and pain, clinical alert with 192, LGPD for health data and a Telegram team desk" loading="lazy" style="width:100%;display:block"></figure>
   <div class="grid g3">
-    <div class="card"><h3>🦵 The system the plan produces</h3><p>Scheduling for evaluations, sessions and RPG (postural re-education), no double booking, automatic confirmation and a waitlist. At the center, the <strong>treatment plan</strong>: planned against completed sessions, with a dropout alert and a re-evaluation alert. Python 3 with the standard library only and SQLite, one clinic per installation.</p></div>
-    <div class="card"><h3>📦 The kit</h3><p>A 26-section specification (0 to 25), 98 black-box tests, 21 decisions already proposed, a map to Raio-X, prompts for <code>/goal</code> and for the headless loop, and the guardrails that freeze the contract. An adversarial validator already went through everything and found 9 problems, 3 of which would have blocked an honest implementer.</p></div>
-    <div class="card"><h3>📈 Source: Raio-X de Margem</h3><p>No-shows, patients who do not come back and indicated treatment that never starts are the leaks the plan attacks. The system hands eight monthly numbers to the dashboard of <a href="https://inematds.github.io/raio-x-margem/guia/en/" target="_blank" rel="noopener">Raio-X de Margem</a>, the source of the business rules and of the professional-council guardrail.</p></div>
+    <div class="card"><h3>🦵 The system</h3><p>Scheduling for evaluations, sessions and RPG (postural re-education), no double booking, automatic confirmation and a waitlist. At the center, the <strong>treatment plan</strong>: planned against completed sessions, with a dropout alert and a re-evaluation alert. Python 3 with the standard library only and SQLite, one clinic per installation. Version 0.7.0.</p></div>
+    <div class="card"><h3>📦 How it was made</h3><p>A 26-section specification (0 to 25), 98 black-box tests, 21 accepted decisions, a map to Raio-X and guardrails that froze the contract. An adversarial validator reviewed the plan first (it found and fixed 9 problems); then the agent implemented it in 7 cycles up to 98 of 98. All of it is still in the repository.</p></div>
+    <div class="card"><h3>📈 Source: Raio-X de Margem</h3><p>No-shows, patients who do not come back and indicated treatment that never starts are the leaks the system attacks. The system hands eight monthly numbers to the dashboard of <a href="https://inematds.github.io/raio-x-margem/guia/en/" target="_blank" rel="noopener">Raio-X de Margem</a>, the source of the business rules and of the professional-council guardrail.</p></div>
   </div>
   <div class="grid g3" style="margin-top:16px">
     <div class="card"><h3>🧭 The bot only explains what is prescribed</h3><p>It explains an exercise only if the physical therapist prescribed it to that patient. Anything else gets "talk to your physical therapist" and a human attendant. It never gives a diagnosis, medication or clinical advice.</p></div>
@@ -158,7 +158,7 @@
 <section id="fluxo"><div class="wrap">
   <span class="chip">How it works</span>
   <h2>From the evaluation to each day's "did it"</h2>
-  <p class="sub">This is the flow of the planned system, what the agent will build. A Python server with no dependencies, SQLite in a data folder and Docker for the VPS. Evolution and Telegram come in only through environment variables; without them the outbox is simulated and no network call goes out.</p>
+  <p class="sub">This is the flow of the implemented system. A Python server with no dependencies, SQLite in a data folder and Docker for the VPS. Evolution and Telegram come in only through environment variables; without them the outbox is simulated and no network call goes out.</p>
   <div class="flow">
     <span>Site chat or WhatsApp (Evolution)</span><span class="arr">→</span>
     <span>Evaluation and sessions booked</span><span class="arr">→</span>
@@ -195,102 +195,83 @@
       </svg></div>
     <div class="card"><h3>The 12 example exercises</h3>
       <p>Bridge, hamstring stretch, shoulder rotation with a stick, Codman pendulum, cervical retraction, cat-camel, wall squat, heel raise, side-lying hip abduction, modified plank, bird-dog and ankle mobility.</p>
-      <p style="margin-top:.8em">Each one has a public page <code>/exercicios/&lt;id&gt;</code> (steps, common mistakes, precautions, contraindications and "stop if"). On WhatsApp the patient gets a 4-second <strong>MP4</strong> rendered with HyperFrames, a local build step (<code>tools/render-exercicios</code>); without the MP4, the link goes out instead. The movement is checked at level 4 by <code>verificar-independente.py</code>, which prints <code>PULADO</code> (skipped) when the tool is missing.</p></div>
+      <p style="margin-top:.8em">Each one has a public page <code>/exercicios/&lt;id&gt;</code> (steps, common mistakes, precautions, contraindications and "stop if"). On WhatsApp the patient can get a 4-second <strong>MP4</strong> rendered with HyperFrames, an optional local build step (<code>tools/render-exercicios</code>, already written, not run yet); without the MP4, the text with the link goes out instead. The SVG movement has already been checked in a Chromium by the independent verification.</p></div>
   </div>
 </div></section>
 
 <section id="pre"><div class="wrap">
   <span class="chip">Prerequisites</span>
   <h2>What you need</h2>
-  <p class="sub">To run the plan you only need Python for the tests and an agent logged in through a subscription. Docker only comes in at the final verification and the deploy; Evolution and Telegram are optional and yours. For the exercise videos, Node 22 or newer, FFmpeg and Chromium.</p>
+  <p class="sub">To run the system you only need Python 3. Docker comes in for the VPS deploy; Evolution and Telegram are optional and yours. The exercise MP4 videos are optional and need Node 22 or newer, FFmpeg and Chromium. An agent (Claude Code or Codex) only if you want to rebuild or adapt the system with the same method.</p>
   <div class="grid g3">
-    <div class="card"><h3>Python 3.10+ and pytest</h3><p>The tests use pytest (a development tool). The application itself will have no dependencies.</p><pre><span class="c"># check</span>
+    <div class="card"><h3>Python 3.10+ (and pytest)</h3><p>The application uses the standard library only, no dependencies. pytest runs the 98 tests.</p><pre><span class="c"># check</span>
 <span class="k">python3</span> --version
 <span class="k">python3</span> -m pip install pytest</pre></div>
-    <div class="card"><h3>Claude Code or Codex</h3><p>On a subscription, no paid API. For the headless loop, clone <a href="https://github.com/inematds/execucao-longa" target="_blank" rel="noopener">execucao-longa</a> into <code>~/projetos</code>.</p><pre><span class="c"># check</span>
+    <div class="card"><h3>Claude Code or Codex (optional)</h3><p>Only to rebuild or adapt the system with the method, on a subscription, no paid API. For the headless loop, clone <a href="https://github.com/inematds/execucao-longa" target="_blank" rel="noopener">execucao-longa</a> into <code>~/projetos</code>.</p><pre><span class="c"># check</span>
 <span class="k">codex</span> --version   <span class="c"># or: claude --version</span></pre></div>
-    <div class="card"><h3>Docker, Evolution and Telegram</h3><p>Docker does the final build and the VPS deploy. An Evolution instance and a Telegram bot only if you want the channels; credentials live in <code>.env</code>.</p><pre><span class="c"># check</span>
+    <div class="card"><h3>Docker, Evolution and Telegram</h3><p>Docker does the build and the VPS deploy. An Evolution instance and a Telegram bot only if you want the channels; credentials live in <code>.env</code>.</p><pre><span class="c"># check</span>
 <span class="k">docker</span> --version</pre></div>
   </div>
 </div></section>
 
 <section id="guia"><div class="wrap">
   <span class="chip">User guide · step by step</span>
-  <h2>From the clone to the implemented system, in your own environment</h2>
-  <p class="sub">The commands below are the repository's own. The cycle: answer the decisions, freeze the contract, run the agent until <code>98 passed</code> and <code>LIMITES OK</code>, check with the independent verification, render the videos and get a clinical review.</p>
+  <h2>From the clone to a running system, in your own environment</h2>
+  <p class="sub">The commands below are the repository's own. The cycle: clone and check the tests, run locally, customize the clinic, deploy to your VPS and get a clinical review. What still depends on you: the real credentials (Evolution/WhatsApp and Telegram), the deploy on your VPS, the clinic's real data, the optional MP4 render and a physical therapist's review.</p>
 
   <div class="step"><div class="b">1</div><div>
-    <h3>Clone the repository</h3>
-    <p>There is no <code>./atende</code> yet: the repository only has the plan. Check that the suite is collected without errors and that nothing passes yet (without the implementation the tests fail or error, and that is expected).</p>
+    <h3>Clone and check the tests</h3>
+    <p>The system is already in the repository (<code>./atende</code>, <code>src/</code>, <code>web/</code>, <code>Dockerfile</code>). Run the suite to see it for yourself.</p>
 <pre><span class="k">git clone</span> <span class="s">https://github.com/inematds/atende-fisioterapia</span> && <span class="k">cd</span> atende-fisioterapia
-<span class="k">python3</span> -m pytest -q --collect-only | tail -n 1   <span class="c"># 98 tests collected</span>
-<span class="k">python3</span> -m pytest -q | tail -n 1                  <span class="c"># 23 failed, 75 errors (0 passed)</span></pre>
+<span class="k">python3</span> -m pytest -q tests/ | tail -n 1                   <span class="c"># 98 passed</span></pre>
   </div></div>
 
   <div class="step"><div class="b">2</div><div>
-    <h3>Answer the open decisions</h3>
-    <p>Read <code>docs/DECISOES-ABERTAS.md</code> (the open decisions): 21 default proposals already applied in the specification and the tests. Answering "ok em tudo" (all fine) unblocks the run. If you change anything marked ⚠ (for example the dropout alert, the list of warning words or the pain threshold), edit <code>docs/ESPECIFICACAO.md</code> and <code>tests/</code> before step 3 and check the count. For a real pilot, also replace <code>exemplos/clinica.json</code> with your hours, services, FAQ and exercises.</p>
-<pre><span class="k">less</span> docs/DECISOES-ABERTAS.md
-<span class="k">python3</span> -m pytest -q --collect-only | tail -n 1</pre>
+    <h3>Run it locally</h3>
+    <p>The server prints <code>PORTA=8080</code> and listens only on <code>127.0.0.1</code>; <code>--porta 0</code> picks a free port. With no configuration, <code>exemplos/clinica.json</code> is copied into the data folder. The patient chat is at <code>/</code>, the team page at <code>/equipe</code> (token <code>TROQUE-ESTE-TOKEN</code> in the example, "change this token") and each exercise at <code>/exercicios/&lt;id&gt;</code>, for example <code>/exercicios/ponte</code>. Without Evolution and Telegram configured, the output is simulated.</p>
+<pre><span class="k">./atende</span> serve --porta 8080 --dados ./dados</pre>
   </div></div>
 
   <div class="step"><div class="b">3</div><div>
-    <h3>Freeze the contract</h3>
-    <p>With a clean <code>git status</code>, the script writes the hash of <code>tests/</code>, <code>pytest.ini</code>, the specification and the verifiers to <code>hash-congelado.txt</code> and makes a commit. From then on, any change to the tests is detected.</p>
-<pre><span class="k">git status</span>
-<span class="k">bash</span> longrun/2026-10-05-fisio-v1/congelar.sh</pre>
+    <h3>Customize your clinic</h3>
+    <p>Edit <code>dados/clinica.json</code> with your hours, professionals, services, FAQ and exercises, and <strong>change the token</strong> before real use. The 21 behavior decisions (dropout alert, opt-in reminder, pain threshold and others) are described in <code>docs/DECISOES-ABERTAS.md</code> and were accepted as the default proposals.</p>
+<pre><span class="k">less</span> docs/DECISOES-ABERTAS.md
+<span class="k">$EDITOR</span> dados/clinica.json</pre>
   </div></div>
 
   <div class="step"><div class="b">4</div><div>
-    <h3>Run the agent (pick one path)</h3>
-    <p><strong>a) Headless loop with Codex (recommended).</strong> <code>loop.env</code> sets 20 cycles of 30 min, 8 GB per cycle, a stop after 3 cycles with no progress, the <code>gpt-6-astra</code> model and <code>CODEX_ARGS="-c sandbox_workspace_write.network_access=true"</code>: without it the Codex sandbox blocks the tests' local server.</p>
-<pre><span class="k">~/projetos/execucao-longa/tools/loop-longrun.sh</span> longrun/2026-10-05-fisio-v1</pre>
-    <p><strong>b) <code>/goal</code> in Claude Code.</strong> Open a new Claude Code session in the project folder and follow <code>longrun/2026-10-05-fisio-v1/prompt-goal-claude.md</code>: paste the <code>/goal</code> condition (the output must show <code>98 passed</code> and <code>LIMITES OK</code>) and, as the first message, the block from <code>prompt-goal-codex.md</code> starting at <code>RESULTADO:</code>.</p>
-<pre><span class="k">claude</span>   <span class="c"># new session, inside atende-fisioterapia</span></pre>
-    <p><strong>c) Codex TUI.</strong> Paste the contents of <code>longrun/2026-10-05-fisio-v1/prompt-goal-codex.md</code>.</p>
-<pre><span class="k">codex</span> -c sandbox_workspace_write.network_access=true</pre>
+    <h3>Deploy to your VPS</h3>
+    <p>The deploy is yours, with your credentials. Copy <code>.env.exemplo</code>, fill in only the integrations you want (Evolution: <code>EVOLUTION_URL</code>, <code>EVOLUTION_API_KEY</code>, <code>EVOLUTION_INSTANCIA</code>, <code>WEBHOOK_SEGREDO</code>; Telegram: <code>TELEGRAM_TOKEN</code>, <code>TELEGRAM_CHAT_ID</code>, <code>TELEGRAM_SEGREDO</code>), create <code>dados/</code> and <code>backups/</code> and bring up the compose. The port is bound to <code>127.0.0.1:8080</code>; put an HTTPS proxy (Nginx or Caddy) in front and set <code>PUBLIC_URL</code>.</p>
+<pre><span class="k">cp</span> .env.exemplo .env && <span class="k">chmod</span> 600 .env
+<span class="k">mkdir</span> -p dados backups && <span class="k">cp</span> exemplos/clinica.json dados/clinica.json
+<span class="k">docker compose</span> up -d --build && <span class="k">docker compose</span> ps</pre>
+    <p>Then register the Evolution webhook (<code>PUBLIC_URL</code> + <code>/webhook/evolution/&lt;segredo&gt;</code>, event <code>MESSAGES_UPSERT</code>) and the Telegram one (<code>setWebhook</code> with <code>PUBLIC_URL</code> + <code>/webhook/telegram</code> and <code>secret_token</code>). Reminders, confirmations and alerts run through periodic calls to <code>POST /api/tarefas/rodar</code> with <code>X-Token</code>, and the daily backup goes in the crontab with <code>./atende backup</code>. The full walkthrough is in the README, "VPS deploy" section.</p>
   </div></div>
 
   <div class="step"><div class="b">5</div><div>
-    <h3>Follow along</h3>
-    <p>In the loop, <code>loop.log</code> shows each cycle and <code>progress.md</code> has one line per checkpoint. The loop's exit code says what happened: <code>0</code> done (the final test passed), <code>1</code> cycle cap reached, <code>2</code> stopped after 3 cycles with no progress, <code>3</code> another loop is already running in the folder. A test that conflicts with the specification goes to <code>failures.md</code>: it is a human gate, and the agent must not adjust a test or the specification.</p>
-<pre><span class="k">tail</span> -f longrun/2026-10-05-fisio-v1/loop.log
-<span class="k">cat</span> longrun/2026-10-05-fisio-v1/state.md</pre>
+    <h3>Exercise MP4 videos (optional)</h3>
+    <p>The 12 exercises already work on the web as animated SVGs. To send MP4s on WhatsApp, run <code>tools/render-exercicios</code> once: it is already written but <strong>has not been run yet</strong>, and it needs network access, Node 22 or newer, FFmpeg and Chromium. It produces <code>web/exercicios/&lt;id&gt;.mp4</code> (4 s, 720×720, no audio); the MP4 files stay out of Git. On the VPS, set <code>EXERCICIOS_MP4_DIR</code>. Without an MP4, the text with the link goes out.</p>
+<pre><span class="k">python3</span> tools/render-exercicios            <span class="c"># or --so ponte, --saida DIR</span></pre>
   </div></div>
 
   <div class="step"><div class="b">6</div><div>
-    <h3>Check with the independent verification</h3>
-    <p>When the agent says "done", run the three commands. The last one the agent has never seen: it looks for fixture values copied into the code, brings up a clinic it has never seen (another schedule step, another pain threshold, another clock, exercises with other texts), opens 3 SVGs in a Chromium to prove they move, renders an MP4 with HyperFrames and runs <code>docker build</code> with a healthcheck. Without Chromium or without HyperFrames those stages come out as <code>PULADO</code> (skipped), never as OK; Docker is mandatory. Then open <code>/</code>, <code>/equipe</code> and <code>/exercicios/ponte</code> in the browser.</p>
-<pre><span class="k">python3</span> -m pytest -q tests/                                         <span class="c"># 98 passed</span>
-<span class="k">bash</span> longrun/2026-10-05-fisio-v1/verificar-limites.sh               <span class="c"># LIMITES OK</span>
+    <h3>Want to rebuild or adapt it? The method is still in the repository</h3>
+    <p>This is how the system was built: the 21 decisions were answered ("ok em tudo", all fine), the contract was frozen (<code>congelar.sh</code> recorded the hash of <code>tests/</code>, <code>pytest.ini</code>, the specification and the verifiers) and the headless loop from <a href="https://inematds.github.io/execucao-longa/guia/en/" target="_blank" rel="noopener">execucao-longa</a> ran Codex (<code>gpt-6-astra</code>, on a subscription) for 7 cycles until <code>98 passed</code> and <code>LIMITES OK</code>. Finally, the independent verification, which the agent never saw, looked for fixture values copied into the code, brought up a clinic never seen, proved in a Chromium that the SVGs move and ran <code>docker build</code> with a healthcheck: <code>INDEPENDENTE OK</code>, with the MP4 render marked <code>PULADO</code> (skipped) because HyperFrames was not installed.</p>
+    <p>To adapt it to another clinic or change a rule marked ⚠, edit the specification and the tests, freeze again and run the loop (or <code>/goal</code> in Claude Code, or the Codex TUI, with the prompts in <code>longrun/2026-10-05-fisio-v1/</code>).</p>
+<pre><span class="k">bash</span> longrun/2026-10-05-fisio-v1/congelar.sh
+<span class="k">~/projetos/execucao-longa/tools/loop-longrun.sh</span> longrun/2026-10-05-fisio-v1
 <span class="k">python3</span> longrun/2026-10-05-fisio-v1/verificar-independente.py      <span class="c"># INDEPENDENTE OK</span></pre>
-  </div></div>
-
-  <div class="step"><div class="b">7</div><div>
-    <h3>Render the exercise MP4 videos</h3>
-    <p>A human step, after the implementation: <code>tools/render-exercicios</code> (written by the agent) needs network access, Node 22 or newer, FFmpeg and Chromium. It produces <code>web/exercicios/&lt;id&gt;.mp4</code> (4 s, 720×720, no audio) from each SVG. The MP4 files stay out of Git; on the VPS, run the command once or copy the files into the <code>EXERCICIOS_MP4_DIR</code> folder.</p>
-<pre><span class="k">python3</span> tools/render-exercicios</pre>
-  </div></div>
-
-  <div class="step"><div class="b">8</div><div>
-    <h3>Run your clinic and deploy to the VPS</h3>
-    <p>With the system implemented, copy the example, replace <code>TROQUE-ESTE-TOKEN</code> (change this token) and start the server. The patient chat is at <code>/</code>, the team page at <code>/equipe</code> (header <code>X-Token</code>) and each exercise at <code>/exercicios/&lt;id&gt;</code>.</p>
-<pre><span class="k">mkdir</span> -p dados && <span class="k">cp</span> exemplos/clinica.json dados/clinica.json
-<span class="k">./atende</span> serve --porta 8080 --dados dados</pre>
-    <p>The deploy is yours, with your credentials, and the agent itself writes the deploy instructions as part of the goal (section 19 of the specification): <code>docker compose</code> behind an HTTPS proxy, the Evolution and Telegram webhooks, and a daily backup.</p>
-<pre><span class="k">cp</span> .env.exemplo .env && <span class="k">chmod</span> 600 .env   <span class="c"># fill in EVOLUTION_*, TELEGRAM_*, WEBHOOK_SEGREDO</span>
-<span class="k">docker compose</span> up -d --build</pre>
   </div></div>
 
   <div class="card" style="border-color:var(--amb)"><h3>⚠️ Before real patients: a physical therapist's review</h3><p>The 12 example exercises (steps, common mistakes, precautions, contraindications and "stop if"), the list of warning words and the pain threshold (<code>dor_alerta: 7</code>) were written as an example, and clinical content belongs to the physical therapist. <strong>A physical therapist must review all of it before it reaches a real patient</strong> (decisions 10 and 9 in <code>docs/DECISOES-ABERTAS.md</code>). One point is still open: words such as <code>caiu</code> and <code>queda</code> (fell, a fall) match everyday phrases ("a dor caiu bastante", the pain dropped a lot) and open a high-priority queue entry by mistake, a cheap false alarm that the physical therapist decides whether to keep (decision 20).</p></div>
 </div></section>
 
 <section id="kit"><div class="wrap">
-  <span class="chip">What's in the kit</span>
-  <h2>Contract, tests and guardrails, with the real numbers</h2>
-  <p class="sub">Everything the agent needs to build, and everything that stops it from pretending it built it.</p>
+  <span class="chip">What's in the repository</span>
+  <h2>System, contract, tests and guardrails, with the real numbers</h2>
+  <p class="sub">The system's code (<code>atende</code>, <code>src/</code>, <code>web/</code>, <code>tools/</code>, <code>Dockerfile</code>, <code>docker-compose.yml</code>) and everything that guided the agent while building it and stopped it from pretending it had built it.</p>
   <div class="grid g3">
-    <div class="card"><h3>98 acceptance tests</h3><p>Black-box, over HTTP and the command line, in 12 files.</p><pre>test_integracoes.py           16
+    <div class="card"><h3>98 acceptance tests, 98 passing</h3><p>Black-box, over HTTP and the command line, in 12 files.</p><pre>test_integracoes.py           16
 test_agenda.py                12
 test_conversa.py              10
 test_cadastros.py              9
@@ -303,9 +284,9 @@ test_planos.py                 6
 test_docker.py                 4
 test_lgpd_raiox.py             3</pre></div>
     <div class="card"><h3>A 26-section specification</h3><p><code>docs/ESPECIFICACAO.md</code>, sections 0 to 25: execution, <code>clinica.json</code>, scheduling rules, the HTTP API, a 12-rule conversation, waitlist, confirmation and follow-up, campaigns and the council guardrail, Raio-X, LGPD, records, WhatsApp, Telegram, Docker, treatment plans, the exercise library, prescription and reminders, adherence and pain, team alerts and the MP4 video. Medical records, Pix billing, insurance and claim denials (TISS) and several clinics on one server are explicitly out.</p></div>
-    <div class="card"><h3>Guardrails against shortcuts</h3><p>A frozen hash of <code>tests/</code>, <code>pytest.ini</code>, the specification and the verifiers. File scope: the agent only touches the code and its own records. No API key, no external API in the code and no SMIL or script in the SVGs. <code>verificar-limites.sh</code> checks all of this and prints <code>LIMITES OK</code>.</p></div>
-    <div class="card"><h3>Independent verification</h3><p>Level 4, hidden from the agent: it looks for fixture values in the code, brings up a clinic never seen, with every argument explicit, checks the SVG movement and the MP4 when the tools exist, and runs <code>docker build</code> and a healthcheck. Only that way does "98 passed" prove general logic.</p></div>
-    <div class="card"><h3>21 decisions already proposed</h3><p>Language, channels, the follow-up as a re-evaluation, the dropout alert, the opt-in reminder, adherence logged per day, pain and warning signs, the 12 exercises, CSS-only animation, what the bot explains, the COFFITO guardrail and Raio-X. Only the items marked ⚠ change the contract.</p></div>
+    <div class="card"><h3>Guardrails against shortcuts</h3><p>A frozen hash of <code>tests/</code>, <code>pytest.ini</code>, the specification and the verifiers. File scope: the agent could only touch the code and its own records. No API key, no external API in the code and no SMIL or script in the SVGs. <code>verificar-limites.sh</code> checks all of this and prints <code>LIMITES OK</code>.</p></div>
+    <div class="card"><h3>Independent verification</h3><p>Level 4, hidden from the agent: it looks for fixture values in the code, brings up a clinic never seen, with every argument explicit, checks the SVG movement and the MP4 when the tools exist, and runs <code>docker build</code> and a healthcheck. Result: <code>INDEPENDENTE OK</code> (MP4 render skipped). Only that way does "98 passed" prove general logic.</p></div>
+    <div class="card"><h3>21 accepted decisions</h3><p>Language, channels, the follow-up as a re-evaluation, the dropout alert, the opt-in reminder, adherence logged per day, pain and warning signs, the 12 exercises, CSS-only animation, what the bot explains, the COFFITO guardrail and Raio-X. Only the items marked ⚠ change the contract.</p></div>
     <div class="card"><h3>Validated by an adversarial agent</h3><p>A validator that had not seen the planning checked tests against the specification, redid the arithmetic and tried to get around the guardrails. It found and fixed 9 problems: 3 blocked the run, 4 got in the way and 2 were cosmetic. The full account is in <code>docs/VALIDACAO.md</code> and each fix has a line in <code>FALHAS.md</code>.</p></div>
   </div>
   <div class="grid g2" style="margin-top:16px">
@@ -317,18 +298,18 @@ test_lgpd_raiox.py             3</pre></div>
 <section id="roadmap"><div class="wrap">
   <span class="chip">Roadmap</span>
   <h2>Where it stands and where it is going</h2>
-  <p class="sub">The plan is ready and validated. The implementation does not exist yet: it is born when you run <code>/goal</code> or the loop, using the <a href="https://inematds.github.io/execucao-longa/guia/en/" target="_blank" rel="noopener">execucao-longa</a> method. <a href="https://inematds.github.io/atende-clinica/guia/en/" target="_blank" rel="noopener">Atende Clínica</a> took the same path and closed 93 of 93.</p>
+  <p class="sub">The plan was validated and the system was implemented with the <a href="https://inematds.github.io/execucao-longa/guia/en/" target="_blank" rel="noopener">execucao-longa</a> method, like <a href="https://inematds.github.io/atende-clinica/guia/en/" target="_blank" rel="noopener">Atende Clínica</a>, which closed 93 of 93. The next step is yours: a pilot in a real clinic.</p>
   <div class="phase"><div class="tag">Plan ✅</div><div class="d"><strong>Specification, tests and guardrails validated</strong><span>A 26-section contract, 98 acceptance tests, 21 proposed decisions, a map to Raio-X and an adversarial validation completed on 05/10/2026.</span></div></div>
-  <div class="phase"><div class="tag">Build</div><div class="d"><strong>You run /goal or the loop</strong><span>Answer the decisions, freeze the contract and let the agent work until <code>98 passed</code> and <code>LIMITES OK</code>, then the independent verification. Today the system is not implemented.</span></div></div>
-  <div class="phase"><div class="tag">Videos</div><div class="d"><strong>Exercise MP4s, on your machine</strong><span>Run <code>tools/render-exercicios</code> once, with network access, Node, FFmpeg and Chromium, and copy the files to the VPS if needed.</span></div></div>
-  <div class="phase"><div class="tag">Pilot</div><div class="d"><strong>In a real clinic</strong><span>Replace the example with the real hours, services and exercises, get a physical therapist's review, publish on the VPS and track no-shows, occupancy, follow-up and adherence in the Raio-X Recovery Dashboard.</span></div></div>
+  <div class="phase"><div class="tag">Build ✅</div><div class="d"><strong>System v0.7.0, 98 of 98</strong><span>Decisions accepted, contract frozen and the Codex headless loop in 7 cycles until <code>98 passed</code> and <code>LIMITES OK</code>, on 19/10/2026. Independent verification OK (SVGs in Chromium, <code>docker build</code> and healthcheck).</span></div></div>
+  <div class="phase"><div class="tag">Videos</div><div class="d"><strong>Exercise MP4s, optional, on your machine</strong><span><code>tools/render-exercicios</code> is written and has not been run yet. Run it once, with network access, Node, FFmpeg and Chromium, and copy the files to the VPS if needed.</span></div></div>
+  <div class="phase"><div class="tag">Pilot</div><div class="d"><strong>In a real clinic</strong><span>Up to you: replace the example with the real hours, services and exercises, get a physical therapist's review, plug in the real Evolution and Telegram credentials, publish on your VPS and track no-shows, occupancy, follow-up and adherence in the Raio-X Recovery Dashboard.</span></div></div>
   <div class="phase"><div class="tag">Later</div><div class="d"><strong>Out of v1</strong><span>Medical records, billing, insurance and claim denials, several clinics, an LLM in the replies and an EN/ES interface are left for a next version, behind a human gate.</span></div></div>
 </div></section>
 
 <footer>
   <div class="wrap">
     <div class="pill">Python 3 · standard library</div><div class="pill">SQLite</div><div class="pill">Docker</div><div class="pill">Evolution API</div><div class="pill">Telegram</div><div class="pill">LGPD</div>
-    <p style="margin-top:18px">Atende Fisioterapia · open plan kit ·
+    <p style="margin-top:18px">Atende Fisioterapia · v0.7.0 · open source ·
       <a href="https://github.com/inematds/atende-fisioterapia">inematds/atende-fisioterapia</a> ·
       <a href="https://inema.club">INEMA.CLUB</a></p>
   </div>

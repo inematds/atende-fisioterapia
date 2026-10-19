@@ -26,30 +26,34 @@ longrun/2026-10-05-fisio-v1/   goal, loop.env, prompts, congelar.sh, verificar-l
 FALHAS.md                  uma linha por falha (data, o que quebrou, menor correção, prompt|infra)
 ```
 
-A implementação (`atende`, `src/`, `web/`, `tools/`, `Dockerfile`, `docker-compose.yml`, `.env.exemplo`) é produzida pela execução longa descrita abaixo.
+**Estado (19/10/2026): sistema implementado, versão 0.7.0.** `python3 -m pytest -q tests/` → **98 passed**; `bash longrun/2026-10-05-fisio-v1/verificar-limites.sh` → **LIMITES OK** na entrega; verificação independente → **INDEPENDENTE OK** (render MP4 pelo HyperFrames pulado). A implementação (`atende`, `src/`, `web/`, `tools/`, `Dockerfile`, `docker-compose.yml`, `.env.exemplo`) foi produzida pela execução longa descrita em "Como foi construído".
 
 ## Como rodar no seu ambiente
 
-Esta seção é do dono do projeto; o implementador acrescenta as dele (Executar localmente, Deploy na VPS) sem reescrevê-la.
+**Pré-requisitos:** Python 3.10+ (a aplicação só usa a biblioteca padrão) e `pytest` para os testes; `git`; Docker para o deploy na VPS; opcionalmente Node ≥ 22, FFmpeg e Chromium para os vídeos MP4.
 
-**Pré-requisitos:** Python 3.10+ e `pytest` (`python3 -m pytest --version`); `git`; para o loop headless, o Codex CLI logado pela assinatura e `~/projetos/execucao-longa` (método, `tools/loop-longrun.sh`); para a verificação final, Docker e, opcionalmente, Chromium/Playwright e Node ≥ 22 + FFmpeg (HyperFrames).
+1. **Conferir:** `python3 -m pytest -q tests/` → **98 passed**.
+2. **Rodar local:** `./atende serve --porta 8080 --dados ./dados` (detalhes em "Executar localmente"). Abra `/`, `/equipe` e `/exercicios/ponte` no navegador.
+3. **Personalizar:** ajuste `dados/clinica.json` (horários, profissionais, serviços, FAQ, exercícios) e troque o token. As 21 decisões de comportamento estão em `docs/DECISOES-ABERTAS.md` (aceitas como propostas padrão).
+4. **Deploy:** siga "Deploy na VPS" abaixo, com as suas credenciais da Evolution/WhatsApp e do Telegram.
+5. **Vídeos MP4 dos exercícios** (opcional, passo humano ainda não executado; precisa de rede, Node ≥ 22, FFmpeg e Chromium): `python3 tools/render-exercicios` gera `web/exercicios/<id>.mp4` (4 s, 720×720, sem áudio) a partir de cada SVG — ver seção 25 da spec. Os MP4 não entram no Git; na VPS, rode o comando uma vez ou copie os arquivos para a pasta de `EXERCICIOS_MP4_DIR`. Sem MP4, os SVG animados continuam funcionando na web.
+6. **Revisão clínica:** os 12 exercícios do exemplo (passos, erros comuns, cuidados, contraindicações, "pare se") e a lista de palavras de alerta da spec (§6, regra 2) são um ponto de partida — um fisioterapeuta revisa antes de usar com paciente real.
 
-1. **Responder as decisões** em `docs/DECISOES-ABERTAS.md` (um "ok em tudo" vale). Se mudar algo marcado ⚠, ajuste `docs/ESPECIFICACAO.md` e `tests/` antes do passo 2 e confira `python3 -m pytest -q --collect-only | tail -1`.
-2. **Congelar o contrato:** `git status` limpo, depois `bash longrun/2026-10-05-fisio-v1/congelar.sh` (grava `hash-congelado.txt` com o hash de `tests/`, `pytest.ini`, da spec e dos verificadores, e faz o commit).
-3. **Executar** por um dos três caminhos:
-   - **Loop headless (recomendado):** `~/projetos/execucao-longa/tools/loop-longrun.sh longrun/2026-10-05-fisio-v1` — lê `loop.env` (Codex `gpt-6-astra`, 20 ciclos × 30 min, 8 G, estagnação 3, `CODEX_ARGS` com `network_access=true` porque os testes sobem servidor em 127.0.0.1), reverte ciclo que toque arquivo protegido e faz o commit de checkpoint.
-   - **`/goal` no Claude Code:** siga `longrun/2026-10-05-fisio-v1/prompt-goal-claude.md` (sessão nova aberta nesta pasta).
-   - **`/goal` no Codex TUI:** `codex -c sandbox_workspace_write.network_access=true` nesta pasta e cole `longrun/2026-10-05-fisio-v1/prompt-goal-codex.md`.
-4. **Acompanhar:** `tail -f longrun/2026-10-05-fisio-v1/loop.log` (headless) e os arquivos `state.md`, `progress.md`, `failures.md`; `git log --oneline` mostra os checkpoints. Critério de pronto: `python3 -m pytest -q tests/` → **98 passed** e `bash longrun/2026-10-05-fisio-v1/verificar-limites.sh` → **LIMITES OK**. O loop para sozinho por estagnação (3 ciclos sem avanço) ou teto.
-5. **Verificação independente (nível 4), depois do "concluído":** `python3 longrun/2026-10-05-fisio-v1/verificar-independente.py` → `INDEPENDENTE OK`. Ela sobe uma clínica nunca vista, procura valores do fixture no código, abre 3 SVGs num Chromium para provar que se mexem (e confere que os 12 têm animações próprias), renderiza um MP4 pelo HyperFrames e faz `docker build` + healthcheck. Sem Chromium/Playwright ou sem HyperFrames, as etapas saem como `PULADO` (nunca como OK) — instale e rode de novo se quiser a prova completa; Docker é obrigatório. O Chromium do snap serve (os quadros são gravados dentro do repo, porque o snap não enxerga `/tmp`). Resultado da validação independente do plano: `docs/VALIDACAO.md`. Abra também `/`, `/equipe` e `/exercicios/ponte` no navegador.
-6. **Vídeos MP4 dos exercícios** (passo humano; precisa de rede, Node ≥ 22, FFmpeg e Chromium): `python3 tools/render-exercicios` gera `web/exercicios/<id>.mp4` (4 s, 720×720, sem áudio) a partir de cada SVG — ver seção 25 da spec. Os MP4 não entram no Git; na VPS, rode o comando uma vez ou copie os arquivos para a pasta de `EXERCICIOS_MP4_DIR`.
-7. **Revisão clínica:** os 12 exercícios do exemplo (passos, erros comuns, cuidados, contraindicações, "pare se") e a lista de palavras de alerta da spec (§6, regra 2) são um ponto de partida — um fisioterapeuta revisa antes de usar com paciente real.
+## Como foi construído (método)
+
+O sistema foi feito por execução longa, e o método continua no repositório para quem quiser refazer ou adaptar:
+
+1. **Decisões respondidas** em `docs/DECISOES-ABERTAS.md` ("ok em tudo"). Para mudar algo marcado ⚠, ajuste `docs/ESPECIFICACAO.md` e `tests/` e confira `python3 -m pytest -q --collect-only | tail -1`.
+2. **Contrato congelado:** `bash longrun/2026-10-05-fisio-v1/congelar.sh` gravou `hash-congelado.txt` com o hash de `tests/`, `pytest.ini`, da spec e dos verificadores (`381b6510e90832d5`).
+3. **Execução:** loop headless `~/projetos/execucao-longa/tools/loop-longrun.sh longrun/2026-10-05-fisio-v1` — lê `loop.env` (Codex `gpt-6-astra` pela assinatura, 20 ciclos × 30 min, 8 G, estagnação 3, `CODEX_ARGS` com `network_access=true` porque os testes sobem servidor em 127.0.0.1); fechou em 7 ciclos. Alternativas: `/goal` no Claude Code (`longrun/2026-10-05-fisio-v1/prompt-goal-claude.md`) ou no Codex TUI (`codex -c sandbox_workspace_write.network_access=true` e `prompt-goal-codex.md`).
+4. **Travas e acompanhamento:** `verificar-limites.sh` conferia hash, contagem de testes e escopo de arquivos (ele compara com o commit congelado, então mudanças posteriores de documentação, como o guia, aparecem como fora do escopo — é esperado). Acompanhamento: `longrun/2026-10-05-fisio-v1/loop.log`, `state.md`, `progress.md`, `failures.md` e os commits de checkpoint (`git log --oneline`).
+5. **Verificação independente (nível 4):** `python3 longrun/2026-10-05-fisio-v1/verificar-independente.py` → `INDEPENDENTE OK`. Ela sobe uma clínica nunca vista, procura valores do fixture no código, abre 3 SVGs num Chromium para provar que se mexem (e confere que os 12 têm animações próprias), renderiza um MP4 pelo HyperFrames e faz `docker build` + healthcheck. Sem Chromium/Playwright ou sem HyperFrames, as etapas saem como `PULADO` (nunca como OK); nesta rodada o render MP4 saiu `PULADO` (HyperFrames não instalado). O Chromium do snap serve (os quadros são gravados dentro do repo, porque o snap não enxerga `/tmp`). Validação do plano antes da execução: `docs/VALIDACAO.md`.
 
 Toda falha real vai para `FALHAS.md` (uma linha: data, o que quebrou, menor correção, prompt|infra).
 
 ## Deploy na VPS
 
-Os comandos desta seção são passos do operador na VPS. Docker, registro de webhooks e renderização não são executados pelo loop de desenvolvimento.
+Os comandos desta seção são passos do operador na VPS.
 
 1. Copie `.env.exemplo` para `.env` e mantenha esse arquivo privado (`chmod 600 .env`). Crie `dados/` e `backups/`; copie `exemplos/clinica.json` para `dados/clinica.json`, ajuste a clínica e troque o token antes de iniciar. O compose persiste o banco e a configuração em `./dados`.
 2. Preencha somente as integrações que deseja habilitar. Evolution usa `EVOLUTION_URL`, `EVOLUTION_API_KEY`, `EVOLUTION_INSTANCIA` e `WEBHOOK_SEGREDO`. Telegram usa `TELEGRAM_API_URL`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID` e `TELEGRAM_SEGREDO`. Sem configuração, a saída é simulada. Não use `ATENDE_AGORA` em produção.
