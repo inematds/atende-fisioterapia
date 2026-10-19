@@ -34,3 +34,7 @@ Cada item tem uma **proposta padrão** já aplicada na spec e nos testes. Respon
 - Os vídeos MP4: renderizar **na sua máquina** e copiar para a VPS, ou instalar Node/Chromium na VPS e rodar lá?
 - Página `/equipe` só funcional (padrão) ou já com o visual INEMA?
 - Isto é **produto para implantar em clínicas** (kit do Raio-X) ou **projeto aberto/curso**? Muda o que vem depois do v1 (guia, licença, deploy), não o v1.
+
+## Resposta do dono (19/10/2026)
+
+"ok em tudo": todas as propostas padrão aceitas. Perguntas abertas ficam para depois do v1 (exemplo fictício, sem piloto real, `/equipe` só funcional). Execução: loop headless com Codex.
