@@ -41,6 +41,9 @@ def campanhas(c, texto):
 
 def remover_paciente(c, ident):
     p = c.paciente(ident)
+    from . import prescricoes
+    prescricoes.remover(c, ident)
+    c.db.execute('DELETE FROM registros WHERE paciente_id=?', (ident,))
     # Desvincula o telefone antes de liberar vagas: ele não pode receber oferta.
     c.db.execute('''UPDATE pacientes SET nome='removido', telefone=NULL, email=NULL,
         nascimento=NULL, consentimento_marketing=0, nao_contatar=1 WHERE id=?''', (ident,))

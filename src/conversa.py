@@ -5,7 +5,7 @@ import unicodedata
 from datetime import datetime, timedelta
 
 from .core import Erro, agora, telefone
-from . import integracoes, planos
+from . import integracoes, planos, prescricoes
 
 
 def normalizar(texto):
@@ -40,21 +40,21 @@ def paciente_tel(c, tel):
     return c.paciente(r[0]) if r else None
 
 
-def registrar(c, tel, direcao, texto):
+def registrar(c, tel, direcao, texto, quando=None):
     p = paciente_tel(c, tel)
     c.db.execute('INSERT INTO historico(paciente_id,telefone,direcao,texto,quando) VALUES (?,?,?,?,?)',
-                 (p['id'] if p else None, tel, direcao, texto, agora().isoformat(timespec='minutes')))
+                 (p['id'] if p else None, tel, direcao, texto, (quando or agora()).isoformat(timespec='minutes')))
 
 
-def enviar(c, pid, tipo, texto, agendamento_id=None, oferta=None):
+def enviar(c, pid, tipo, texto, agendamento_id=None, oferta=None, quando=None):
     p = c.paciente(pid)
     if p['nao_contatar'] or not p['telefone']:
         return 0
     ident = c.db.execute('''INSERT INTO saida(tipo,telefone,paciente_id,texto,agendamento_id,quando,oferta)
         VALUES (?,?,?,?,?,?,?)''', (tipo, p['telefone'], pid, texto, agendamento_id,
-        agora().isoformat(timespec='minutes'), json.dumps(oferta) if oferta else None)).lastrowid
+        (quando or agora()).isoformat(timespec='minutes'), json.dumps(oferta) if oferta else None)).lastrowid
     integracoes.entregar(c, ident)
-    registrar(c, p['telefone'], 'saida', texto)
+    registrar(c, p['telefone'], 'saida', texto, quando)
     return 1
 
 
@@ -100,6 +100,7 @@ def rodar(c, instante=None):
             if n:
                 c.db.execute('UPDATE retornos SET avisado=1 WHERE id=?', (r['id'],))
             enviadas += n
+    enviadas += prescricoes.rodar(c, t)
     return {'enviadas': enviadas, 'reenviadas': reenviadas, 'alertas': planos.rodar_alertas(c, t)}
 
 
@@ -237,6 +238,10 @@ def decidir(c, tel, texto, estado):
             estado['falhas'] = 0
             c.db.execute('UPDATE saida SET respondida=1 WHERE id=?', (pendente['id'],))
             return [acao]
+    resposta = prescricoes.conversar(c, p, texto, t, pendente)
+    if resposta is not None:
+        estado['falhas'] = 0
+        return [resposta]
     if any(contem(t, x) for x in ('agendar', 'marcar', 'consulta')):
         estado['falhas'] = 0
         if not p:
@@ -264,5 +269,5 @@ def decidir(c, tel, texto, estado):
 
 def dados_paciente(c, ident):
     p = c.paciente(ident)
-    return {'paciente': p, 'planos': planos.listar(c, ident), 'agendamentos': [a for a in c.listar_agenda({}) if a['paciente_id'] == ident],
+    return {'paciente': p, 'prescricao': prescricoes.obter(c, ident), 'registros': prescricoes.registros(c, ident), 'planos': planos.listar(c, ident), 'agendamentos': [a for a in c.listar_agenda({}) if a['paciente_id'] == ident],
             'mensagens': [dict(r) for r in c.db.execute('SELECT direcao,texto,quando FROM historico WHERE paciente_id=? ORDER BY id', (ident,))]}

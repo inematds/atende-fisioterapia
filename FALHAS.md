@@ -2,6 +2,7 @@
 
 | data | o que quebrou | menor correção | prompt \| infra |
 |---|---|---|---|
+| 2026-10-19 | Prescrição, opt-in e registros domiciliares ausentes causavam 12 falhas de aceitação | adicionar módulo persistente, rotas e regras 6–8; completar exportação/remoção LGPD | infra |
 | 2026-10-19 | Biblioteca e páginas inexistentes deixavam 7 testes de catálogo/recursos falhando | adicionar módulo de biblioteca, rotas públicas e 12 SVGs; reutilizar catálogo persistido | infra |
 | 2026-10-19 | Agenda rejeitava todo plano e tarefas não geravam alertas/retorno de conclusão | adicionar módulo de planos, vínculo e transição de presença; derivar contagens da agenda e marcar sequência alertada | infra |
 | 2026-10-19 | Molde aceitava presença repetida e gerava retorno por serviço, incompatíveis com fisioterapia | guard 409 na presença e remover geração por retorno_dias; retorno de plano fica para próxima etapa | prompt |

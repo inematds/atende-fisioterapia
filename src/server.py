@@ -8,10 +8,31 @@ import sys
 from urllib.parse import parse_qs, urlsplit
 
 from .core import Clinica, Erro, ROOT
-from . import conversa, gestao, cadastros, backup, integracoes, planos, exercicios
+from . import conversa, gestao, cadastros, backup, integracoes, planos, exercicios, prescricoes
 
 
 def rotear(c, metodo, rota, q, b):
+    if metodo == 'GET' and rota == '/api/adesao':
+        return 200, {'pacientes': prescricoes.geral(c)}
+    m = re.fullmatch(r'/api/pacientes/(\d+)/(prescricao|lembrete|adesao)', rota)
+    if m:
+        pid, recurso = int(m[1]), m[2]
+        c.paciente(pid)
+        if recurso == 'prescricao':
+            if metodo == 'POST':
+                return 201, prescricoes.criar(c, pid, b)
+            if metodo == 'GET':
+                resultado = prescricoes.obter(c, pid)
+                if resultado is None:
+                    raise Erro(404, 'Sem prescrição ativa')
+                return 200, resultado
+            if metodo == 'DELETE':
+                prescricoes.remover(c, pid)
+                return 204, None
+        if recurso == 'lembrete' and metodo == 'PUT':
+            return 200, prescricoes.preferencias(c, pid, b)
+        if recurso == 'adesao' and metodo == 'GET':
+            return 200, prescricoes.adesao(c, pid, q.get('semanas', 4))
     m = re.fullmatch(r'/api/exercicios(?:/([^/]+))?', rota)
     if m:
         ident = m[1]

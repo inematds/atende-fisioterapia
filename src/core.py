@@ -60,8 +60,9 @@ class Clinica:
                 id INTEGER PRIMARY KEY, profissional TEXT NOT NULL,
                 inicio TEXT NOT NULL, fim TEXT NOT NULL, motivo TEXT NOT NULL);
         ''')
-        from . import planos
+        from . import planos, prescricoes
         planos.iniciar(self)
+        prescricoes.iniciar(self)
         with self.db:
             if not self.db.execute("SELECT 1 FROM meta WHERE chave='semeado'").fetchone():
                 for tipo in ('servicos', 'profissionais', 'faq', 'exercicios'):
@@ -89,7 +90,7 @@ class Clinica:
         if not r:
             raise Erro(404, 'Paciente inexistente')
         p = dict(r)
-        for k in ('consentimento_marketing', 'nao_contatar'):
+        for k in ('consentimento_marketing', 'nao_contatar', 'lembrete_ativo'):
             p[k] = bool(p[k])
         return p
 
@@ -105,6 +106,7 @@ class Clinica:
         c = self.db.execute('INSERT INTO pacientes(nome,telefone,email,nascimento,consentimento_marketing) VALUES (?,?,?,?,?)',
                             (b['nome'], tel, b.get('email'), b.get('nascimento'), bool(b.get('consentimento_marketing', False))))
         ident = c.lastrowid
+        self.db.execute('UPDATE pacientes SET lembrete_hora=? WHERE id=?', (self.cfg['lembrete_hora_padrao'], ident))
         # A preferência de contato pode anteceder o cadastro pela recepção.
         if self.db.execute("SELECT 1 FROM sqlite_master WHERE name='sessoes'").fetchone():
             sessao = self.db.execute('SELECT dados FROM sessoes WHERE telefone=?', (tel,)).fetchone()

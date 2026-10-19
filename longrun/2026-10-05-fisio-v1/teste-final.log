@@ -1,27 +1,9 @@
-..............FF.F.......F...................FFFFFFFFFFFF.....FF.F...... [ 73%]
+...............F.............................FFFFF...FFF......FF.F...... [ 73%]
 .........F........FFFFFFFF                                               [100%]
 =================================== FAILURES ===================================
-_______________ test_rotas_da_equipe_exigem_token_e_publicas_nao _______________
-
-api = <conftest.Cliente object at 0xe6a40f402c00>
-
-    def test_rotas_da_equipe_exigem_token_e_publicas_nao(api):
-        for metodo, rota in [("GET", "/api/saida"), ("GET", "/api/agendamentos?data=2026-10-07"),
-                             ("POST", "/api/pacientes"), ("GET", "/api/atendimento-humano"),
-                             ("GET", "/api/raiox?mes=2026-10"), ("POST", "/api/campanhas"),
-                             ("GET", "/api/planos"), ("POST", "/api/planos"), ("GET", "/api/alertas"),
-                             ("GET", "/api/adesao"), ("POST", "/api/exercicios")]:
-            corpo = {} if metodo == "POST" else None
-            assert api.req(metodo, rota, corpo, token=None)[0] == 401, rota
-            assert api.req(metodo, rota, corpo, token="errado")[0] == 401, rota
-        assert api.get("/api/horarios?servico=sessao&data=2026-10-07", token=None)[0] == 200
->       assert api.get("/api/exercicios", token=None)[0] == 200
-E       assert 401 == 200
-
-tests/test_basico.py:29: AssertionError
 _________________________________ test_paginas _________________________________
 
-api = <conftest.Cliente object at 0xe6a40f401ee0>
+api = <conftest.Cliente object at 0xfbddf04a63c0>
 
     def test_paginas(api):
         st, html = api.get("/", token=None)
@@ -31,42 +13,9 @@ api = <conftest.Cliente object at 0xe6a40f401ee0>
 E       assert 401 == 200
 
 tests/test_basico.py:37: AssertionError
-_________________ test_cria_clinica_json_do_exemplo_se_faltar __________________
-
-tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-68/test_cria_clinica_json_do_exem0')
-
-    def test_cria_clinica_json_do_exemplo_se_faltar(tmp_path):
-        d = tmp_path / "vazio"
-        d.mkdir()
-        api = Servidor(d).subir()
-        assert api.get("/api/saude", token=None)[0] == 200
-        assert (d / "clinica.json").exists()
->       assert len(api.get("/api/exercicios", token=None)[1]["exercicios"]) >= 12
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       KeyError: 'exercicios'
-
-tests/test_basico.py:66: KeyError
-_______________________ test_semente_so_na_primeira_vez ________________________
-
-dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-68/test_semente_so_na_primeira_ve0/dados')
-
-    def test_semente_so_na_primeira_vez(dados):
-        s = Servidor(dados)
-        api = s.subir()
-        api.post("/api/servicos", {"id": "pilates", "nome": "Pilates clínico", "duracao_min": 60})
-        api.post("/api/exercicios", {"id": "remada-elastico", "nome": "Remada com elástico", "regiao": "costas",
-                                     "passos": ["Prenda o elástico à frente.", "Puxe os cotovelos para trás."]})
-        s.parar()
-        api2 = Servidor(dados).subir()
-        assert [x["id"] for x in api2.get("/api/servicos", token=None)[1]["servicos"]] == ["avaliacao", "sessao", "rpg", "pilates"]
->       ids = [x["id"] for x in api2.get("/api/exercicios", token=None)[1]["exercicios"]]
-                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       KeyError: 'exercicios'
-
-tests/test_cadastros.py:121: KeyError
 _________________________ test_parar_bloqueia_contato __________________________
 
-api = <conftest.Cliente object at 0xe6a40f44f1d0>
+api = <conftest.Cliente object at 0xfbddf04f18e0>
 
     def test_parar_bloqueia_contato(api):
         pid = api.paciente("Maria", TEL)
@@ -76,7 +25,7 @@ api = <conftest.Cliente object at 0xe6a40f44f1d0>
 tests/test_conversa.py:110: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40f44f1d0>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddf04f18e0>, paciente_id = 1
 itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
 lembrete_hora = None
 
@@ -169,57 +118,39 @@ E           AssertionError: /webhook/evolution/
 E           assert '/webhook/evolution/' in '\n(Seção escrita pelo implementador conforme a seção 19 da especificação: compose, proxy HTTPS, registro dos webhooks da Evolution e do Telegram com os segredos, backup diário no cron, endereço público e pasta dos vídeos.)\n'
 
 tests/test_docker.py:48: AssertionError
-___________________ test_catalogo_minimo_na_ordem_do_fixture ___________________
-
-api = <conftest.Cliente object at 0xe6a40f4b50a0>
-
-    def test_catalogo_minimo_na_ordem_do_fixture(api):
-        st, r = api.get("/api/exercicios", token=None)
->       assert st == 200
-E       assert 401 == 200
-
-tests/test_exercicios.py:13: AssertionError
-____________________ test_svg_de_cada_exercicio_do_fixture _____________________
-
-api = <conftest.Cliente object at 0xe6a40f4b5970>
-
-    def test_svg_de_cada_exercicio_do_fixture(api):
-        ids = [e["id"] for e in json.loads(FIXTURE.read_text())["exercicios"]]
-        assert len(ids) >= 12
-        for i in ids:
-            arq = RAIZ / "web" / "exercicios" / f"{i}.svg"
->           assert arq.exists(), f"falta web/exercicios/{i}.svg"
-E           AssertionError: falta web/exercicios/ponte.svg
-E           assert False
-E            +  where False = exists()
-E            +    where exists = PosixPath('/home/nmaldaner/projetos/atende-fisioterapia/web/exercicios/ponte.svg').exists
-
-tests/test_exercicios.py:29: AssertionError
-___________________________ test_pagina_do_exercicio ___________________________
-
-api = <conftest.Cliente object at 0xe6a40f4b64e0>
-
-    def test_pagina_do_exercicio(api):
-        st, html = api.get("/exercicios/ponte", token=None)
->       assert st == 200
-E       assert 401 == 200
-
-tests/test_exercicios.py:54: AssertionError
 _____________________________ test_biblioteca_crud _____________________________
 
-api = <conftest.Cliente object at 0xe6a40f44c440>
+api = <conftest.Cliente object at 0xfbddf0578830>
 
     def test_biblioteca_crud(api):
         novo = {"id": "remada-elastico", "nome": "Remada com elástico", "apelidos": ["remada"], "regiao": "costas",
                 "passos": ["Prenda o elástico à frente, na altura do peito.", "Puxe os cotovelos para trás, juntando as escápulas."],
                 "pare_se": ["Dor aguda no ombro."]}
->       assert api.post("/api/exercicios", novo)[0] == 201
-E       assert 404 == 201
+        assert api.post("/api/exercicios", novo)[0] == 201
+        assert api.post("/api/exercicios", novo)[0] == 409
+        assert api.post("/api/exercicios", dict(novo, id="sem-passos", passos=[]))[0] == 422
+        assert api.post("/api/exercicios", dict(novo, id="Id Errado"))[0] == 422
+        e = next(x for x in api.get("/api/exercicios", token=None)[1]["exercicios"] if x["id"] == "remada-elastico")
+        assert e["svg"] is False and e["ativo"] is True
+        assert api.get("/exercicios/remada-elastico", token=None)[0] == 200    # página existe mesmo sem SVG
+        assert api.bruto("/exercicios/remada-elastico.svg")[0] == 404
+        st, r = api.put("/api/exercicios/remada-elastico", {"regiao": "costas e ombros"})
+        assert st == 200 and r["regiao"] == "costas e ombros"
+        assert api.put("/api/exercicios/xyz", {"regiao": "x"})[0] == 404
+        st, r = api.delete("/api/exercicios/remada-elastico")
+        assert st == 200 and r["ativo"] is False
+        assert api.get("/exercicios/remada-elastico", token=None)[0] == 404
+        pid = api.paciente()
+        st, r = api.post(f"/api/pacientes/{pid}/prescricao", {"itens": [
+            {"exercicio": "remada-elastico", "series": 3, "repeticoes": 10, "vezes_dia": 1, "dias": ["seg"]}]})
+>       assert st == 422, r
+E       AssertionError: {'erro': 'Rota inexistente'}
+E       assert 404 == 422
 
-tests/test_exercicios.py:65: AssertionError
+tests/test_exercicios.py:82: AssertionError
 ____________________ test_chat_explica_exercicio_prescrito _____________________
 
-api = <conftest.Cliente object at 0xe6a40f402210>
+api = <conftest.Cliente object at 0xfbddf0578d40>
 
     def test_chat_explica_exercicio_prescrito(api):
         pid = api.paciente("Maria", TEL)
@@ -229,7 +160,7 @@ api = <conftest.Cliente object at 0xe6a40f402210>
 tests/test_exercicios.py:87: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40f402210>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddf0578d40>, paciente_id = 1
 itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
 lembrete_hora = None
 
@@ -248,7 +179,7 @@ E       assert 404 == 201
 tests/conftest.py:112: AssertionError
 ___________ test_chat_exercicio_fora_da_prescricao_vai_para_o_fisio ____________
 
-api = <conftest.Cliente object at 0xe6a40f402e70>
+api = <conftest.Cliente object at 0xfbddf0579250>
 
     def test_chat_exercicio_fora_da_prescricao_vai_para_o_fisio(api):
         pid = api.paciente("Maria", TEL)
@@ -257,7 +188,7 @@ api = <conftest.Cliente object at 0xe6a40f402e70>
 tests/test_exercicios.py:100: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40f402e70>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddf0579250>, paciente_id = 1
 itens = [{'dias': ['seg'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}]
 lembrete_hora = None
 
@@ -274,26 +205,11 @@ E       AssertionError: (404, {'erro': 'Rota inexistente'})
 E       assert 404 == 201
 
 tests/conftest.py:112: AssertionError
-____________________ test_mp4_servido_da_pasta_configurada _____________________
-
-dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-68/test_mp4_servido_da_pasta_conf0/dados')
-tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-68/test_mp4_servido_da_pasta_conf0')
-
-    def test_mp4_servido_da_pasta_configurada(dados, tmp_path):
-        pasta = tmp_path / "mp4"
-        pasta.mkdir()
-        (pasta / "ponte.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp42fake")
-        api = Servidor(dados, env={"EXERCICIOS_MP4_DIR": str(pasta)}).subir()
-        st, tipo, corpo = api.bruto("/exercicios/ponte.mp4")
->       assert st == 200 and tipo.startswith("video/mp4") and corpo == (pasta / "ponte.mp4").read_bytes()
-E       assert (401 == 200)
-
-tests/test_exercicios.py:117: AssertionError
 ___________________ test_exercicio_com_mp4_vai_por_sendmedia ___________________
 
-dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-68/test_exercicio_com_mp4_vai_por0/dados')
-externo = <conftest.Externo object at 0xe6a40f45bf80>
-tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-68/test_exercicio_com_mp4_vai_por0')
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-86/test_exercicio_com_mp4_vai_por0/dados')
+externo = <conftest.Externo object at 0xfbddf05782c0>
+tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-86/test_exercicio_com_mp4_vai_por0')
 
     def test_exercicio_com_mp4_vai_por_sendmedia(dados, externo, tmp_path):
         pasta = tmp_path / "mp4"
@@ -306,7 +222,7 @@ tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-68/test_exercicio_com_mp4_
 tests/test_integracoes.py:127: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40eadd370>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddf057ef90>, paciente_id = 1
 itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
 lembrete_hora = None
 
@@ -325,9 +241,9 @@ E       assert 404 == 201
 tests/conftest.py:112: AssertionError
 ________________ test_exercicio_sem_mp4_vai_por_texto_com_link _________________
 
-dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-68/test_exercicio_sem_mp4_vai_por0/dados')
-externo = <conftest.Externo object at 0xe6a40f45bd10>
-tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-68/test_exercicio_sem_mp4_vai_por0')
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-86/test_exercicio_sem_mp4_vai_por0/dados')
+externo = <conftest.Externo object at 0xfbddf057f020>
+tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-86/test_exercicio_sem_mp4_vai_por0')
 
     def test_exercicio_sem_mp4_vai_por_texto_com_link(dados, externo, tmp_path):
         vazia = tmp_path / "sem-mp4"
@@ -339,7 +255,7 @@ tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-68/test_exercicio_sem_mp4_
 tests/test_integracoes.py:145: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40eadcdd0>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddf057df10>, paciente_id = 1
 itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
 lembrete_hora = None
 
@@ -358,8 +274,8 @@ E       assert 404 == 201
 tests/conftest.py:112: AssertionError
 ___________________ test_emergencia_e_dor_forte_marcam_alta ____________________
 
-api_int = <conftest.Cliente object at 0xe6a40eadd730>
-externo = <conftest.Externo object at 0xe6a40eadd400>
+api_int = <conftest.Cliente object at 0xfbddf0519160>
+externo = <conftest.Externo object at 0xfbddf057e900>
 
     def test_emergencia_e_dor_forte_marcam_alta(api_int, externo):
         api_int.msg(TEL, "meu pai desmaiou aqui")
@@ -370,7 +286,7 @@ externo = <conftest.Externo object at 0xe6a40eadd400>
 tests/test_integracoes.py:167: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40eadd730>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddf0519160>, paciente_id = 1
 itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
 lembrete_hora = None
 
@@ -389,7 +305,7 @@ E       assert 404 == 201
 tests/conftest.py:112: AssertionError
 ____________________________ test_dados_e_exclusao _____________________________
 
-api = <conftest.Cliente object at 0xe6a40eadf140>
+api = <conftest.Cliente object at 0xfbddf051bd10>
 
     def test_dados_e_exclusao(api):
         tel = "41999990001"
@@ -403,7 +319,7 @@ api = <conftest.Cliente object at 0xe6a40eadf140>
 tests/test_lgpd_raiox.py:19: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40eadf140>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddf051bd10>, paciente_id = 1
 itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
 lembrete_hora = None
 
@@ -422,7 +338,7 @@ E       assert 404 == 201
 tests/conftest.py:112: AssertionError
 _______________ test_criar_prescricao_envia_mensagem_e_substitui _______________
 
-api = <conftest.Cliente object at 0xe6a40eadd820>
+api = <conftest.Cliente object at 0xfbddf05180e0>
 
     def test_criar_prescricao_envia_mensagem_e_substitui(api):
         pid = api.paciente("Maria", TEL)
@@ -432,7 +348,7 @@ api = <conftest.Cliente object at 0xe6a40eadd820>
 tests/test_prescricao.py:17: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40eadd820>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddf05180e0>, paciente_id = 1
 itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
 lembrete_hora = None
 
@@ -451,7 +367,7 @@ E       assert 404 == 201
 tests/conftest.py:112: AssertionError
 ________________________ test_validacoes_da_prescricao _________________________
 
-api = <conftest.Cliente object at 0xe6a40eadff80>
+api = <conftest.Cliente object at 0xfbddefb6d610>
 
     def test_validacoes_da_prescricao(api):
         pid = api.paciente("Maria", TEL)
@@ -464,7 +380,7 @@ E       assert 404 == 422
 tests/test_prescricao.py:38: AssertionError
 ________________________ test_lembrete_opt_in_pelo_chat ________________________
 
-api = <conftest.Cliente object at 0xe6a40eb88b00>
+api = <conftest.Cliente object at 0xfbddf051b620>
 
     def test_lembrete_opt_in_pelo_chat(api):
         pid = api.paciente("Maria", TEL)
@@ -473,7 +389,7 @@ api = <conftest.Cliente object at 0xe6a40eb88b00>
 tests/test_prescricao.py:53: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40eb88b00>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddf051b620>, paciente_id = 1
 itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
 lembrete_hora = None
 
@@ -492,7 +408,7 @@ E       assert 404 == 201
 tests/conftest.py:112: AssertionError
 __________________ test_lembrete_diario_no_horario_e_nos_dias __________________
 
-api = <conftest.Cliente object at 0xe6a40eb881d0>
+api = <conftest.Cliente object at 0xfbddf057de80>
 
     def test_lembrete_diario_no_horario_e_nos_dias(api):
         pid = api.paciente("Maria", TEL)
@@ -501,7 +417,7 @@ api = <conftest.Cliente object at 0xe6a40eb881d0>
 tests/test_prescricao.py:71: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40eb881d0>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddf057de80>, paciente_id = 1
 itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
 lembrete_hora = None
 
@@ -520,7 +436,7 @@ E       assert 404 == 201
 tests/conftest.py:112: AssertionError
 ____________________ test_registro_fiz_nao_fiz_e_dor_no_dia ____________________
 
-api = <conftest.Cliente object at 0xe6a40eb88c50>
+api = <conftest.Cliente object at 0xfbddf057ee40>
 
     def test_registro_fiz_nao_fiz_e_dor_no_dia(api):
         pid = api.paciente("Maria", TEL)
@@ -529,7 +445,7 @@ api = <conftest.Cliente object at 0xe6a40eb88c50>
 tests/test_prescricao.py:89: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40eb88c50>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddf057ee40>, paciente_id = 1
 itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
 lembrete_hora = None
 
@@ -548,7 +464,7 @@ E       assert 404 == 201
 tests/conftest.py:112: AssertionError
 _________ test_dor_forte_abre_fila_alta_e_numero_puro_so_com_pendencia _________
 
-api = <conftest.Cliente object at 0xe6a40eadfb00>
+api = <conftest.Cliente object at 0xfbddefb6fcb0>
 
     def test_dor_forte_abre_fila_alta_e_numero_puro_so_com_pendencia(api):
         pid = api.paciente("Maria", TEL)
@@ -557,7 +473,7 @@ api = <conftest.Cliente object at 0xe6a40eadfb00>
 tests/test_prescricao.py:108: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40eadfb00>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddefb6fcb0>, paciente_id = 1
 itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
 lembrete_hora = None
 
@@ -576,7 +492,7 @@ E       assert 404 == 201
 tests/conftest.py:112: AssertionError
 _____________________________ test_adesao_semanal ______________________________
 
-dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-68/test_adesao_semanal0/dados')
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-86/test_adesao_semanal0/dados')
 
     def test_adesao_semanal(dados):
         # semana de 05/10 (seg) a 11/10 (dom); prescrição em 06/10 (ter); dias previstos até 09/10: 06, 07, 08, 09 = 4
@@ -588,7 +504,7 @@ dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-68/test_adesao_semanal0/dados
 tests/test_prescricao.py:129: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40eaddd30>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddefb6eb10>, paciente_id = 1
 itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
 lembrete_hora = None
 
@@ -607,7 +523,7 @@ E       assert 404 == 201
 tests/conftest.py:112: AssertionError
 __________________ test_prescricao_para_quem_parou_nao_envia ___________________
 
-api = <conftest.Cliente object at 0xe6a40eb8b380>
+api = <conftest.Cliente object at 0xfbddefb6d340>
 
     def test_prescricao_para_quem_parou_nao_envia(api):
         pid = api.paciente("Maria", TEL)
@@ -617,7 +533,7 @@ api = <conftest.Cliente object at 0xe6a40eb8b380>
 tests/test_prescricao.py:157: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = <conftest.Cliente object at 0xe6a40eb8b380>, paciente_id = 1
+self = <conftest.Cliente object at 0xfbddefb6d340>, paciente_id = 1
 itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
 lembrete_hora = None
 
@@ -635,22 +551,15 @@ E       assert 404 == 201
 
 tests/conftest.py:112: AssertionError
 =========================== short test summary info ============================
-FAILED tests/test_basico.py::test_rotas_da_equipe_exigem_token_e_publicas_nao
 FAILED tests/test_basico.py::test_paginas - assert 401 == 200
-FAILED tests/test_basico.py::test_cria_clinica_json_do_exemplo_se_faltar - Ke...
-FAILED tests/test_cadastros.py::test_semente_so_na_primeira_vez - KeyError: '...
 FAILED tests/test_conversa.py::test_parar_bloqueia_contato - AssertionError: ...
 FAILED tests/test_docker.py::test_dockerfile - AssertionError: falta Dockerfile
 FAILED tests/test_docker.py::test_compose - AssertionError: falta docker-comp...
 FAILED tests/test_docker.py::test_env_exemplo_tem_todas_as_variaveis_sem_segredo_real
 FAILED tests/test_docker.py::test_readme_explica_deploy_e_mantem_a_secao_do_dono
-FAILED tests/test_exercicios.py::test_catalogo_minimo_na_ordem_do_fixture - a...
-FAILED tests/test_exercicios.py::test_svg_de_cada_exercicio_do_fixture - Asse...
-FAILED tests/test_exercicios.py::test_pagina_do_exercicio - assert 401 == 200
-FAILED tests/test_exercicios.py::test_biblioteca_crud - assert 404 == 201
+FAILED tests/test_exercicios.py::test_biblioteca_crud - AssertionError: {'err...
 FAILED tests/test_exercicios.py::test_chat_explica_exercicio_prescrito - Asse...
 FAILED tests/test_exercicios.py::test_chat_exercicio_fora_da_prescricao_vai_para_o_fisio
-FAILED tests/test_exercicios.py::test_mp4_servido_da_pasta_configurada - asse...
 FAILED tests/test_integracoes.py::test_exercicio_com_mp4_vai_por_sendmedia - ...
 FAILED tests/test_integracoes.py::test_exercicio_sem_mp4_vai_por_texto_com_link
 FAILED tests/test_integracoes.py::test_emergencia_e_dor_forte_marcam_alta - A...
@@ -663,4 +572,4 @@ FAILED tests/test_prescricao.py::test_registro_fiz_nao_fiz_e_dor_no_dia - Ass...
 FAILED tests/test_prescricao.py::test_dor_forte_abre_fila_alta_e_numero_puro_so_com_pendencia
 FAILED tests/test_prescricao.py::test_adesao_semanal - AssertionError: (404, ...
 FAILED tests/test_prescricao.py::test_prescricao_para_quem_parou_nao_envia - ...
-28 failed, 70 passed in 34.26s
+21 failed, 77 passed in 32.85s

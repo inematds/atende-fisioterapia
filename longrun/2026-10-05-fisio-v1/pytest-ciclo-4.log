@@ -1,0 +1,165 @@
+...............F..............................FFFF....FF......FF........ [ 73%]
+..........................                                               [100%]
+=================================== FAILURES ===================================
+_________________________________ test_paginas _________________________________
+
+api = <conftest.Cliente object at 0xe4597cd7e6f0>
+
+    def test_paginas(api):
+        st, html = api.get("/", token=None)
+        assert st == 200 and 'id="chat"' in html
+        st, html = api.get("/equipe", token=None)
+>       assert st == 200
+E       assert 401 == 200
+
+tests/test_basico.py:37: AssertionError
+_______________________________ test_dockerfile ________________________________
+
+    def test_dockerfile():
+>       d = ler("Dockerfile")
+            ^^^^^^^^^^^^^^^^^
+
+tests/test_docker.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+nome = 'Dockerfile'
+
+    def ler(nome):
+        p = RAIZ / nome
+>       assert p.exists(), f"falta {nome}"
+E       AssertionError: falta Dockerfile
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/nmaldaner/projetos/atende-fisioterapia/Dockerfile').exists
+
+tests/test_docker.py:12: AssertionError
+_________________________________ test_compose _________________________________
+
+    def test_compose():
+>       c = ler("docker-compose.yml")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_docker.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+nome = 'docker-compose.yml'
+
+    def ler(nome):
+        p = RAIZ / nome
+>       assert p.exists(), f"falta {nome}"
+E       AssertionError: falta docker-compose.yml
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/nmaldaner/projetos/atende-fisioterapia/docker-compose.yml').exists
+
+tests/test_docker.py:12: AssertionError
+___________ test_env_exemplo_tem_todas_as_variaveis_sem_segredo_real ___________
+
+    def test_env_exemplo_tem_todas_as_variaveis_sem_segredo_real():
+>       e = ler(".env.exemplo")
+            ^^^^^^^^^^^^^^^^^^^
+
+tests/test_docker.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+nome = '.env.exemplo'
+
+    def ler(nome):
+        p = RAIZ / nome
+>       assert p.exists(), f"falta {nome}"
+E       AssertionError: falta .env.exemplo
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/nmaldaner/projetos/atende-fisioterapia/.env.exemplo').exists
+
+tests/test_docker.py:12: AssertionError
+_____________ test_readme_explica_deploy_e_mantem_a_secao_do_dono ______________
+
+    def test_readme_explica_deploy_e_mantem_a_secao_do_dono():
+        r = ler("README.md")
+        assert "Como rodar no seu ambiente" in r
+        # só o corpo da seção "## Deploy na VPS" (até o próximo "## "): a seção do dono já cita PUBLIC_URL etc.
+        m = re.search(r"^##\s+Deploy na VPS\s*$(.*?)(?=^##\s|\Z)", r, re.M | re.S)
+        assert m, "falta a seção '## Deploy na VPS' (seção 19)"
+        deploy = m.group(1)
+        for trecho in ("/webhook/evolution/", "MESSAGES_UPSERT", "setWebhook", "secret_token", "./atende backup",
+                       "PUBLIC_URL", "EXERCICIOS_MP4_DIR", "render-exercicios"):
+>           assert trecho in deploy, trecho
+E           AssertionError: /webhook/evolution/
+E           assert '/webhook/evolution/' in '\n(Seção escrita pelo implementador conforme a seção 19 da especificação: compose, proxy HTTPS, registro dos webhooks da Evolution e do Telegram com os segredos, backup diário no cron, endereço público e pasta dos vídeos.)\n'
+
+tests/test_docker.py:48: AssertionError
+____________________ test_chat_explica_exercicio_prescrito _____________________
+
+api = <conftest.Cliente object at 0xe4597ce00140>
+
+    def test_chat_explica_exercicio_prescrito(api):
+        pid = api.paciente("Maria", TEL)
+        api.prescricao(pid)   # ponte + retração cervical
+        r = api.msg(TEL, "como faço a ponte?")
+>       assert "Ponte" in r and "1. Deite de costas" in r and "4. Segure 2 segundos" in r
+E       AssertionError: assert ('Ponte' in 'Não entendi. Você pode pedir um atendente.')
+
+tests/test_exercicios.py:89: AssertionError
+___________ test_chat_exercicio_fora_da_prescricao_vai_para_o_fisio ____________
+
+api = <conftest.Cliente object at 0xe4597ce005f0>
+
+    def test_chat_exercicio_fora_da_prescricao_vai_para_o_fisio(api):
+        pid = api.paciente("Maria", TEL)
+        api.prescricao(pid, itens=[{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 1, "dias": ["seg"]}])
+        r = api.msg(TEL, "como faço a prancha?")
+>       assert "fale com seu fisioterapeuta" in norm(r) and "atendente" in norm(r)
+E       AssertionError: assert ('fale com seu fisioterapeuta' in 'nao entendi. voce pode pedir um atendente.')
+E        +  where 'nao entendi. voce pode pedir um atendente.' = norm('Não entendi. Você pode pedir um atendente.')
+
+tests/test_exercicios.py:102: AssertionError
+___________________ test_exercicio_com_mp4_vai_por_sendmedia ___________________
+
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-97/test_exercicio_com_mp4_vai_por0/dados')
+externo = <conftest.Externo object at 0xe4597cd7c380>
+tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-97/test_exercicio_com_mp4_vai_por0')
+
+    def test_exercicio_com_mp4_vai_por_sendmedia(dados, externo, tmp_path):
+        pasta = tmp_path / "mp4"
+        pasta.mkdir()
+        (pasta / "ponte.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp42fake")
+        api = Servidor(dados, env=env_integracoes(externo, EXERCICIOS_MP4_DIR=str(pasta))).subir()
+        pid = api.paciente("Maria", TEL)
+        api.prescricao(pid)
+        assert esperar(lambda: any("LEMBRETE" in t for t in textos_whats(externo)))   # prescrição vai por texto
+        evo(api, "como faço a ponte?")
+>       assert esperar(lambda: len(externo.media()) == 1)
+E       assert False
+E        +  where False = esperar(<function test_exercicio_com_mp4_vai_por_sendmedia.<locals>.<lambda> at 0xe4597ce69d00>)
+
+tests/test_integracoes.py:130: AssertionError
+________________ test_exercicio_sem_mp4_vai_por_texto_com_link _________________
+
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-97/test_exercicio_sem_mp4_vai_por0/dados')
+externo = <conftest.Externo object at 0xe4597ce5f710>
+tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-97/test_exercicio_sem_mp4_vai_por0')
+
+    def test_exercicio_sem_mp4_vai_por_texto_com_link(dados, externo, tmp_path):
+        vazia = tmp_path / "sem-mp4"
+        vazia.mkdir()
+        api_int = Servidor(dados, env=env_integracoes(externo, EXERCICIOS_MP4_DIR=str(vazia))).subir()
+        pid = api_int.paciente("Maria", TEL)
+        api_int.prescricao(pid)
+        evo(api_int, "como faço a ponte?")
+>       assert esperar(lambda: any("1. Deite de costas" in t for t in textos_whats(externo)))
+E       assert False
+E        +  where False = esperar(<function test_exercicio_sem_mp4_vai_por_texto_com_link.<locals>.<lambda> at 0xe4597ce6aca0>)
+
+tests/test_integracoes.py:147: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_basico.py::test_paginas - assert 401 == 200
+FAILED tests/test_docker.py::test_dockerfile - AssertionError: falta Dockerfile
+FAILED tests/test_docker.py::test_compose - AssertionError: falta docker-comp...
+FAILED tests/test_docker.py::test_env_exemplo_tem_todas_as_variaveis_sem_segredo_real
+FAILED tests/test_docker.py::test_readme_explica_deploy_e_mantem_a_secao_do_dono
+FAILED tests/test_exercicios.py::test_chat_explica_exercicio_prescrito - Asse...
+FAILED tests/test_exercicios.py::test_chat_exercicio_fora_da_prescricao_vai_para_o_fisio
+FAILED tests/test_integracoes.py::test_exercicio_com_mp4_vai_por_sendmedia - ...
+FAILED tests/test_integracoes.py::test_exercicio_sem_mp4_vai_por_texto_com_link
+9 failed, 89 passed in 49.19s

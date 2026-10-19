@@ -1,24 +1,23 @@
-# Estado — atualizado 2026-10-19 13:58
+# Estado — atualizado 2026-10-19 14:02
 
 ## Funciona
-- Base `./atende serve`, SQLite, auth, agenda concorrente, conversa básica, FAQ, emergência/sinais clínicos, confirmação e espera persistidas, cadastros, campanhas e transportes opcionais.
-- Planos: criação/validação/listagem/encerramento, vínculo na agenda, presença, conclusão, retorno de reavaliação e alertas persistidos de abandono/reavaliação. Telegram /alertas e indicadores Raio-X ampliados.
-- Biblioteca: API pública de listagem, criação/edição/inativação autenticadas, validação dos campos e persistência no catálogo SQLite. Páginas públicas com textos escapados e todos os campos, 404 para inativos/inexistentes, SVG local e MP4 de EXERCICIOS_MP4_DIR (padrão web/exercicios).
-- Os 12 SVGs obrigatórios foram escritos, com 12 estilos próprios, figuras esquemáticas, animações CSS de 2/4 segundos e pausa por prefers-reduced-motion. Página responsiva em web/exercicio.html, estilos em web/exercicio.css. VERSION 0.3.0.
-- Suíte completa: **77 passed / 21 failed**, 32,41 s; log `longrun/2026-10-05-fisio-v1/pytest-ciclo-3.log`. Ganho de 7 testes sobre o ciclo anterior.
-- Verificação de limites: **LIMITES OK**, hash 381b6510e90832d5, 98 testes. Verificação adicional local: persistência de exercício novo após reinício, escape HTML, inativação, rejeição de caminhos e XML/12 estilos distintos: OK.
-- `git diff --check -- src web VERSION`: OK. A checagem global apontou espaço final no teste-final.log do loop externo; arquivo preservado.
+- Base serve/SQLite/auth, agenda concorrente, conversa/FAQ/emergência/alertas clínicos, confirmação/espera, cadastros/bloqueios/backup, campanhas, planos e alertas de abandono/reavaliação, indicadores Raio-X e transportes opcionais.
+- Biblioteca persistente com CRUD, páginas públicas e 12 SVGs CSS; recursos MP4 locais. Revisão clínica e visual no navegador continuam humanas.
+- Prescrição: criação validada, substituição mantendo histórico inativo e preferências do paciente, GET/DELETE, envio síncrono e bloqueio nao_contatar. Migração de pacientes existentes; pacientes novos recebem hora padrão e opt-in falso.
+- Lembrete opt-in por chat/API, validação de hora original, itens do dia e um envio por data; caixa de saída e histórico usam agora da rodada. Regras 6–8 registram adesão/dor no dia do processo; dor forte abre humano alta com aviso ao Telegram.
+- Adesão semanal/geral calculada da prescrição ativa, registros persistentes com atualização independente de fez/dor. LGPD exporta prescrição/registros/preferências; remoção inativa prescrição, desliga lembrete e apaga registros.
+- VERSION 0.4.0. Suíte final: **89 passed / 9 failed**, 49,19 s; log `longrun/2026-10-05-fisio-v1/pytest-ciclo-4.log` (ganho de 12 testes).
+- **LIMITES OK**, hash 381b6510e90832d5, 98 testes. Validação local adicional OK: reinício, preservação de opt-in/hora na substituição, itens inválidos, semanas muito grandes, idempotência e timestamp do histórico. `git diff --check -- src VERSION FALHAS.md` OK.
 
 ## Falta
-- Prescrição, preferências/lembretes opt-in, registro de adesão/dor, alertas por dor e agregados; completar LGPD com prescrição/registros e preferências.
-- Explicação de exercício prescrito e Evolution sendMedia/MP4 (a rota pública do MP4 já funciona).
-- Página /equipe (a interface /recepcao ainda é do molde), Docker/compose/env/README e tools/render-exercicios (escrever, NÃO executar).
-- O teste biblioteca_crud avança por todo o CRUD e falha na validação final de prescrição inativa, pois a rota de prescrição ainda não existe. Não criar stub; implementar a seção 22 inteira.
-- Revisão clínica e movimento visual dos SVGs no navegador continuam como validação humana nível 4; neste ciclo só foram validados XML/CSS, recursos HTTP e regras estruturais.
-- Nenhum conflito entre testes e especificação identificado. Não marcar concluído.
+- Regra 9: explicação somente de exercício prescrito, nomes/apelidos normalizados, termo mais longo e listagem por palavra exercício. Quatro falhas cobrem conversa e Evolution sendMedia/fallback sendText.
+- /equipe com ações reais (1 falha); interface /recepcao ainda vem do molde.
+- Dockerfile, compose, .env.exemplo e seção Deploy na VPS no README (4 falhas). Preservar seção do dono.
+- Escrever tools/render-exercicios conforme §25; NÃO executar. Não está coberto pela suíte de 98 testes, mas faz parte do resultado.
+- Nenhum conflito teste/especificação identificado. Resultado geral ainda não concluído.
 
 ## Como retomar
-1. Ler goal → state → plan → canal → fins de progress/failures. Especificação inteira, conftest e fixture lidos neste ciclo.
-2. Implementar prescrição/adesão (seções 22–23), preferências no paciente e regras 6–9 da conversa, usando src/exercicios.py para consultar o catálogo. Depois completar LGPD e sendMedia sem duplicar saída no webhook.
-3. Rodar `python3 -m pytest -q tests/` com saída em arquivo e ler só as últimas 30 linhas; depois verificar-limites.sh.
-4. Atualizar registros; sem commits, rede externa, render, npm/npx ou Docker. Loop externo cuida de commits; não alterar seus logs.
+1. Ler goal → state → plan → canal → fins progress/failures. Especificação inteira, conftest e fixture lidos neste ciclo.
+2. Implementar regra 9 e sendMedia; evitar duplicação entre enviar(), conversar() e evolution(). Prescrição e lembrete já têm envio síncrono pelo transporte existente.
+3. Completar equipe e entrega/render, rodar suíte inteira e verificar-limites.sh. Só marcar concluído com 98 passed e LIMITES OK, mantendo toda a spec implementada.
+4. Atualizar registros; sem commits, rede externa, render, npm/npx ou Docker. Logs ciclo-4.log, loop.log e teste-final.log pertencem ao loop externo; não editar.
