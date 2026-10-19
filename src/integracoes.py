@@ -148,6 +148,9 @@ def receber_telegram(c, b):
             humano(c, int(m[1]), 'responder', m[2])
         elif enc:
             humano(c, int(enc[1]), 'encerrar')
+        elif texto == '/alertas':
+            from .planos import listar_alertas
+            telegram(c, '\n'.join(f"#{a['id']} {a['tipo']} {a['nome']}: {a['texto']}" for a in listar_alertas(c)) or 'Nenhum alerta aberto.')
         elif texto == '/fila':
             telegram(c, '\n'.join(f"#{h['id']} {h['nome'] or h['telefone']} — {h['motivo']}" for h in fila(c)) or 'Fila vazia.')
         elif texto == '/agenda' or texto.startswith('/agenda '):

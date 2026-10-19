@@ -1,0 +1,1011 @@
+..............FFFF.......FF...............F..FFFFFFFFFFFF.....FF.F.....F [ 73%]
+......FF.FFFFFFFFFFFFFFFFF                                               [100%]
+=================================== FAILURES ===================================
+_______________ test_rotas_da_equipe_exigem_token_e_publicas_nao _______________
+
+api = <conftest.Cliente object at 0xecfe54252d80>
+
+    def test_rotas_da_equipe_exigem_token_e_publicas_nao(api):
+        for metodo, rota in [("GET", "/api/saida"), ("GET", "/api/agendamentos?data=2026-10-07"),
+                             ("POST", "/api/pacientes"), ("GET", "/api/atendimento-humano"),
+                             ("GET", "/api/raiox?mes=2026-10"), ("POST", "/api/campanhas"),
+                             ("GET", "/api/planos"), ("POST", "/api/planos"), ("GET", "/api/alertas"),
+                             ("GET", "/api/adesao"), ("POST", "/api/exercicios")]:
+            corpo = {} if metodo == "POST" else None
+            assert api.req(metodo, rota, corpo, token=None)[0] == 401, rota
+            assert api.req(metodo, rota, corpo, token="errado")[0] == 401, rota
+        assert api.get("/api/horarios?servico=sessao&data=2026-10-07", token=None)[0] == 200
+>       assert api.get("/api/exercicios", token=None)[0] == 200
+E       assert 401 == 200
+
+tests/test_basico.py:29: AssertionError
+_________________________________ test_paginas _________________________________
+
+api = <conftest.Cliente object at 0xecfe54252360>
+
+    def test_paginas(api):
+        st, html = api.get("/", token=None)
+        assert st == 200 and 'id="chat"' in html
+        st, html = api.get("/equipe", token=None)
+>       assert st == 200
+E       assert 401 == 200
+
+tests/test_basico.py:37: AssertionError
+______________________ test_estado_persiste_ao_reiniciar _______________________
+
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_estado_persiste_ao_reinic0/dados')
+
+    def test_estado_persiste_ao_reiniciar(dados):
+        s = Servidor(dados)
+        api = s.subir()
+        pid = api.paciente()
+        st, ag = api.agenda(pid, "2026-10-07T09:00", profissional="carla")
+        assert st == 201
+>       plano = api.plano(pid, sessoes=5)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_basico.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe54251670>, paciente_id = 1
+servico = 'sessao', sessoes = 5, frequencia = 2, profissional = None
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:101: AssertionError
+_________________ test_cria_clinica_json_do_exemplo_se_faltar __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_cria_clinica_json_do_exem0')
+
+    def test_cria_clinica_json_do_exemplo_se_faltar(tmp_path):
+        d = tmp_path / "vazio"
+        d.mkdir()
+        api = Servidor(d).subir()
+        assert api.get("/api/saude", token=None)[0] == 200
+        assert (d / "clinica.json").exists()
+>       assert len(api.get("/api/exercicios", token=None)[1]["exercicios"]) >= 12
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'exercicios'
+
+tests/test_basico.py:66: KeyError
+_______________________ test_semente_so_na_primeira_vez ________________________
+
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_semente_so_na_primeira_ve0/dados')
+
+    def test_semente_so_na_primeira_vez(dados):
+        s = Servidor(dados)
+        api = s.subir()
+        api.post("/api/servicos", {"id": "pilates", "nome": "Pilates clínico", "duracao_min": 60})
+        api.post("/api/exercicios", {"id": "remada-elastico", "nome": "Remada com elástico", "regiao": "costas",
+                                     "passos": ["Prenda o elástico à frente.", "Puxe os cotovelos para trás."]})
+        s.parar()
+        api2 = Servidor(dados).subir()
+        assert [x["id"] for x in api2.get("/api/servicos", token=None)[1]["servicos"]] == ["avaliacao", "sessao", "rpg", "pilates"]
+>       ids = [x["id"] for x in api2.get("/api/exercicios", token=None)[1]["exercicios"]]
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'exercicios'
+
+tests/test_cadastros.py:121: KeyError
+___________________________ test_backup_e_restaurar ____________________________
+
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_backup_e_restaurar0/dados')
+tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_backup_e_restaurar0')
+
+    def test_backup_e_restaurar(dados, tmp_path):
+        s = Servidor(dados)
+        api = s.subir()
+        pid = api.paciente("Guardada", "41999990009")
+        api.agenda(pid, "2026-10-07T09:00", "sessao", "carla")
+>       api.plano(pid, sessoes=4)
+
+tests/test_cadastros.py:130: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe542cda90>, paciente_id = 1
+servico = 'sessao', sessoes = 4, frequencia = 2, profissional = None
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:101: AssertionError
+_____ test_agendamento_pelo_chat_paciente_conhecido_opcao_invalida_e_plano _____
+
+api = <conftest.Cliente object at 0xecfe542fc890>
+
+    def test_agendamento_pelo_chat_paciente_conhecido_opcao_invalida_e_plano(api):
+        pid = api.paciente("Maria", TEL)
+>       plano = api.plano(pid, servico="sessao", sessoes=8)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_conversa.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe542fc890>, paciente_id = 1
+servico = 'sessao', sessoes = 8, frequencia = 2, profissional = None
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:101: AssertionError
+_________________________ test_parar_bloqueia_contato __________________________
+
+api = <conftest.Cliente object at 0xecfe542fd040>
+
+    def test_parar_bloqueia_contato(api):
+        pid = api.paciente("Maria", TEL)
+        api.agenda(pid, "2026-10-07T09:00", profissional="carla")
+>       api.prescricao(pid)
+
+tests/test_conversa.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe542fd040>, paciente_id = 1
+itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
+lembrete_hora = None
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:112: AssertionError
+_______________________________ test_dockerfile ________________________________
+
+    def test_dockerfile():
+>       d = ler("Dockerfile")
+            ^^^^^^^^^^^^^^^^^
+
+tests/test_docker.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+nome = 'Dockerfile'
+
+    def ler(nome):
+        p = RAIZ / nome
+>       assert p.exists(), f"falta {nome}"
+E       AssertionError: falta Dockerfile
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/nmaldaner/projetos/atende-fisioterapia/Dockerfile').exists
+
+tests/test_docker.py:12: AssertionError
+_________________________________ test_compose _________________________________
+
+    def test_compose():
+>       c = ler("docker-compose.yml")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_docker.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+nome = 'docker-compose.yml'
+
+    def ler(nome):
+        p = RAIZ / nome
+>       assert p.exists(), f"falta {nome}"
+E       AssertionError: falta docker-compose.yml
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/nmaldaner/projetos/atende-fisioterapia/docker-compose.yml').exists
+
+tests/test_docker.py:12: AssertionError
+___________ test_env_exemplo_tem_todas_as_variaveis_sem_segredo_real ___________
+
+    def test_env_exemplo_tem_todas_as_variaveis_sem_segredo_real():
+>       e = ler(".env.exemplo")
+            ^^^^^^^^^^^^^^^^^^^
+
+tests/test_docker.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+nome = '.env.exemplo'
+
+    def ler(nome):
+        p = RAIZ / nome
+>       assert p.exists(), f"falta {nome}"
+E       AssertionError: falta .env.exemplo
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/nmaldaner/projetos/atende-fisioterapia/.env.exemplo').exists
+
+tests/test_docker.py:12: AssertionError
+_____________ test_readme_explica_deploy_e_mantem_a_secao_do_dono ______________
+
+    def test_readme_explica_deploy_e_mantem_a_secao_do_dono():
+        r = ler("README.md")
+        assert "Como rodar no seu ambiente" in r
+        # só o corpo da seção "## Deploy na VPS" (até o próximo "## "): a seção do dono já cita PUBLIC_URL etc.
+        m = re.search(r"^##\s+Deploy na VPS\s*$(.*?)(?=^##\s|\Z)", r, re.M | re.S)
+        assert m, "falta a seção '## Deploy na VPS' (seção 19)"
+        deploy = m.group(1)
+        for trecho in ("/webhook/evolution/", "MESSAGES_UPSERT", "setWebhook", "secret_token", "./atende backup",
+                       "PUBLIC_URL", "EXERCICIOS_MP4_DIR", "render-exercicios"):
+>           assert trecho in deploy, trecho
+E           AssertionError: /webhook/evolution/
+E           assert '/webhook/evolution/' in '\n(Seção escrita pelo implementador conforme a seção 19 da especificação: compose, proxy HTTPS, registro dos webhooks da Evolution e do Telegram com os segredos, backup diário no cron, endereço público e pasta dos vídeos.)\n'
+
+tests/test_docker.py:48: AssertionError
+___________________ test_catalogo_minimo_na_ordem_do_fixture ___________________
+
+api = <conftest.Cliente object at 0xecfe54251670>
+
+    def test_catalogo_minimo_na_ordem_do_fixture(api):
+        st, r = api.get("/api/exercicios", token=None)
+>       assert st == 200
+E       assert 401 == 200
+
+tests/test_exercicios.py:13: AssertionError
+____________________ test_svg_de_cada_exercicio_do_fixture _____________________
+
+api = <conftest.Cliente object at 0xecfe54253140>
+
+    def test_svg_de_cada_exercicio_do_fixture(api):
+        ids = [e["id"] for e in json.loads(FIXTURE.read_text())["exercicios"]]
+        assert len(ids) >= 12
+        for i in ids:
+            arq = RAIZ / "web" / "exercicios" / f"{i}.svg"
+>           assert arq.exists(), f"falta web/exercicios/{i}.svg"
+E           AssertionError: falta web/exercicios/ponte.svg
+E           assert False
+E            +  where False = exists()
+E            +    where exists = PosixPath('/home/nmaldaner/projetos/atende-fisioterapia/web/exercicios/ponte.svg').exists
+
+tests/test_exercicios.py:29: AssertionError
+___________________________ test_pagina_do_exercicio ___________________________
+
+api = <conftest.Cliente object at 0xecfe542ffc80>
+
+    def test_pagina_do_exercicio(api):
+        st, html = api.get("/exercicios/ponte", token=None)
+>       assert st == 200
+E       assert 401 == 200
+
+tests/test_exercicios.py:54: AssertionError
+_____________________________ test_biblioteca_crud _____________________________
+
+api = <conftest.Cliente object at 0xecfe542fedb0>
+
+    def test_biblioteca_crud(api):
+        novo = {"id": "remada-elastico", "nome": "Remada com elástico", "apelidos": ["remada"], "regiao": "costas",
+                "passos": ["Prenda o elástico à frente, na altura do peito.", "Puxe os cotovelos para trás, juntando as escápulas."],
+                "pare_se": ["Dor aguda no ombro."]}
+>       assert api.post("/api/exercicios", novo)[0] == 201
+E       assert 404 == 201
+
+tests/test_exercicios.py:65: AssertionError
+____________________ test_chat_explica_exercicio_prescrito _____________________
+
+api = <conftest.Cliente object at 0xecfe542fd190>
+
+    def test_chat_explica_exercicio_prescrito(api):
+        pid = api.paciente("Maria", TEL)
+>       api.prescricao(pid)   # ponte + retração cervical
+        ^^^^^^^^^^^^^^^^^^^
+
+tests/test_exercicios.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe542fd190>, paciente_id = 1
+itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
+lembrete_hora = None
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:112: AssertionError
+___________ test_chat_exercicio_fora_da_prescricao_vai_para_o_fisio ____________
+
+api = <conftest.Cliente object at 0xecfe542fe300>
+
+    def test_chat_exercicio_fora_da_prescricao_vai_para_o_fisio(api):
+        pid = api.paciente("Maria", TEL)
+>       api.prescricao(pid, itens=[{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 1, "dias": ["seg"]}])
+
+tests/test_exercicios.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe542fe300>, paciente_id = 1
+itens = [{'dias': ['seg'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}]
+lembrete_hora = None
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:112: AssertionError
+____________________ test_mp4_servido_da_pasta_configurada _____________________
+
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_mp4_servido_da_pasta_conf0/dados')
+tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_mp4_servido_da_pasta_conf0')
+
+    def test_mp4_servido_da_pasta_configurada(dados, tmp_path):
+        pasta = tmp_path / "mp4"
+        pasta.mkdir()
+        (pasta / "ponte.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp42fake")
+        api = Servidor(dados, env={"EXERCICIOS_MP4_DIR": str(pasta)}).subir()
+        st, tipo, corpo = api.bruto("/exercicios/ponte.mp4")
+>       assert st == 200 and tipo.startswith("video/mp4") and corpo == (pasta / "ponte.mp4").read_bytes()
+E       assert (401 == 200)
+
+tests/test_exercicios.py:117: AssertionError
+___________________ test_exercicio_com_mp4_vai_por_sendmedia ___________________
+
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_exercicio_com_mp4_vai_por0/dados')
+externo = <conftest.Externo object at 0xecfe542fd6d0>
+tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_exercicio_com_mp4_vai_por0')
+
+    def test_exercicio_com_mp4_vai_por_sendmedia(dados, externo, tmp_path):
+        pasta = tmp_path / "mp4"
+        pasta.mkdir()
+        (pasta / "ponte.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp42fake")
+        api = Servidor(dados, env=env_integracoes(externo, EXERCICIOS_MP4_DIR=str(pasta))).subir()
+        pid = api.paciente("Maria", TEL)
+>       api.prescricao(pid)
+
+tests/test_integracoes.py:127: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe542504d0>, paciente_id = 1
+itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
+lembrete_hora = None
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:112: AssertionError
+________________ test_exercicio_sem_mp4_vai_por_texto_com_link _________________
+
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_exercicio_sem_mp4_vai_por0/dados')
+externo = <conftest.Externo object at 0xecfe542fd580>
+tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_exercicio_sem_mp4_vai_por0')
+
+    def test_exercicio_sem_mp4_vai_por_texto_com_link(dados, externo, tmp_path):
+        vazia = tmp_path / "sem-mp4"
+        vazia.mkdir()
+        api_int = Servidor(dados, env=env_integracoes(externo, EXERCICIOS_MP4_DIR=str(vazia))).subir()
+        pid = api_int.paciente("Maria", TEL)
+>       api_int.prescricao(pid)
+
+tests/test_integracoes.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe54251be0>, paciente_id = 1
+itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
+lembrete_hora = None
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:112: AssertionError
+___________________ test_emergencia_e_dor_forte_marcam_alta ____________________
+
+api_int = <conftest.Cliente object at 0xecfe5423f950>
+externo = <conftest.Externo object at 0xecfe542512e0>
+
+    def test_emergencia_e_dor_forte_marcam_alta(api_int, externo):
+        api_int.msg(TEL, "meu pai desmaiou aqui")
+        assert esperar(lambda: any("ALTA" in t for t in textos_tg(externo)))
+        pid = api_int.paciente("Maria", "41999990002")
+>       api_int.prescricao(pid)
+
+tests/test_integracoes.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe5423f950>, paciente_id = 1
+itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
+lembrete_hora = None
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:112: AssertionError
+_________________ test_alertas_vao_ao_grupo_e_comando_alertas __________________
+
+api_int = <conftest.Cliente object at 0xecfe539ec6b0>
+externo = <conftest.Externo object at 0xecfe542cc3b0>
+
+    def test_alertas_vao_ao_grupo_e_comando_alertas(api_int, externo):
+        pid = api_int.paciente("Maria Lima", "41999990001")
+>       api_int.plano(pid, servico="sessao", sessoes=6)
+
+tests/test_integracoes.py:235: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe539ec6b0>, paciente_id = 1
+servico = 'sessao', sessoes = 6, frequencia = 2, profissional = None
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:101: AssertionError
+______________________ test_retorno_apos_plano_concluido _______________________
+
+api = <conftest.Cliente object at 0xecfe539edeb0>
+
+    def test_retorno_apos_plano_concluido(api):
+        p = api.paciente("Maria", "41999990001")
+>       plano = api.plano(p, servico="sessao", sessoes=1)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_lembretes.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe539edeb0>, paciente_id = 1
+servico = 'sessao', sessoes = 1, frequencia = 2, profissional = None
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:101: AssertionError
+__________________ test_plano_nao_concluido_nao_gera_retorno ___________________
+
+api = <conftest.Cliente object at 0xecfe539edcd0>
+
+    def test_plano_nao_concluido_nao_gera_retorno(api):
+        p = api.paciente("Maria", "41999990001")
+>       api.plano(p, servico="sessao", sessoes=3)
+
+tests/test_lembretes.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe539edcd0>, paciente_id = 1
+servico = 'sessao', sessoes = 3, frequencia = 2, profissional = None
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:101: AssertionError
+____________________________ test_dados_e_exclusao _____________________________
+
+api = <conftest.Cliente object at 0xecfe54251e20>
+
+    def test_dados_e_exclusao(api):
+        tel = "41999990001"
+        pid = api.paciente("Maria Silva", tel, marketing=True)
+>       plano = api.plano(pid, servico="sessao", sessoes=5)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_lgpd_raiox.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe54251e20>, paciente_id = 1
+servico = 'sessao', sessoes = 5, frequencia = 2, profissional = None
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:101: AssertionError
+__________________________ test_raiox_numeros_do_mes ___________________________
+
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_raiox_numeros_do_mes0/dados')
+
+    def test_raiox_numeros_do_mes(dados):
+>       s, api = montar_mes(dados)
+                 ^^^^^^^^^^^^^^^^^
+
+tests/test_lgpd_raiox.py:85: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_lgpd_raiox.py:54: in montar_mes
+    api.plano(pid, servico="sessao", sessoes=1)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe542ff890>, paciente_id = 1
+servico = 'sessao', sessoes = 1, frequencia = 2, profissional = None
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:101: AssertionError
+________________ test_cli_grava_mes_no_acompanhamento_do_painel ________________
+
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_cli_grava_mes_no_acompanh0/dados')
+tmp_path = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_cli_grava_mes_no_acompanh0')
+
+    def test_cli_grava_mes_no_acompanhamento_do_painel(dados, tmp_path):
+>       s, _ = montar_mes(dados)
+               ^^^^^^^^^^^^^^^^^
+
+tests/test_lgpd_raiox.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_lgpd_raiox.py:54: in montar_mes
+    api.plano(pid, servico="sessao", sessoes=1)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe539ec6b0>, paciente_id = 1
+servico = 'sessao', sessoes = 1, frequencia = 2, profissional = None
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:101: AssertionError
+______________________ test_criar_plano_e_contar_sessoes _______________________
+
+api = <conftest.Cliente object at 0xecfe539ec8c0>
+
+    def test_criar_plano_e_contar_sessoes(api):
+        pid = api.paciente()
+        st, p = api.post("/api/planos", {"paciente_id": pid, "servico": "sessao", "sessoes_previstas": 6,
+                                          "frequencia_semanal": 2, "profissional": "carla", "observacao": "lombalgia"})
+>       assert st == 201, p
+E       AssertionError: {'erro': 'Rota inexistente'}
+E       assert 404 == 201
+
+tests/test_planos.py:15: AssertionError
+__________________ test_vinculo_automatico_e_plano_errado_422 __________________
+
+api = <conftest.Cliente object at 0xecfe539ee960>
+
+    def test_vinculo_automatico_e_plano_errado_422(api):
+        pid = api.paciente()
+>       p = api.plano(pid, servico="sessao", sessoes=4)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_planos.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe539ee960>, paciente_id = 1
+servico = 'sessao', sessoes = 4, frequencia = 2, profissional = None
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:101: AssertionError
+___________________________ test_validacoes_do_plano ___________________________
+
+api = <conftest.Cliente object at 0xecfe539ed8b0>
+
+    def test_validacoes_do_plano(api):
+        pid = api.paciente()
+        base = {"paciente_id": pid, "servico": "sessao", "sessoes_previstas": 10, "frequencia_semanal": 2}
+        assert api.post("/api/planos", dict(base, paciente_id=9999))[0] == 404
+        assert api.post("/api/planos", dict(base, servico="xyz"))[0] == 404
+        assert api.post("/api/planos", dict(base, profissional="zz"))[0] == 404
+>       assert api.post("/api/planos", dict(base, sessoes_previstas=0))[0] == 422
+E       assert 404 == 422
+
+tests/test_planos.py:53: AssertionError
+_________________ test_alerta_de_abandono_por_faltas_seguidas __________________
+
+api = <conftest.Cliente object at 0xecfe539c4320>
+
+    def test_alerta_de_abandono_por_faltas_seguidas(api):
+        pid = api.paciente("Maria", "41999990001")
+>       p = api.plano(pid, servico="sessao", sessoes=6)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_planos.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe539c4320>, paciente_id = 1
+servico = 'sessao', sessoes = 6, frequencia = 2, profissional = None
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:101: AssertionError
+____________________ test_alerta_de_reavaliacao_e_conclusao ____________________
+
+api = <conftest.Cliente object at 0xecfe539ee240>
+
+    def test_alerta_de_reavaliacao_e_conclusao(api):
+        pid = api.paciente("Maria", "41999990001")
+>       p = api.plano(pid, servico="sessao", sessoes=4)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_planos.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe539ee240>, paciente_id = 1
+servico = 'sessao', sessoes = 4, frequencia = 2, profissional = None
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:101: AssertionError
+_____________________________ test_encerrar_plano ______________________________
+
+api = <conftest.Cliente object at 0xecfe542fdb80>
+
+    def test_encerrar_plano(api):
+        pid = api.paciente()
+>       p = api.plano(pid, servico="sessao", sessoes=10)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_planos.py:117: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe542fdb80>, paciente_id = 1
+servico = 'sessao', sessoes = 10, frequencia = 2, profissional = None
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:101: AssertionError
+_______________ test_criar_prescricao_envia_mensagem_e_substitui _______________
+
+api = <conftest.Cliente object at 0xecfe542523f0>
+
+    def test_criar_prescricao_envia_mensagem_e_substitui(api):
+        pid = api.paciente("Maria", TEL)
+>       p = api.prescricao(pid)
+            ^^^^^^^^^^^^^^^^^^^
+
+tests/test_prescricao.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe542523f0>, paciente_id = 1
+itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
+lembrete_hora = None
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:112: AssertionError
+________________________ test_validacoes_da_prescricao _________________________
+
+api = <conftest.Cliente object at 0xecfe539c6720>
+
+    def test_validacoes_da_prescricao(api):
+        pid = api.paciente("Maria", TEL)
+        item = {"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 1, "dias": ["seg"]}
+        rota = f"/api/pacientes/{pid}/prescricao"
+        assert api.post("/api/pacientes/9999/prescricao", {"itens": [item]})[0] == 404
+>       assert api.post(rota, {"itens": []})[0] == 422
+E       assert 404 == 422
+
+tests/test_prescricao.py:38: AssertionError
+________________________ test_lembrete_opt_in_pelo_chat ________________________
+
+api = <conftest.Cliente object at 0xecfe539c6240>
+
+    def test_lembrete_opt_in_pelo_chat(api):
+        pid = api.paciente("Maria", TEL)
+>       api.prescricao(pid)
+
+tests/test_prescricao.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe539c6240>, paciente_id = 1
+itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
+lembrete_hora = None
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:112: AssertionError
+__________________ test_lembrete_diario_no_horario_e_nos_dias __________________
+
+api = <conftest.Cliente object at 0xecfe539c4680>
+
+    def test_lembrete_diario_no_horario_e_nos_dias(api):
+        pid = api.paciente("Maria", TEL)
+>       api.prescricao(pid)
+
+tests/test_prescricao.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe539c4680>, paciente_id = 1
+itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
+lembrete_hora = None
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:112: AssertionError
+____________________ test_registro_fiz_nao_fiz_e_dor_no_dia ____________________
+
+api = <conftest.Cliente object at 0xecfe539c5fa0>
+
+    def test_registro_fiz_nao_fiz_e_dor_no_dia(api):
+        pid = api.paciente("Maria", TEL)
+>       api.prescricao(pid)
+
+tests/test_prescricao.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe539c5fa0>, paciente_id = 1
+itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
+lembrete_hora = None
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:112: AssertionError
+_________ test_dor_forte_abre_fila_alta_e_numero_puro_so_com_pendencia _________
+
+api = <conftest.Cliente object at 0xecfe539ef770>
+
+    def test_dor_forte_abre_fila_alta_e_numero_puro_so_com_pendencia(api):
+        pid = api.paciente("Maria", TEL)
+>       api.prescricao(pid)
+
+tests/test_prescricao.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe539ef770>, paciente_id = 1
+itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
+lembrete_hora = None
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:112: AssertionError
+_____________________________ test_adesao_semanal ______________________________
+
+dados = PosixPath('/tmp/pytest-of-nmaldaner/pytest-52/test_adesao_semanal0/dados')
+
+    def test_adesao_semanal(dados):
+        # semana de 05/10 (seg) a 11/10 (dom); prescrição em 06/10 (ter); dias previstos até 09/10: 06, 07, 08, 09 = 4
+        s = Servidor(dados)
+        api = s.subir()
+        pid = api.paciente("Maria", TEL)
+>       api.prescricao(pid)
+
+tests/test_prescricao.py:129: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe539ed400>, paciente_id = 1
+itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
+lembrete_hora = None
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:112: AssertionError
+__________________ test_prescricao_para_quem_parou_nao_envia ___________________
+
+api = <conftest.Cliente object at 0xecfe539c5640>
+
+    def test_prescricao_para_quem_parou_nao_envia(api):
+        pid = api.paciente("Maria", TEL)
+        api.msg(TEL, "parar")
+>       api.prescricao(pid)
+
+tests/test_prescricao.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <conftest.Cliente object at 0xecfe539c5640>, paciente_id = 1
+itens = [{'dias': ['seg', 'qua', 'sex'], 'exercicio': 'ponte', 'repeticoes': 10, 'series': 3, ...}, {'dias': ['ter', 'qui'], 'exercicio': 'retracao-cervical', 'repeticoes': 10, 'series': 2, ...}]
+lembrete_hora = None
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+>       assert st == 201, (st, r)
+E       AssertionError: (404, {'erro': 'Rota inexistente'})
+E       assert 404 == 201
+
+tests/conftest.py:112: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_basico.py::test_rotas_da_equipe_exigem_token_e_publicas_nao
+FAILED tests/test_basico.py::test_paginas - assert 401 == 200
+FAILED tests/test_basico.py::test_estado_persiste_ao_reiniciar - AssertionErr...
+FAILED tests/test_basico.py::test_cria_clinica_json_do_exemplo_se_faltar - Ke...
+FAILED tests/test_cadastros.py::test_semente_so_na_primeira_vez - KeyError: '...
+FAILED tests/test_cadastros.py::test_backup_e_restaurar - AssertionError: (40...
+FAILED tests/test_conversa.py::test_agendamento_pelo_chat_paciente_conhecido_opcao_invalida_e_plano
+FAILED tests/test_conversa.py::test_parar_bloqueia_contato - AssertionError: ...
+FAILED tests/test_docker.py::test_dockerfile - AssertionError: falta Dockerfile
+FAILED tests/test_docker.py::test_compose - AssertionError: falta docker-comp...
+FAILED tests/test_docker.py::test_env_exemplo_tem_todas_as_variaveis_sem_segredo_real
+FAILED tests/test_docker.py::test_readme_explica_deploy_e_mantem_a_secao_do_dono
+FAILED tests/test_exercicios.py::test_catalogo_minimo_na_ordem_do_fixture - a...
+FAILED tests/test_exercicios.py::test_svg_de_cada_exercicio_do_fixture - Asse...
+FAILED tests/test_exercicios.py::test_pagina_do_exercicio - assert 401 == 200
+FAILED tests/test_exercicios.py::test_biblioteca_crud - assert 404 == 201
+FAILED tests/test_exercicios.py::test_chat_explica_exercicio_prescrito - Asse...
+FAILED tests/test_exercicios.py::test_chat_exercicio_fora_da_prescricao_vai_para_o_fisio
+FAILED tests/test_exercicios.py::test_mp4_servido_da_pasta_configurada - asse...
+FAILED tests/test_integracoes.py::test_exercicio_com_mp4_vai_por_sendmedia - ...
+FAILED tests/test_integracoes.py::test_exercicio_sem_mp4_vai_por_texto_com_link
+FAILED tests/test_integracoes.py::test_emergencia_e_dor_forte_marcam_alta - A...
+FAILED tests/test_integracoes.py::test_alertas_vao_ao_grupo_e_comando_alertas
+FAILED tests/test_lembretes.py::test_retorno_apos_plano_concluido - Assertion...
+FAILED tests/test_lembretes.py::test_plano_nao_concluido_nao_gera_retorno - A...
+FAILED tests/test_lgpd_raiox.py::test_dados_e_exclusao - AssertionError: (404...
+FAILED tests/test_lgpd_raiox.py::test_raiox_numeros_do_mes - AssertionError: ...
+FAILED tests/test_lgpd_raiox.py::test_cli_grava_mes_no_acompanhamento_do_painel
+FAILED tests/test_planos.py::test_criar_plano_e_contar_sessoes - AssertionErr...
+FAILED tests/test_planos.py::test_vinculo_automatico_e_plano_errado_422 - Ass...
+FAILED tests/test_planos.py::test_validacoes_do_plano - assert 404 == 422
+FAILED tests/test_planos.py::test_alerta_de_abandono_por_faltas_seguidas - As...
+FAILED tests/test_planos.py::test_alerta_de_reavaliacao_e_conclusao - Asserti...
+FAILED tests/test_planos.py::test_encerrar_plano - AssertionError: (404, {'er...
+FAILED tests/test_prescricao.py::test_criar_prescricao_envia_mensagem_e_substitui
+FAILED tests/test_prescricao.py::test_validacoes_da_prescricao - assert 404 =...
+FAILED tests/test_prescricao.py::test_lembrete_opt_in_pelo_chat - AssertionEr...
+FAILED tests/test_prescricao.py::test_lembrete_diario_no_horario_e_nos_dias
+FAILED tests/test_prescricao.py::test_registro_fiz_nao_fiz_e_dor_no_dia - Ass...
+FAILED tests/test_prescricao.py::test_dor_forte_abre_fila_alta_e_numero_puro_so_com_pendencia
+FAILED tests/test_prescricao.py::test_adesao_semanal - AssertionError: (404, ...
+FAILED tests/test_prescricao.py::test_prescricao_para_quem_parou_nao_envia - ...
+42 failed, 56 passed in 27.42s

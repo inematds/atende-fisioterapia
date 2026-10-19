@@ -1,22 +1,23 @@
-# Estado — atualizado 2026-10-19 13:50
+# Estado — atualizado 2026-10-19 13:54
 
 ## Funciona
-- Base executável `./atende serve`: primeira linha PORTA, SQLite em --dados, relógio ATENDE_AGORA, autenticação antes do corpo e fila de conexões ampliada.
-- Reaproveitados src/ e web/ do atende-clinica, sem dependências externas. Todos os testes de agenda passaram, inclusive concorrência e presença; presença repetida agora dá 409.
-- FAQ, fluxo básico do chat, emergência, sinais clínicos por palavras inteiras, confirmação e espera persistidas; cadastros e bloqueios básicos; campanhas incluindo depoimento COFFITO; transporte sendText e atendimento Telegram básico verificados pelos testes locais.
-- `python3 -m pytest -q tests/`: **56 passed / 42 failed**, 26,90 s. Log completo: `longrun/2026-10-05-fisio-v1/pytest-ciclo-1.log`.
-- `bash longrun/2026-10-05-fisio-v1/verificar-limites.sh`: **LIMITES OK**, hash 381b6510e90832d5, 98 testes.
+- Base `./atende serve`, SQLite, auth, agenda concorrente, conversa básica, FAQ, emergência/sinais clínicos, confirmação e espera persistidas, cadastros, campanhas e transportes opcionais do ciclo anterior.
+- Planos: criação/validação/listagem/encerramento, um ativo por paciente/serviço, vínculo explícito ou automático na agenda, contagem por início das sessões, conclusão e retorno de reavaliação. Planos incluídos na exportação de dados e encerrados na anonimização.
+- Alertas de abandono e reavaliação persistidos, resolução, avisos ao Telegram e comando /alertas. Marcador da última sessão realizada impede duplicação por sequência mesmo com relógio anterior às presenças.
+- Raio-X: recorrência, orçamentos e aprovação; testes HTTP/CLI de indicadores aprovados. VERSION 0.2.0.
+- Suíte completa: **70 passed / 28 failed**, 34,95 s; log `longrun/2026-10-05-fisio-v1/pytest-ciclo-2.log`. Nenhuma falha nos testes de planos ou lembretes/retorno.
+- Checagem local adicional: duas sequências de abandono, repetição da rodada e reinício no mesmo banco sem duplicar alertas: OK.
+- Verificação de limites: **LIMITES OK**, hash 381b6510e90832d5, 98 testes, escopo válido. `git diff --check` sem erros.
 
 ## Falta
-- Planos: API, vínculo automático/expresso na agenda, contagens, conclusão, retorno de avaliação, alertas e /alertas Telegram. A agenda tem coluna plano_id mas ainda rejeita plano informado (404).
-- Biblioteca: exercícios já semeados em catalogo, mas faltam CRUD, rotas públicas, páginas, 12 SVGs e MP4; regras de explicação e sendMedia.
-- Prescrição, lembretes opt-in, registro de adesão/dor, agregados e extensão LGPD/Raio-X. Defaults da clínica inseridos; preferências de lembrete do paciente ainda faltam.
-- /equipe ainda não existe: web/ mantém interface /recepcao do molde; adaptar em etapa própria. Docker, compose, .env.exemplo, seção Deploy na VPS e tools/render-exercicios faltam.
-- Testes de persistência/semente/backup ainda falham nos recursos novos; não considerar essas funcionalidades integralmente aceitas.
-- Sem conflitos identificados entre teste e spec neste ciclo. Não marcar concluído.
+- Biblioteca: CRUD, rotas públicas, páginas e os 12 SVGs CSS. Catálogo já semeado, mas ainda sem API.
+- Prescrição, preferências/lembretes opt-in, registro de adesão/dor, alertas por dor e agregados; completar LGPD com prescrição/registros e preferências.
+- Explicação de exercício prescrito e Evolution sendMedia/MP4.
+- Página /equipe (a interface /recepcao ainda é do molde), Docker/compose/env/README e tools/render-exercicios (escrever, NÃO executar).
+- As 28 falhas restantes se concentram nesses recursos ausentes. Nenhum conflito entre testes e especificação identificado. Não marcar concluído.
 
 ## Como retomar
-1. Ler goal → state → plan → canal → fim de progress/failures. Especificação inteira e conftest/fixture lidos neste ciclo.
-2. Implementar planos em módulo próprio, ligar à agenda/presença e depois às tarefas/alertas. Presença não deve voltar a gerar retorno por serviço.
-3. Rodar `python3 -m pytest -q tests/ > /tmp/fisio-pytest.log 2>&1; tail -30 /tmp/fisio-pytest.log` e `bash longrun/2026-10-05-fisio-v1/verificar-limites.sh`.
-4. Atualizar registros; não fazer commit, não executar render, não usar rede externa.
+1. Ler goal → state → plan → canal → fins de progress/failures. Especificação inteira, conftest e fixture já lidos.
+2. Implementar biblioteca/exercícios (seção 21) e depois prescrição/adesão (22–23), usando `src/planos.py` como módulo de domínio independente. Não voltar ao retorno por serviço do molde.
+3. Rodar `python3 -m pytest -q tests/` com saída em arquivo e ler só as últimas 30 linhas; depois verificar-limites.sh.
+4. Atualizar registros; sem commits, rede externa, render, npm/npx ou Docker. Loop externo cuida de commits; não alterar seus logs.

@@ -5,7 +5,7 @@ import unicodedata
 from datetime import datetime, timedelta
 
 from .core import Erro, agora, telefone
-from . import integracoes
+from . import integracoes, planos
 
 
 def normalizar(texto):
@@ -80,6 +80,7 @@ def presenca(c, ident, compareceu):
         raise Erro(409, 'Presença já registrada')
     status = 'realizado' if compareceu else 'falta'
     c.db.execute('UPDATE agendamentos SET status=? WHERE id=?', (status, ident))
+    planos.atualizar_presenca(c, a['plano_id'])
     return status
 
 
@@ -95,11 +96,11 @@ def rodar(c, instante=None):
                     f"Confirme {c.servico(a['servico'])['nome']} em {data}: 1 confirmar, 2 cancelar.", a['id'])
     for r in c.db.execute('SELECT * FROM retornos WHERE avisado=0 ORDER BY id').fetchall():
         if t >= datetime.fromisoformat(r['data']) - timedelta(days=c.cfg['retorno_aviso_dias']):
-            n = enviar(c, r['paciente_id'], 'retorno', f"Está chegando seu retorno de {c.servico(r['servico'])['nome']}.", r['agendamento_id'])
+            n = enviar(c, r['paciente_id'], 'retorno', f"Está chegando sua reavaliação de {c.servico(r['servico'])['nome']}.", r['agendamento_id'])
             if n:
                 c.db.execute('UPDATE retornos SET avisado=1 WHERE id=?', (r['id'],))
             enviadas += n
-    return {'enviadas': enviadas, 'reenviadas': reenviadas, 'alertas': 0}
+    return {'enviadas': enviadas, 'reenviadas': reenviadas, 'alertas': planos.rodar_alertas(c, t)}
 
 
 def abrir_humano(c, tel, motivo, prioridade, original=None):
@@ -263,5 +264,5 @@ def decidir(c, tel, texto, estado):
 
 def dados_paciente(c, ident):
     p = c.paciente(ident)
-    return {'paciente': p, 'agendamentos': [a for a in c.listar_agenda({}) if a['paciente_id'] == ident],
+    return {'paciente': p, 'planos': planos.listar(c, ident), 'agendamentos': [a for a in c.listar_agenda({}) if a['paciente_id'] == ident],
             'mensagens': [dict(r) for r in c.db.execute('SELECT direcao,texto,quando FROM historico WHERE paciente_id=? ORDER BY id', (ident,))]}

@@ -45,6 +45,7 @@ def remover_paciente(c, ident):
     c.db.execute('''UPDATE pacientes SET nome='removido', telefone=NULL, email=NULL,
         nascimento=NULL, consentimento_marketing=0, nao_contatar=1 WHERE id=?''', (ident,))
     c.db.execute("UPDATE espera SET status='cancelado' WHERE paciente_id=?", (ident,))
+    c.db.execute("UPDATE planos SET status='encerrado' WHERE paciente_id=? AND status='ativo'", (ident,))
     c.db.execute('UPDATE retornos SET avisado=1 WHERE paciente_id=?', (ident,))
     for a in c.db.execute("SELECT id FROM agendamentos WHERE paciente_id=? AND status IN ('agendado','confirmado')", (ident,)).fetchall():
         conversa.cancelar(c, a['id'])
@@ -89,10 +90,15 @@ def raiox(c, mes):
             (r['paciente_id'], r['servico'], de, ate)).fetchone())
     def percentual(n, total):
         return round(n / total * 100, 1) if total else 0.0
+    distintos = len({a['paciente_id'] for a in registros if a['status'] == 'realizado'})
+    orcamentos = c.db.execute('SELECT id FROM planos WHERE substr(criado_em,1,7)=?', (mes,)).fetchall()
+    aprovados = sum(bool(c.db.execute("SELECT 1 FROM agendamentos WHERE plano_id=? AND status='realizado' LIMIT 1", (p['id'],)).fetchone()) for p in orcamentos)
     return {'pacote': 'clinica', 'mes': mes, 'valores': {
         'atendimentos_mes': realizados, 'falta_pct': percentual(faltas, realizados + faltas),
         'ocupacao_pct': percentual(ocupados, disponiveis), 'clientes_novos_mes': novos,
         'retorno_atual_pct': percentual(cumpridos, len(retornos)),
+        'atendimentos_mes_recorrente': round(realizados / distintos, 1) if distintos else 0.0,
+        'orcamentos_mes': len(orcamentos), 'aprovacao_atual_pct': percentual(aprovados, len(orcamentos)),
     }}
 
 

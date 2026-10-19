@@ -8,10 +8,26 @@ import sys
 from urllib.parse import parse_qs, urlsplit
 
 from .core import Clinica, Erro, ROOT
-from . import conversa, gestao, cadastros, backup, integracoes
+from . import conversa, gestao, cadastros, backup, integracoes, planos
 
 
 def rotear(c, metodo, rota, q, b):
+    if rota == '/api/planos':
+        if metodo == 'POST':
+            return 201, planos.criar(c, b)
+        if metodo == 'GET':
+            return 200, {'planos': planos.listar(c, q.get('paciente_id'))}
+    m = re.fullmatch(r'/api/planos/(\d+)(/encerrar)?', rota)
+    if m:
+        if metodo == 'GET' and not m[2]:
+            return 200, planos.obter(c, int(m[1]))
+        if metodo == 'POST' and m[2]:
+            return 200, planos.encerrar(c, int(m[1]), b.get('motivo'))
+    if metodo == 'GET' and rota == '/api/alertas':
+        return 200, {'alertas': planos.listar_alertas(c)}
+    m = re.fullmatch(r'/api/alertas/(\d+)/resolver', rota)
+    if metodo == 'POST' and m:
+        return 200, planos.resolver(c, int(m[1]))
     if metodo == 'POST' and rota.startswith('/webhook/evolution/'):
         integracoes.evolution(c, b)
         return 200, {'ok': True}

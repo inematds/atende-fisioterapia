@@ -60,6 +60,8 @@ class Clinica:
                 id INTEGER PRIMARY KEY, profissional TEXT NOT NULL,
                 inicio TEXT NOT NULL, fim TEXT NOT NULL, motivo TEXT NOT NULL);
         ''')
+        from . import planos
+        planos.iniciar(self)
         with self.db:
             if not self.db.execute("SELECT 1 FROM meta WHERE chave='semeado'").fetchone():
                 for tipo in ('servicos', 'profissionais', 'faq', 'exercicios'):
@@ -150,8 +152,8 @@ class Clinica:
     def agendar(self, b, ident=None):
         self.paciente(b['paciente_id'])
         s = self.servico(b['servico'])
-        if b.get('plano_id') is not None:
-            raise Erro(404, 'Plano inexistente')
+        from . import planos
+        plano_id = planos.vinculo(self, b)
         inicio = b['inicio']
         try:
             datetime.strptime(inicio, '%Y-%m-%dT%H:%M')
@@ -163,11 +165,11 @@ class Clinica:
         fim = (datetime.fromisoformat(inicio) + timedelta(minutes=s['duracao_min'])).isoformat(timespec='minutes')
         for h in candidatos:
             if self.livre(h['profissional'], inicio, fim, ident):
-                valores = (b['paciente_id'], s['id'], h['profissional'], inicio, fim, 'agendado')
+                valores = (b['paciente_id'], s['id'], h['profissional'], inicio, fim, 'agendado', plano_id)
                 if ident is None:
-                    ident = self.db.execute('INSERT INTO agendamentos(paciente_id,servico,profissional,inicio,fim,status) VALUES (?,?,?,?,?,?)', valores).lastrowid
+                    ident = self.db.execute('INSERT INTO agendamentos(paciente_id,servico,profissional,inicio,fim,status,plano_id) VALUES (?,?,?,?,?,?,?)', valores).lastrowid
                 else:
-                    self.db.execute('UPDATE agendamentos SET paciente_id=?,servico=?,profissional=?,inicio=?,fim=?,status=? WHERE id=?', (*valores, ident))
+                    self.db.execute('UPDATE agendamentos SET paciente_id=?,servico=?,profissional=?,inicio=?,fim=?,status=?,plano_id=? WHERE id=?', (*valores, ident))
                 return self.agendamento(ident)
         raise Erro(409, 'Horário ocupado')
 
