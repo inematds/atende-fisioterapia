@@ -1,0 +1,15 @@
+.git
+.env
+.env.*
+dados
+backups
+longrun
+tests
+docs
+guia
+__pycache__
+**/__pycache__
+*.pyc
+*.sqlite*
+*.db
+node_modules

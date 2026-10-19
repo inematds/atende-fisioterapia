@@ -9,3 +9,6 @@
 | 2026-10-19 14:02 | 21 falhas anteriores → implementar prescrição, lembrete opt-in, registros/adesão/dor e LGPD → 89 passed / 9 failed; restantes: regra 9/sendMedia, /equipe e entrega; nenhum conflito com a especificação | implementação incremental | avanço de 12 testes; LIMITES OK | infra |
 | 2026-10-19 14:08 | 9 falhas anteriores → implementar regra 9 e transporte de explicação → 93 passed / 5 failed; restantes /equipe e entrega, sem conflito com a especificação | implementação incremental | avanço de 4 testes; LIMITES OK | infra |
 | 2026-10-19 14:08 | tail -12 com múltiplos arquivos foi rejeitado na leitura inicial → usar tail -n 12 → leitura corrigida | corrigir sintaxe | resolvido | prompt |
+
+| 2026-10-19 14:11 | 5 falhas anteriores → completar entrega §19 → 97 passed / 1 failed (test_paginas: /equipe retorna 401) | Docker/env/README; nenhum conflito de contrato | avanço de 4 testes; LIMITES OK | infra |
+| 2026-10-19 14:11 | Leitura presumiu tests/test_entrega.py e tools existentes → localizar com rg --files → tests/test_docker.py lido; tools pendente | corrigir descoberta e registrar lição | resolvido | prompt |

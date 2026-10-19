@@ -1,0 +1,2287 @@
+OpenAI Codex v0.163.0
+--------
+workdir: /home/nmaldaner/projetos/atende-fisioterapia
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a15523-df0f-7270-8f90-60d9c2ce6a1f
+--------
+user
+Você está num ciclo de uma execução longa no repo /home/nmaldaner/projetos/atende-fisioterapia.
+
+RESULTADO: `./atende` (Python 3, só biblioteca padrão; código em `src/`, páginas e SVGs em `web/`, utilitário de build em `tools/`) implementa docs/ESPECIFICACAO.md por inteiro — atendimento de uma clínica de fisioterapia.
+
+ANTES DE AGIR: leia longrun/2026-10-05-fisio-v1/goal.md → state.md → plan.md → canal.md → últimas linhas de progress.md e failures.md. Na primeira vez, leia docs/ESPECIFICACAO.md inteiro (inclusive o bloco "O que muda em relação ao atende-clinica"), tests/conftest.py e tests/fixtures/clinica.json. O projeto irmão ~/projetos/atende-clinica tem uma implementação do molde (src/, web/) que você pode reaproveitar onde a spec for igual — mas a fonte da verdade é a spec deste repo.
+
+NESTE CICLO: escolha a próxima ação útil (comece pela base: `./atende serve` imprimindo `PORTA=<n>`, SQLite em --dados, auth; depois agenda → conversa → confirmação/espera → planos e alertas → biblioteca de exercícios, páginas e os 12 SVGs (`web/exercicios/<id>.svg`, só animação CSS, sem SMIL, sem script) → prescrição, lembrete, registro de adesão/dor e alerta clínico → campanhas → LGPD → raiox → cadastros/bloqueios/backup → Evolution (sendText e sendMedia) → Telegram (inclusive /alertas) → Docker/README/.env.exemplo → página /equipe → `tools/render-exercicios` (escrever conforme a seção 25; NÃO executar, precisa de rede)), implemente, rode `python3 -m pytest -q tests/` (leva alguns minutos). Leia só o fim da saída (`| tail -30`); saída longa vai para arquivo.
+
+AO TERMINAR O CICLO (obrigatório):
+- reescreva state.md (Funciona / Falta / Como retomar) e plan.md (próximos 3 passos);
+- acrescente 1 linha em progress.md: data-hora, o que mudou, resultado do pytest (N passed / N failed);
+- se algo deu errado, 1 linha em failures.md: erro → tentativa → resultado;
+- decisões de design em decisions.md; fatos e armadilhas novos em canal.md (só acrescentar);
+- quando `python3 -m pytest -q tests/` passar inteiro (98 passed) E `bash longrun/2026-10-05-fisio-v1/verificar-limites.sh` imprimir LIMITES OK, escreva "concluído" na primeira linha de "## Funciona" do state.md.
+
+SE UM TESTE CONTRADIZ A ESPECIFICAÇÃO: não altere o teste nem a spec. Registre em failures.md (teste, trecho da spec, o conflito) e siga com os outros itens; isso é portão humano.
+
+INTEGRAÇÕES: Evolution e Telegram só pelas variáveis de ambiente da spec; teste só contra o servidor falso dos testes. Nunca chame api.telegram.org nem uma Evolution real, nunca escreva URL externa no código (a única exceção é o namespace `http://www.w3.org/2000/svg` dentro dos SVGs). O bot nunca dá orientação clínica: fora do FAQ e da prescrição, humano.
+
+RESTRIÇÕES: não altere tests/, pytest.ini, docs/, goal.md, hash-congelado.txt, congelar.sh, verificar-*, loop.env, prompt.md. Não reescreva a seção "Como rodar no seu ambiente" do README.md (acrescente as suas). Só biblioteca padrão do Python 3 (`python3`, não `python`). Nenhuma API, nenhuma rede externa, nenhuma chave, nenhum `npx`/`npm`/`docker`. Servidor só em 127.0.0.1. Não use `pkill -f`; mate só o PID que você subiu. Não faça commit (o loop externo faz).
+
+2026-10-19T17:09:37.086825Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_token\", resource_metadata=\"https://mcp.magnific.com/.well-known/oauth-protected-resource\", scope=\"openid profile email mcp:custom-audience\"" })
+2026-10-19T17:09:37.590705Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_token\", resource_metadata=\"https://mcp.magnific.com/.well-known/oauth-protected-resource\", scope=\"openid profile email mcp:custom-audience\"" })
+2026-10-19T17:09:37.783051Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer resource_metadata=\"https://ai.metricool.com/.well-known/oauth-protected-resource\"" })
+codex
+Vou ler o estado da execução e a especificação, escolher o próximo item pendente e verificar a implementação com a suíte completa e o verificador de limites. Ao final, atualizarei os registros do ciclo, sem commit nem acesso à rede.
+
+exec
+/bin/bash -lc "pwd; rg --files -g AGENTS.md -g CLAUDE.md -g 'context/*' -g 'tasks/current.md' -g 'handoffs/latest.md'" in /home/nmaldaner/projetos/atende-fisioterapia
+ succeeded in 0ms:
+/home/nmaldaner/projetos/atende-fisioterapia
+CLAUDE.md
+
+exec
+/bin/bash -lc 'cat longrun/2026-10-05-fisio-v1/{goal,state,plan,canal}.md; tail -15 longrun/2026-10-05-fisio-v1/progress.md; tail -15 longrun/2026-10-05-fisio-v1/failures.md' in /home/nmaldaner/projetos/atende-fisioterapia
+ succeeded in 0ms:
+# Goal — fisio-v1
+
+- **Início:** 2026-10-05 (planejado; a execução começa quando o dono rodar `congelar.sh`) · **Agente:** `codex exec` (gpt-6-astra, assinatura) em loop headless — `~/projetos/execucao-longa/tools/loop-longrun.sh` · alternativa: `/goal` no Codex TUI ou no Claude Code
+- **Tetos:** 20 ciclos × 30 min (≤ 10 h) · memória 8G por ciclo · estagnação 3 ciclos
+
+## Resultado
+`./atende` sobe o atendimento de **uma clínica de fisioterapia** — agenda (avaliação e sessões), confirmação, lista de espera, plano de tratamento com alerta de abandono e de reavaliação, biblioteca de exercícios com 12 SVGs animados e páginas públicas, prescrição domiciliar com lembrete opt-in, registro de adesão e dor com alerta clínico, FAQ, fila humana, emergência, campanhas com trava COFFITO/LGPD, cadastros, gestão de agenda, backup, WhatsApp pela Evolution (texto e MP4), equipe pelo Telegram, exportação para o Painel do Raio-X e entrega em Docker —, conforme `docs/ESPECIFICACAO.md`.
+
+## Especificação
+**`docs/ESPECIFICACAO.md`** (contrato completo, congelado). Contexto: `docs/MAPA-RAIO-X.md`. Fora do escopo: seção 12 da especificação. O `tools/render-exercicios` (seção 25) é escrito pelo agente mas **não é executado** no loop (precisa de rede para o `npx`); quem o roda é o humano no nível 4.
+
+## Critérios de pronto (verificáveis)
+
+**Função**
+- [ ] `python3 -m pytest -q tests/` → **98 passed**, 0 failed, 0 errors, 0 skipped
+
+**Regressão**
+- [ ] a mesma suíte inteira no teste final (o loop só fecha se todas passam juntas; teste que passava e voltou a falhar impede o fecho)
+- [ ] `./atende serve` reiniciado com o mesmo `--dados` mantém o estado (coberto por `test_estado_persiste_ao_reiniciar`, `test_confirmacao_sobrevive_a_reinicio`, `test_semente_so_na_primeira_vez` e `test_adesao_semanal`, que reinicia 4 vezes com relógios diferentes)
+
+**Limite**
+- [ ] `bash longrun/2026-10-05-fisio-v1/verificar-limites.sh` → `LIMITES OK` (hash do contrato = `hash-congelado.txt`, nº de testes coletados = 98, só arquivos do escopo — `atende`, `src/`, `web/` (inclusive `web/exercicios/*.svg`), `tools/`, `exemplos/`, `README.md`, `VERSION`, `Dockerfile`, `docker-compose.yml`, `.env.exemplo`, `.dockerignore`, `.gitignore`, `CLAUDE.md`, `FALHAS.md`, esta pasta —, sem SDK/dependência externa, sem URL externa (o namespace `http://www.w3.org/` dos SVGs é a única exceção), sem chave de API, sem `0.0.0.0` no código)
+
+**Teste rápido por ciclo**: `python3 -m pytest -q tests/`
+**Teste completo no final**: `python3 -m pytest -q tests/ && bash longrun/2026-10-05-fisio-v1/verificar-limites.sh`
+
+**Depois do "concluído" (humano, nível 4):** `python3 longrun/2026-10-05-fisio-v1/verificar-independente.py` → `INDEPENDENTE OK` (sem valores do fixture no código + clínica nunca vista com outros limiares + 3 SVGs se mexendo no Chromium + um MP4 renderizado pelo HyperFrames + `docker build` e healthcheck do container; as etapas de Chromium e HyperFrames podem sair como `pulado` quando a máquina não tem a ferramenta — nunca como OK), e abrir `/`, `/equipe` e `/exercicios/ponte` no navegador.
+
+## Restrições
+- só pela assinatura; nenhuma API, nenhuma rede externa, nenhuma dependência fora da biblioteca padrão do Python 3 (decisão 2 de `docs/DECISOES-ABERTAS.md`)
+- não mexer em: `tests/`, `pytest.ini`, `docs/` (inclusive `ESPECIFICACAO.md`), `goal.md`, `hash-congelado.txt`, `congelar.sh`, `verificar-*.{sh,py}`, `loop.env`, `prompt.md`
+- a seção **"Como rodar no seu ambiente"** do `README.md` é do dono: acrescentar as seções da spec (§19) sem reescrevê-la
+- servidor só em `127.0.0.1`; ao testar à mão, porta 0 e matar só o PID que subiu
+- não rodar `npx`, `npm`, `docker` nem nada que baixe pacote; `tools/render-exercicios` é escrito, não executado
+- no loop headless não fazer commit (o loop faz); no /goal interativo, commit local a cada checkpoint; nunca criar repo remoto nem fazer push
+
+## Portões humanos (parar e perguntar)
+- teste que contradiz a especificação (registrar em `failures.md` com o trecho exato e parar — não "ajustar" o teste)
+- qualquer chamada a API real (Evolution, Telegram, LLM, Pix) — durante a execução só os servidores falsos locais dos testes; dependência externa
+- deploy na VPS, render dos MP4 (precisa de rede e Chromium) e revisão clínica dos 12 exercícios — são do humano
+- mudança de contrato, criar repo, push, publicar
+# Estado — atualizado 2026-10-19 14:08
+
+## Funciona
+- Base serve/SQLite/auth, agenda concorrente, conversa/FAQ/emergência/alertas clínicos, confirmação/espera, cadastros/bloqueios/backup, campanhas, planos e alertas de abandono/reavaliação, indicadores Raio-X e transportes opcionais.
+- Biblioteca persistente com CRUD, páginas públicas e 12 SVGs CSS; recursos MP4 locais. Revisão clínica e visual no navegador continuam humanas.
+- Prescrição: criação validada, substituição mantendo histórico inativo e preferências do paciente, GET/DELETE, envio síncrono e bloqueio nao_contatar. Migração de pacientes existentes; pacientes novos recebem hora padrão e opt-in falso.
+- Lembrete opt-in por chat/API, validação de hora original, itens do dia e um envio por data; caixa de saída e histórico usam agora da rodada. Regras 6–8 registram adesão/dor no dia do processo; dor forte abre humano alta com aviso ao Telegram.
+- Adesão semanal/geral calculada da prescrição ativa, registros persistentes com atualização independente de fez/dor. LGPD exporta prescrição/registros/preferências; remoção inativa prescrição, desliga lembrete e apaga registros.
+- Regra 9: explica somente exercício ativo prescrito, normaliza nomes/apelidos, escolhe termo mais longo (empate por catálogo) e lista os prescritos. Explicação gera saída própria; não vira pendência de dor.
+- Evolution envia explicação por sendMedia quando há MP4 local e PUBLIC_URL, ou sendText; ID do exercício persistido permite reenvio após reinício. Webhook e histórico não duplicam a resposta; nao_contatar bloqueia a saída.
+- VERSION 0.5.0. Suíte: **93 passed / 5 failed**, 38,23 s; log `longrun/2026-10-05-fisio-v1/pytest-ciclo-5.log` (ganho de 4 testes).
+- **LIMITES OK**, hash 381b6510e90832d5, 98 testes. Validação complementar `validar-explicacao.py` OK: reenvio após reinício, histórico único, ausência de pendência, prioridade/empate de termos, inativo e opt-out. `git diff --check -- src VERSION` OK.
+
+## Falta
+- /equipe com ações reais (1 falha); interface /recepcao ainda vem do molde.
+- Dockerfile, compose, .env.exemplo e seção Deploy na VPS no README (4 falhas). Preservar seção do dono.
+- Escrever tools/render-exercicios conforme §25; NÃO executar. Não está coberto pela suíte de 98 testes, mas faz parte do resultado.
+- Nenhum conflito teste/especificação identificado. Resultado geral ainda não concluído.
+
+## Como retomar
+1. Ler goal → state → plan → canal → fins progress/failures. Especificação inteira, conftest e fixture lidos neste ciclo.
+2. Implementar /equipe com ações reais nas rotas existentes; /recepcao ainda é do molde. Consultar §13–15 e §20–24.
+3. Completar Docker/compose/env/README e escrever tools/render-exercicios (§25) sem executar. Preservar seção do dono no README.
+4. Rodar suíte inteira e limites; só marcar concluído com 98 passed e LIMITES OK e toda a spec implementada. Atualizar registros; sem commits, rede externa, render, npm/npx ou Docker. Logs ciclo-5.log, loop.log e teste-final.log pertencem ao loop externo; não editar.
+# Plano
+
+## Estratégia atual
+93/98 testes aprovados. Conversa, prescrição, explicações e transportes implementados; concluir interface da equipe e entrega.
+
+## Próximos 3 passos
+1. Implementar /equipe com agenda, cadastros, planos, prescrições, adesão/dor, biblioteca, alertas e fila humana; ações reais autenticadas, dados apresentados com segurança.
+2. Completar Dockerfile, compose, .env.exemplo e README (§19); preservar seção do dono e não executar Docker nem rede.
+3. Escrever tools/render-exercicios conforme §25 sem executar; rodar suíte completa e limites, atualizar registros. Só marcar concluído após todo o resultado, 98 passed e LIMITES OK.
+# Canal — fisio-v1 (só acrescentar; nunca reescrever)
+
+Conhecimento do projeto que a compactação perde: fatos descobertos, aprendizados, glossário, armadilhas, onde estão as coisas.
+Não é estado da tarefa (isso vai em state/plan/progress). Preencha cedo — o hook avisa na faixa 1 (~50% do contexto).
+
+Formato: `- AAAA-MM-DD HH:MM · fato|aprendizado|glossário|armadilha · texto`
+
+- 2026-10-19 13:50 · fato · Base importada de atende-clinica/src e web; catalogo é JSON em SQLite com ordem rowid. Config semeia catálogos uma vez, incluindo exercícios. Testes completos: 56 passed / 42 failed.
+- 2026-10-19 13:50 · armadilha · O molde gerava retorno por servico.retorno_dias: removido. Agora retorno deverá nascer exclusivamente da conclusão de plano. Não copiar essa regra antiga de volta.
+- 2026-10-19 13:50 · fato · Integracoes só lê URLs do ambiente; testes higienizam ambiente e usam servidor falso. Nenhuma chamada externa feita. UI /recepcao ainda é provisória; /equipe precisa ser implementada.
+- 2026-10-19 13:54 · fato · src/planos.py cria tabelas planos/alertas no início de Clinica; contagens são consultas à agenda. Retorno usa tabela retornos já criada por conversa.iniciar. Novas rotas passam pelo mesmo lock/transação/auth. Suíte: 70 passed / 28 failed.
+- 2026-10-19 13:54 · armadilha · Presenças podem ter início futuro frente a ATENDE_AGORA. Timestamp do alerta isolado não identifica uma sequência já notificada; abandono_ultima_sessao guarda a sequência e não aparece na API. Checado com duas sequências e reinício.
+- 2026-10-19 13:58 · fato · src/exercicios.py oferece listar/obter/salvar/pagina/recurso; id validado antes de montar caminhos, catálogo semeado existente reaproveitado. Template em web/exercicio.html e 12 SVGs em web/exercicios. Testes completos: 77 passed / 21 failed.
+- 2026-10-19 13:58 · armadilha · test_biblioteca_crud inclui ao final prescrição de exercício inativo; ainda falha 404 porque prescrição não existe, embora operações do CRUD passem. Não alterar teste nem simular rota; implementar seção 22.
+- 2026-10-19 13:58 · fato · Apenas validação estrutural e HTTP dos SVGs foi executada; revisão clínica e captura de quadros no navegador ficam para nível 4. CSS d anima pontos com apoios fixos em ponte/gato/agachamento/prancha/bird-dog.
+- 2026-10-19 14:02 · fato · src/prescricoes.py concentra prescrição, preferências, lembretes, registros e adesão; inicialização migra pacientes existentes e cria prescricoes/registros. obter retorna None sem ativa; rota GET transforma em 404, LGPD mantém null.
+- 2026-10-19 14:02 · armadilha · Pendência de exercício é ausência de dor na data da mensagem; registro da resposta pertence ao dia do relógio do processo. Não usar respondida isoladamente nem trocar data da resposta pela data do lembrete.
+- 2026-10-19 14:02 · fato · Integração futura de explicação deve evitar envio duplo: conversar registra histórico e evolution envia toda resposta; enviar também entrega imediatamente. Prescrição/lembrete já usam entregar e seus reenvios funcionam pelo transporte existente.
+- 2026-10-19 14:02 · fato · Final do ciclo 4: 89 passed / 9 failed (49,19 s), LIMITES OK. Nº semanas arbitrariamente grande é limitado às semanas disponíveis antes de subtrair datas; preferência e histórico de lembrete conferidos após reinício em validação local adicional.
+- 2026-10-19 14:08 · fato · Regra 9 em exercicios.conversar, entre prescricoes.conversar e agendamento; enviar aceita exercicio_id e historico=False. conversar mantém histórico único. Lista processadas impede webhook de repetir explicação já tentada ou bloqueada.
+- 2026-10-19 14:08 · armadilha · saida.exercicio_id exige migração via PRAGMA em conversa.iniciar; reenviar reaproveita entregar e resolve MP4/PUBLIC_URL no momento do envio. Não converter explicacao em exercicio: número puro depois dela não é dor.
+- 2026-10-19 14:08 · fato · Ciclo 5: 93 passed / 5 failed; LIMITES OK. Validação complementar local reproduzível em validar-explicacao.py. Restam /equipe, entrega Docker/README e render-exercicios (escrever, nunca executar no loop).
+# Progresso (só acrescentar)
+
+| data/hora | checkpoint | commit | critério atingido? | tokens in/cached/out | compactações |
+|---|---|---|---|---|---|
+| 2026-10-19 13:50 | Base importada/adaptada: serve, SQLite, auth, agenda, conversa e transportes locais; pytest 56 passed / 42 failed; LIMITES OK | sem commit (loop externo) | parcial | — | 0 |
+| 2026-10-19 13:54 | Planos, vínculo/presença/conclusão, retorno, alertas e Telegram /alertas; Raio-X ampliado; pytest 70 passed / 28 failed (34,95 s); LIMITES OK | sem commit (loop externo) | parcial | — | 0 |
+| 2026-10-19 13:58 | Biblioteca CRUD, páginas públicas, 12 SVGs CSS e MP4 local; pytest 77 passed / 21 failed (32,41 s); LIMITES OK | sem commit (loop externo) | parcial | — | 0 |
+| 2026-10-19 14:02 | Prescrição, preferências, lembrete diário, adesão/dor, humano alta e LGPD; pytest 89 passed / 9 failed (49,19 s); LIMITES OK; validação local de persistência/limites OK | sem commit (loop externo) | parcial | — | 0 |
+| 2026-10-19 14:08 | Regra 9, saída explicacao e Evolution sendMedia/fallback/reenvio sem duplicação; pytest 93 passed / 5 failed (38,23 s); LIMITES OK; validar-explicacao.py OK | sem commit (loop externo) | parcial | — | 0 |
+# Falhas (só acrescentar; ao fim, a menor correção vira linha no FALHAS.md do projeto)
+
+| data | o que quebrou | tentativa | resultado | prompt \| infra |
+|---|---|---|---|---|
+| 2026-10-19 13:50 | 42 testes falham: recursos específicos da fisioterapia e entrega ausentes | importar base e adaptar presença, sinais clínicos e campanhas | 56 passed; implementar planos, exercícios, prescrição e entrega nos próximos ciclos; nenhum conflito de contrato identificado | infra |
+| 2026-10-19 13:54 | 42 falhas anteriores, planos e recursos domiciliares ausentes → implementar planos/alertas/retorno e indicadores → 70 passed / 28 failed; restantes em biblioteca, prescrição, dor, páginas e entrega; nenhum conflito de contrato | implementação incremental | avanço de 14 testes | infra |
+| 2026-10-19 13:58 | 28 falhas anteriores → implementar biblioteca/páginas/SVG/MP4 → 77 passed / 21 failed; CRUD só falha na etapa de prescrição ainda ausente, sem conflito de contrato | implementação incremental | avanço de 7 testes | infra |
+| 2026-10-19 13:58 | Leitura inicial tentou src/servidor.py inexistente → consultar rg --files e ler src/server.py → leitura corrigida, sem alteração de código | corrigir caminho | resolvido | prompt |
+| 2026-10-19 14:02 | 21 falhas anteriores → implementar prescrição, lembrete opt-in, registros/adesão/dor e LGPD → 89 passed / 9 failed; restantes: regra 9/sendMedia, /equipe e entrega; nenhum conflito com a especificação | implementação incremental | avanço de 12 testes; LIMITES OK | infra |
+| 2026-10-19 14:08 | 9 falhas anteriores → implementar regra 9 e transporte de explicação → 93 passed / 5 failed; restantes /equipe e entrega, sem conflito com a especificação | implementação incremental | avanço de 4 testes; LIMITES OK | infra |
+| 2026-10-19 14:08 | tail -12 com múltiplos arquivos foi rejeitado na leitura inicial → usar tail -n 12 → leitura corrigida | corrigir sintaxe | resolvido | prompt |
+
+exec
+/bin/bash -lc 'cat CLAUDE.md; cat docs/ESPECIFICACAO.md' in /home/nmaldaner/projetos/atende-fisioterapia
+ succeeded in 0ms:
+# CLAUDE.md — atende-fisioterapia
+
+Sistema de atendimento ao paciente para uma clínica de fisioterapia: agenda, confirmação, lista de espera, plano de tratamento (abandono/reavaliação), exercícios prescritos com SVG animado e lembrete, adesão e dor, FAQ, fila humana, emergência, campanhas com trava COFFITO/LGPD e exportação para o Painel do Raio-X de Margem. Derivado do `~/projetos/atende-clinica`.
+
+- Repo local (sem remoto ainda). Autor de commit: `inematds <inematds@gmail.com>` (config local).
+- **Contrato:** `docs/ESPECIFICACAO.md` (o bloco "O que muda em relação ao atende-clinica" resume as diferenças). Testes caixa-preta em `tests/` (pytest sobe `./atende serve --porta 0`). Contrato e testes são **protegidos** durante a execução longa — só humano altera, e aí recongela o hash.
+- Decisões pendentes: `docs/DECISOES-ABERTAS.md`. Relação com o Raio-X: `docs/MAPA-RAIO-X.md`.
+- Execução longa: `longrun/2026-10-05-fisio-v1/` (método em `~/projetos/execucao-longa`). Passo a passo para rodar: `README.md`, seção "Como rodar no seu ambiente".
+- `python3` (não existe `python` neste host). Sem dependência externa no v1.
+- Nenhuma API (WhatsApp/Meta, LLM pago, Pix/PSP, OpenRouter, Groq) sem autorização explícita. Sem rede externa no código. `tools/render-exercicios` (HyperFrames via `npx`) é passo humano, fora do loop.
+- O bot **nunca** dá orientação clínica; dor forte e sinais de alerta vão para humano com prioridade alta.
+- Servidor de teste: só `127.0.0.1`, porta 0; matar só o PID que subiu.
+- Versão em `VERSION` (semver do CLAUDE global: minor carrega o patch).
+
+## Self-learning
+
+When I correct you, or you catch yourself making a mistake: before continuing, add the lesson as a one-line rule under ## Lessons, so it never happens again.
+
+## Lessons
+- Em leituras de vários arquivos com tail, usar `tail -n N arquivo1 arquivo2` para evitar ambiguidade de opções.
+- Toda data/valor esperado num teste tem a conta num comentário e foi conferido com `python3 -c` (dia da semana, soma de dias, minutos disponíveis).
+- Chromium do snap (`/snap/bin/chromium`) não grava em `/tmp` (tmp privado): screenshot do verificador vai numa pasta dentro do repo. O `chrome-headless-shell` do Playwright não avança animação CSS com `--virtual-time-budget` (quadros iguais) — só o `chrome` completo. Medido em 05/10/2026. (05/10/2026)
+# Especificação v1 — atende-fisioterapia (contrato congelado)
+
+> Este arquivo é **protegido** durante a execução longa: o agente implementa contra ele e não o altera.
+> Os testes em `tests/` verificam exatamente o que está aqui. Mudança de contrato = humano edita, recongela o hash e reinicia o longrun.
+
+## O que muda em relação ao atende-clinica
+
+Este sistema é o `atende-clinica` adaptado a **uma clínica de fisioterapia**. Tudo o que não está listado aqui é igual ao molde (`~/projetos/atende-clinica/docs/ESPECIFICACAO.md`):
+
+| Tema | atende-clinica | atende-fisioterapia |
+|---|---|---|
+| Serviços do exemplo | odonto (avaliação, limpeza, canal) | `avaliacao` 60 min, `sessao` 30 min, `rpg` 60 min (seção 2) |
+| Conselho do exemplo | `cfo` | `coffito` (COFFITO 424/2013); a tabela de travas continua com os 4 perfis (seção 9) e ganha o código `depoimento` |
+| Retorno programado | `retorno_dias` por serviço | **não existe `retorno_dias`**; o retorno (reavaliação) nasce quando um **plano de tratamento é concluído** (seções 8 e 20) |
+| Página da equipe | `/recepcao` | `/equipe` (seção 13), com planos, prescrições, adesão, biblioteca e alertas |
+| Conversa | 8 regras | 12 regras: alerta clínico, lembrete, adesão/dor e explicação de exercício (seção 6) |
+| `tarefas/rodar` | confirmação, retorno, reenvio | + lembrete de exercícios + alertas de abandono/reavaliação (seções 22 e 24) |
+| Raio-X | 5 valores | + `atendimentos_mes_recorrente`, `orcamentos_mes`, `aprovacao_atual_pct` (seção 10) |
+| LGPD | paciente, agendamentos, mensagens | + planos, prescrição, registros de adesão/dor (seção 11) |
+| Evolution | `sendText` | + `sendMedia` com o MP4 do exercício quando existir (seção 17) |
+| Telegram | `/responder /encerrar /fila /agenda` | + `/alertas` (seção 18) |
+| Variáveis novas | — | `PUBLIC_URL`, `EXERCICIOS_MP4_DIR` (seções 17, 19, 21) |
+| Novo | — | planos (20), biblioteca de exercícios com SVG animado (21), prescrição e lembretes (22), adesão/dor/alertas clínicos (23), alertas à equipe (24), MP4 pelo HyperFrames (25) |
+
+## 0. O que é
+
+Sistema de atendimento ao paciente para **uma clínica de fisioterapia**: agenda de avaliação e sessões, confirmação automática, lista de espera, plano de tratamento com alerta de abandono e de reavaliação, exercícios domiciliares prescritos com lembrete, registro de adesão e dor, explicação animada de cada exercício, tirar dúvidas (FAQ), passagem para humano, emergência, campanhas com trava de conselho/LGPD e exportação de números para o **Painel de Recuperação do Raio-X de Margem**.
+
+Canais: **chat web**, **WhatsApp pela Evolution API** (seção 17) e caixa de saída **simulada** quando a Evolution não está configurada. Equipe interna atende pelo **Telegram** (seção 18) e pela página da equipe. Cadastros (seção 14), gestão de agenda (seção 15), backup do banco (seção 16) e entrega em **Docker** para VPS (seção 19).
+
+O bot **nunca** dá orientação clínica, diagnóstico, remédio ou exercício fora do que o fisioterapeuta prescreveu: explica o que está no catálogo **e** na prescrição do paciente; o resto vai para o humano.
+
+## 1. Execução
+
+- Ponto de entrada: arquivo executável `./atende` na raiz do repo.
+- `./atende serve --porta N --dados DIR [--host H]`
+  - `--porta 0` = porta livre escolhida pelo sistema. A **primeira linha** do stdout é `PORTA=<n>` (com flush), impressa quando o servidor já aceita conexões.
+  - Escuta em `--host` (padrão `127.0.0.1`; no Docker, `0.0.0.0` passado pelo comando do container — nunca escrito no código).
+  - `DIR/clinica.json` = configuração (seção 2). Se não existir, copiar `exemplos/clinica.json`. `DIR` é criado se não existir.
+  - Todo o estado persiste em `DIR/` (ex.: SQLite). Reiniciar com o mesmo `DIR` mantém tudo.
+  - O servidor aceita conexões simultâneas (10 pedidos ao mesmo tempo não podem ser recusados por fila cheia).
+- **Relógio:** variável de ambiente `ATENDE_AGORA` (`AAAA-MM-DDTHH:MM`, hora local da clínica, sem fuso) fixa o "agora" do processo. Sem ela, usa o relógio real. Datas/horas no contrato são sempre `AAAA-MM-DDTHH:MM` local; datas, `AAAA-MM-DD`; horas, `HH:MM`.
+- `./atende raiox --dados DIR --mes AAAA-MM --acompanhamento ARQ` (seção 10).
+- `./atende backup` / `./atende restaurar` (seção 16).
+- `tools/render-exercicios` (seção 25) é passo de build do humano, fora do servidor.
+- Integrações externas **só** por variáveis de ambiente (seções 17–19). Sem elas, nenhuma chamada de rede sai do processo. Nenhuma URL externa, chave ou token escrito no código.
+
+## 2. `clinica.json`
+
+```json
+{
+  "nome": "Fisio Movimento",
+  "conselho": "coffito",             // cfm | cfo | coffito | estetica
+  "token": "segredo",               // exigido no header X-Token das rotas da equipe
+  "passo_min": 30,                   // grade de horários
+  "antecedencia_min_horas": 2,       // não oferece/aceita horário antes de agora + isto
+  "janela_dias": 14,                 // até quantos dias à frente o chat oferece horários
+  "confirmacao_horas": 48,           // pede confirmação quando a sessão começa em até 48 h
+  "retorno_aviso_dias": 7,           // avisa a reavaliação quando faltam até 7 dias
+  "abandono_faltas": 2,              // faltas seguidas num plano ativo → alerta de abandono
+  "reavaliacao_sessoes": 2,          // restantes ≤ isto → alerta de reavaliação
+  "reavaliacao_dias": 30,            // plano concluído → retorno em última sessão + 30 dias
+  "dor_alerta": 7,                   // dor ≥ 7 → fila humana alta
+  "lembrete_hora_padrao": "19:00",   // hora do lembrete quando o paciente não escolhe
+  "feriados": ["2026-10-12"],
+  "horarios": { "seg": [["08:00","12:00"],["14:00","18:00"]], "ter": [...], "qua": [...], "qui": [...], "sex": [...], "sab": [["08:00","12:00"]], "dom": [] },
+  "profissionais": [ { "id": "carla", "nome": "Carla Souza", "servicos": ["avaliacao","sessao","rpg"] } ],
+  "servicos": [ { "id": "sessao", "nome": "Sessão de fisioterapia", "duracao_min": 30 } ],
+  "faq": [ { "id": "convenios", "perguntas": ["vocês aceitam convênio"], "resposta": "Atendemos Unimed e particular." } ],
+  "exercicios": [ { "id": "ponte", "nome": "Ponte", "apelidos": ["ponte de glúteo"], "regiao": "lombar e quadril",
+                    "passos": ["..."], "erros_comuns": ["..."], "cuidados": ["..."], "contraindicacoes": ["..."], "pare_se": ["..."] } ]
+}
+```
+
+Dias da semana: `seg ter qua qui sex sab dom`. Serviço **não** tem `retorno_dias`. Os campos novos (`abandono_faltas`, `reavaliacao_sessoes`, `reavaliacao_dias`, `dor_alerta`, `lembrete_hora_padrao`) são obrigatórios no exemplo; se faltarem no arquivo, valem os valores acima.
+
+## 3. Regras de agenda
+
+- Horário candidato: começa no início de uma janela e anda de `passo_min` em `passo_min`; vale se `[inicio, inicio+duracao)` cabe inteiro na janela.
+- **Inválido (422)** se: não é horário candidato (fora da grade ou não cabe na janela); dia em `feriados`; `inicio < agora + antecedencia_min_horas`; profissional não faz o serviço ou está inativo; horário dentro de bloqueio (seção 15); `plano_id` informado que não é um plano `ativo` do mesmo paciente e do mesmo serviço.
+- **Ocupado (409)** se é válido mas sobrepõe outro agendamento **ativo** do mesmo profissional (ou, sem profissional indicado, de todos que fazem o serviço).
+- `GET /api/horarios` lista só horários válidos e livres.
+- Agendamento ativo = status `agendado`, `confirmado`, `realizado` ou `falta`. `cancelado` libera o horário.
+- Dois pedidos simultâneos para o mesmo horário/profissional: exatamente um vence (201), o outro recebe 409.
+
+## 4. Autenticação
+
+Rotas marcadas **[R]** (equipe) exigem header `X-Token` igual a `clinica.json.token`; sem ele ou errado → **401**, verificado **antes** de ler o corpo (um `POST {}` sem token é 401, não 422). Rotas públicas: `/`, `/equipe` (página; os dados vêm de rotas [R]), `/exercicios/...`, `/api/saude`, `GET /api/servicos`, `GET /api/exercicios`, `/api/horarios`, `/api/mensagens`. Webhooks têm segredo próprio (seções 17 e 18).
+
+## 5. API HTTP (JSON, UTF-8)
+
+Toda resposta JSON vai com `Content-Type: application/json`. Id inexistente no caminho ou no corpo → 404; valor inválido → 422; conflito de estado → 409.
+
+| Método e rota | Corpo | Resposta |
+|---|---|---|
+| `GET /api/saude` | — | 200 `{"ok": true, "versao": "<conteúdo de VERSION>"}` |
+| `GET /api/servicos` | — | 200 `{"servicos": [{id, nome, duracao_min}]}` só ativos, na ordem de cadastro |
+| `GET /api/horarios?servico=S&data=AAAA-MM-DD[&profissional=P]` | — | 200 `{"horarios": [{"inicio", "profissional"}]}` ordenado por `inicio`, depois `profissional` (texto); serviço inexistente → 404 |
+| `POST /api/pacientes` [R] | `{nome, telefone, consentimento_marketing?: bool}` | 201 `{id}`; telefone já cadastrado → 200 com o mesmo `{id}`; telefone inválido → 400 |
+| `POST /api/agendamentos` [R] | `{paciente_id, servico, inicio, profissional?, plano_id?}` | 201 `{id, status: "agendado", inicio, fim, profissional, plano_id}`; sem `profissional` = o primeiro livre por ordem de `id`; sem `plano_id` = o plano `ativo` do paciente com o mesmo `servico`, se houver (senão `null`); horário ocupado → 409; inválido (regra 3) → 422; paciente/serviço inexistente → 404 |
+| `GET /api/agendamentos?data=AAAA-MM-DD` [R] | — | 200 `{"agendamentos": [{id, paciente_id, telefone, servico, profissional, inicio, fim, status, plano_id}]}` todos os status, ordem de `inicio` e depois `id` |
+| `POST /api/agendamentos/{id}/cancelar` [R] | — | 200 `{status: "cancelado"}`; dispara a lista de espera (seção 7) |
+| `POST /api/agendamentos/{id}/remarcar` [R] | `{inicio}` | 200 com o agendamento no novo horário (mesmo `id`, status `agendado`); mesmas regras de 409/422 |
+| `POST /api/agendamentos/{id}/presenca` [R] | `{compareceu: bool}` | 200 `{status: "realizado" \| "falta"}`; atualiza o plano vinculado (seção 20); pode ser marcada a qualquer momento (não depende do relógio); segunda chamada no mesmo agendamento → 409 |
+| `POST /api/espera` [R] | `{paciente_id, servico, data}` | 201 `{id}` |
+| `POST /api/tarefas/rodar` [R] | `{agora?}` (padrão = relógio do processo; vale só para esta rodada) | 200 `{"enviadas": n, "alertas": n}` (+ `"reenviadas"` com a Evolution); idempotente: rodar de novo no mesmo instante → tudo 0 |
+| `GET /api/saida` [R] | — | 200 `{"mensagens": [{id, tipo, telefone, paciente_id, texto, agendamento_id, status}]}` em ordem de criação. `tipo` ∈ `confirmacao, espera, retorno, campanha, humano, prescricao, exercicio, explicacao` (`exercicio` = lembrete diário da seção 22; `explicacao` = resposta da regra 9 da seção 6). Ids de todo recurso são inteiros, crescentes na ordem de criação |
+| `POST /api/mensagens` | `{telefone, texto}` | 200 `{"respostas": [texto, ...]}` (seção 6) |
+| `GET /api/atendimento-humano` [R] | — | 200 `{"fila": [{id, telefone, nome, motivo, prioridade, status}]}` só os `aberto`, ordem de `id`; `prioridade` ∈ `normal, alta` |
+| `POST /api/campanhas` [R] | `{texto}` | 200 `{"enviadas": n}` ou 422 `{"violacoes": [codigos]}` (seção 9) |
+| `GET /api/pacientes/{id}/dados` [R] | — | 200 `{paciente, agendamentos, mensagens, planos, prescricao, registros}` (LGPD art. 18, II) |
+| `DELETE /api/pacientes/{id}` [R] | — | 204; anonimiza (seção 11); `GET .../dados` continua respondendo 200 |
+| `GET /api/raiox?mes=AAAA-MM` [R] | — | 200 (seção 10) |
+
+Telefone: aceita com ou sem `+55`, espaços, parênteses e hífen; normaliza para `+55DDNNNNNNNNN` (DDD + 8 ou 9 dígitos; 10 ou 11 dígitos sem o 55, 12 ou 13 com ele). Fora disso → inválido. Todas as respostas usam o telefone normalizado.
+
+**Envio síncrono:** `tarefas/rodar`, `campanhas`, `POST .../prescricao`, `.../responder` e `/responder` do Telegram só devolvem a resposta HTTP depois de tentar os envios (o `status` da mensagem já está definido ao responder). Respostas ao webhook da Evolution e avisos ao Telegram podem ser assíncronos.
+
+## 6. Conversa (`POST /api/mensagens`)
+
+O texto é normalizado (minúsculas, sem acento, pontuação trocada por espaço) antes de decidir. "Contém X" = X aparece como **sequência de palavras inteiras** no texto normalizado (`fiz` não casa `fizemos`; `dor 7` exige as duas palavras seguidas, então `minha dor hoje e 7` não casa), **exceto** na regra 1, que usa substring como no atende-clinica. Ordem de decisão (a primeira que casa decide):
+
+1. **Emergência** — o texto contém (substring) um destes: `dor no peito`, `falta de ar`, `desmaio`, `desmaiou`, `sangramento`, `sangrando`, `convulsao`, `suicidio`, `me matar`, `avc`, `infarto`. Resposta contém `192` e `pronto-socorro`; entra na fila humana com `prioridade: "alta"` e `motivo: "emergencia"`. Não agenda nem registra nada.
+2. **Alerta clínico** — palavras inteiras: `dormencia`, `dormente`, `formigamento`, `perda de forca`, `sem forca`, `perdi a forca`, `febre`, `irradia`, `irradiando`, `queda`, `caiu`, `tombo`, `inchaco`, `inchou`, `inchado`, `nao consigo andar`, `nao consigo mexer`, `perdi o controle`. Resposta contém `fisioterapeuta` e `192` e **não** contém orientação (nada de "faça", "tome", "alongue"); fila humana `prioridade: "alta"`, `motivo: "alerta clinico"`. Nada mais é registrado.
+3. **Parar** — texto igual a `parar`, `sair` ou `pare`: paciente fica `nao_contatar`; resposta contém `não vai mais receber`. Nenhuma mensagem de saída (confirmação, retorno, campanha, espera, prescrição, lembrete de exercício) vai mais para esse telefone.
+4. **Humano** — contém `atendente`, `humano` ou `falar com alguem`: fila humana `prioridade: "normal"`; resposta contém `atendente`.
+5. **Fluxo em andamento** (agendamento pelo chat, abaixo) consome a mensagem.
+6. **Resposta a pendência** — vale a **última mensagem da caixa de saída** (`/api/saida`) para o telefone, **se ela for de um dos três tipos abaixo** e ainda estiver **sem resposta** (`prescricao`, `explicacao`, `humano`, `campanha` e `retorno` não são pendência: uma delas por último = sem pendência). "Sem resposta" quer dizer: `confirmacao` → o agendamento ainda está `agendado`; `espera` → o pedido ainda está `ofertado`; `exercicio` → ainda não há registro com `dor` para o paciente na data da mensagem. O texto normalizado é comparado por **igualdade**; texto que não casa nenhuma opção segue para as regras seguintes (a pendência continua):
+   - `confirmacao`: igual a `1`, `sim` ou `confirmo` → status `confirmado`, resposta contém `confirmad`; igual a `2`, `cancelar` ou `nao` → `cancelado` (dispara espera), resposta contém `cancelad`.
+   - `espera`: igual a `1` ou `sim` → agenda **exatamente o par (`inicio`, `profissional`) ofertado** (seção 7) se esse profissional ainda estiver livre nesse horário (resposta contém `agendad`; o pedido vira `atendido`); senão resposta contém `ocupado` — **mesmo que outro profissional esteja livre** no mesmo horário.
+   - `exercicio` (lembrete, seção 22): texto que é só um número inteiro de `0` a `10` → registra **dor** desse valor **com os mesmos efeitos da regra 8** (resposta contém `registrad`; se `N ≥ dor_alerta`, fila humana `alta` com `motivo: "dor N"` e resposta com `fisioterapeuta` e `192`). `fiz` / `nao fiz` / `dor N` seguem a regra 8.
+7. **Lembrete** — paciente com prescrição ativa e texto que contém a palavra `lembrete`: se contém `sem lembrete` → desliga (`lembrete_ativo: false`); senão → liga na hora `\d{1,2}:\d{2}` lida do **texto original** (antes de normalizar; a primeira ocorrência), ou em `lembrete_hora_padrao` se o texto não traz hora (`lembrete` sozinho). Hora válida = `00 ≤ HH ≤ 23` e `00 ≤ MM ≤ 59`, guardada com dois dígitos (`7:30` → `07:30`); hora inválida (ex.: `25:99`) → resposta contém `lembrete` e nada muda. Resposta contém `lembrete` e, ao ligar, a hora `HH:MM`. Sem prescrição ativa → cai na regra 12.
+8. **Adesão e dor** — paciente cadastrado (telefone conhecido): `nao fiz` ou `nao consegui` → `fez: false`; senão `fiz` → `fez: true` (**`nao fiz` tem precedência**: `nao fiz tudo` é `fez: false`, apesar de conter `fiz`); os dois exigem prescrição ativa (sem ela → regra 12). `dor N` (N inteiro 0–10, as duas palavras seguidas) → `dor: N` (não exige prescrição). Um texto pode trazer os dois (`fiz, dor 3`). Tudo no **dia do relógio do processo** (seção 23). Resposta contém `registrad`. Se `N ≥ dor_alerta`: fila humana `prioridade: "alta"`, `motivo: "dor N"`, e a resposta contém também `fisioterapeuta` e `192`. Telefone desconhecido → regra 12.
+9. **Exercício** — o texto contém o `nome` ou um `apelido` (com a mesma normalização do texto: `Bird-dog` casa `bird dog`) de um exercício **ativo** do catálogo; mais de um casa → o de maior número de palavras no termo casado, empate → o primeiro na ordem do catálogo. Se o exercício está na **prescrição ativa** do paciente: resposta com o nome, os `passos` numerados (`1. ...`), a linha `Pare se: <pare_se separados por "; ">` e o link `<PUBLIC_URL>/exercicios/<id>` (sem `PUBLIC_URL`, só `/exercicios/<id>`); essa resposta **também entra na caixa de saída** como `tipo: "explicacao"` (`status: "simulado"` sem Evolution; com Evolution, seção 17). Se não está prescrito (ou o telefone não tem cadastro/prescrição): resposta contém `fale com seu fisioterapeuta` e `atendente`, **sem** passos. Texto com a palavra `exercicio`/`exercicios` sem casar nome: lista os exercícios prescritos (`- <nome> — <link>`), ou a mesma resposta de "não prescrito".
+10. **Agendar** — contém `agendar`, `marcar` ou `consulta`: inicia o fluxo.
+11. **FAQ** — palavras significativas de alguma pergunta do FAQ (palavras normalizadas com ≥ 3 letras, fora desta lista **fechada**, a mesma do molde: `que qual quais como onde para por com sem uma uns umas dos das seu sua seus suas voce voces vcs nos eles elas tem`): se ≥ 60 % delas aparecem no texto, responde **exatamente** a `resposta` daquele item (só ela, uma mensagem). Mais de um item casa → o de maior %; empate → o primeiro do FAQ.
+12. **Não entendi** — resposta contém `não entendi` e oferece `atendente`. Na **segunda** seguida sem entender, entra na fila humana (`normal`) automaticamente.
+
+**Fluxo de agendamento pelo chat** (estado por telefone, persistido):
+- telefone sem paciente → pergunta o nome (resposta contém `nome`); a próxima mensagem vira o nome e o paciente é criado (`consentimento_marketing: false`). Paciente conhecido não ouve pergunta de nome.
+- lista os serviços ativos numerados `1 - <nome>` na ordem de cadastro;
+- escolhido o número, oferece os **3 primeiros** horários livres a partir de `agora + antecedencia_min_horas`, dentro de `janela_dias`, em todos os profissionais, ordem da seção 5; cada linha `N) DD/MM HH:MM com <nome do profissional>`;
+- escolhido o número, cria o agendamento (vinculado ao plano ativo do serviço, se houver); resposta contém `agendad`, `DD/MM` e `HH:MM`.
+- número inválido em qualquer passo → repete as opções. `cancelar` dentro do fluxo → sai do fluxo.
+- O bot **nunca** inventa preço, diagnóstico, remédio ou exercício: fora do FAQ e da prescrição cai na regra 12.
+
+Enquanto um atendimento humano do telefone estiver `aberto` (seção 18), o bot não responde (`respostas: []`), exceto as regras 1 e 2 — que respondem normalmente, **não abrem um segundo atendimento** (há no máximo um `aberto` por telefone), elevam a `prioridade` do aberto para `alta` e repassam a mensagem ao grupo (seção 18).
+
+## 7. Lista de espera
+
+Ao cancelar (pela API ou pela conversa), o primeiro pedido de espera ainda não atendido com o mesmo `servico` e a mesma `data` do horário liberado (ordem de criação), cujo paciente não esteja `nao_contatar`, recebe mensagem `tipo: "espera"` contendo `HH:MM` do horário e `1`. A oferta é o par (`inicio`, `profissional`) do agendamento cancelado e fica guardada com o pedido, que passa a `ofertado` (não recebe outra oferta do mesmo horário); aceitar (regra 6 da seção 6) agenda esse par exato, e o pedido vira `atendido`.
+
+## 8. Confirmação e retorno (`POST /api/tarefas/rodar`)
+
+- **Confirmação:** todo agendamento `agendado` com `agora < inicio ≤ agora + confirmacao_horas` que ainda não recebeu confirmação → mensagem `tipo: "confirmacao"` com `agendamento_id`. Texto contém o nome do serviço, `DD/MM`, `HH:MM`, `1` (confirmar) e `2` (cancelar). **Não contém valor em R$.**
+- **Retorno (reavaliação):** quando um plano fica `concluido` (seção 20) nasce um retorno com `servico: "avaliacao"` (o serviço de avaliação do plano, campo `servico_avaliacao` do plano; padrão `avaliacao`) e `data = data da última sessão realizada + reavaliacao_dias`. Quando a **data** de `agora` ≥ `data − retorno_aviso_dias` e ainda não avisado → mensagem `tipo: "retorno"` com a palavra `reavalia` e o nome do serviço. Uma vez só.
+- Paciente `nao_contatar` nunca recebe (a mensagem **não é criada**). Lembrete, retorno e prescrição **não** dependem de `consentimento_marketing` (LGPD art. 11, II, f — tutela da saúde).
+- `enviadas` conta as mensagens **criadas** nesta rodada (confirmação, retorno, lembrete de exercício), mesmo que o envio pela Evolution falhe (`pendente`).
+
+## 9. Campanhas e trava de conselho
+
+`POST /api/campanhas {texto}` envia só para pacientes com `consentimento_marketing: true` e sem `nao_contatar` (LGPD art. 11, I — consentimento específico). Antes de enviar, valida o texto em minúsculas e sem acento (**pontuação mantida**, para `r$` e `100%`). O `422` lista **todos** os códigos violados. Qualquer violação → 422 e nada é enviado.
+
+| Código | Detecta | cfm | cfo | coffito | estetica |
+|---|---|---|---|---|---|
+| `promessa_resultado` | `garantido`, `garantia de resultado`, `100%`, `resultado garantido` | ✔ | ✔ | ✔ | ✔ |
+| `melhor_profissional` | `melhor medico`, `melhor dentista`, `melhor fisioterapeuta`, `melhor clinica` | ✔ | ✔ | ✔ | — |
+| `sorteio_brinde` | `sorteio`, `brinde`, `premio`, `premiacao` | ✔ | ✔ | — | — |
+| `antes_depois` | `antes e depois` | ✔ | ✔ | — | — |
+| `consorcio` | `consorcio` | ✔ | — | — | — |
+| `preco` | `r$`, `reais` | — | ✔ | ✔ | — |
+| `parcelamento` | `parcela`, `parcelamento`, `sem juros`, `10x` (qualquer `<n>x`) | — | ✔ | — | — |
+| `gratuito` | `gratis`, `gratuito`, `gratuita` | — | ✔ | ✔ | — |
+| `promocao` | `promocao`, `desconto`, `oferta` | — | — | ✔ | — |
+| `depoimento` | `depoimento`, `carta de agradecimento`, `agradecimento de paciente` | — | — | ✔ | — |
+
+Bases: CFM 2.336/2023 arts. 9º e 11; CFO 118/2012 art. 44 + 196/2019 + 271/2025; COFFITO 424/2013 arts. 10 (V), 39 e 40. Fonte e leitura em `raio-x-margem/docs/setores/servicos-pesquisa-2026-10.md`.
+
+## 10. Exportação para o Raio-X (Painel de Recuperação)
+
+`GET /api/raiox?mes=AAAA-MM` → `{"pacote": "clinica", "mes": "AAAA-MM", "valores": {...}}`, números com 1 casa decimal (os testes toleram ±0,06):
+
+- `atendimentos_mes` = agendamentos `realizado` com `inicio` no mês (inteiro);
+- `falta_pct` = `falta ÷ (realizado + falta) × 100` (0 se não houver);
+- `ocupacao_pct` = minutos de agendamentos ativos no mês ÷ minutos disponíveis no mês (todas as janelas de todos os profissionais ativos, menos feriados) × 100;
+- `clientes_novos_mes` = pacientes cujo **primeiro** `realizado` cai no mês;
+- `retorno_atual_pct` = dos retornos com `data` no mês, % cujo paciente tem agendamento `realizado` do mesmo serviço entre `data − 30 dias` e `data + 30 dias` (0 se não houver retornos);
+- `atendimentos_mes_recorrente` = `atendimentos_mes ÷ pacientes distintos com realizado no mês` (0 se não houver);
+- `orcamentos_mes` = planos de tratamento **criados** no mês (inteiro; qualquer status);
+- `aprovacao_atual_pct` = desses planos, % com pelo menos uma sessão `realizado` vinculada (0 se não houver planos).
+
+`./atende raiox --dados DIR --mes M --acompanhamento ARQ`: lê `ARQ` (formato do `raio-x-margem/app/painel-motor.js`: `{tipo: "acompanhamento", pacote, cliente, base: {data, valores}, meses: [{mes, valores, obs}]}`), insere ou substitui o mês `M` com `valores` = os da rota acima **mesclados** sobre os valores do mês anterior (a entrada de `meses` com o maior `mes < M`; se não houver, `base.valores`) e `obs: "atende-fisioterapia"`, e grava de volta. Campos que o sistema não mede (ex.: `ticket_medio`, `glosa_pct`) ficam como estavam. Sai com código 0.
+
+## 11. LGPD
+
+- `GET /api/pacientes/{id}/dados` devolve tudo o que há do paciente: `paciente` `{id, nome, telefone, consentimento_marketing, nao_contatar, lembrete_hora, lembrete_ativo}`, `agendamentos` (formato da listagem), `mensagens` = recebidas e enviadas, cada uma `{direcao: "entrada" | "saida", texto, quando}`, `planos` (formato da seção 20), `prescricao` (a ativa, formato da seção 22, ou `null`) e `registros` (seção 23).
+- `DELETE /api/pacientes/{id}`: nome vira `removido`, telefone vira `null`, agendamentos `agendado`/`confirmado` viram `cancelado` (os `realizado`/`falta` ficam), textos de mensagens dele viram `""`, planos `ativo` viram `encerrado`, a prescrição fica inativa (`prescricao: null`, lembrete desligado) e os `registros` são apagados (`[]`). Depois disso, mensagens ao telefone antigo são tratadas como de telefone desconhecido. Números agregados do `/api/raiox` continuam contando os atendimentos e planos passados.
+
+## 12. Fora do v1 (não implementar; portão humano ou próxima versão)
+
+WhatsApp Cloud API oficial da Meta (v1 usa a Evolution), SMS/e-mail, deploy na VPS (é do humano: README explica), cobrança/pacote pago por Pix e planos/assinatura (PSP), prontuário e evolução clínica, convênio/glosa/TISS, várias clínicas no mesmo servidor, login por usuário, LLM nas respostas (pode entrar depois atrás de uma opção desligada por padrão; os testes nunca a usam), interface EN/ES, vídeo com pessoa real, geração automática dos SVGs por IA, envio de foto/vídeo pelo paciente.
+
+## 13. Páginas
+
+- `GET /` → HTML do chat do paciente, com elemento `id="chat"`, que usa `/api/mensagens`.
+- `GET /equipe` → HTML da equipe com elementos `id="agenda"`, `id="fila-humano"`, `id="saida"`, `id="pacientes"`, `id="planos"`, `id="prescricoes"`, `id="adesao"`, `id="biblioteca"` e `id="alertas"`; pede o token e usa as rotas [R] (cadastros, agenda, planos, prescrição por paciente, adesão e dor por paciente, biblioteca de exercícios, alertas, fila humana com responder/encerrar).
+- `GET /exercicios/{id}` e `GET /exercicios/{id}.svg` → seção 21.
+
+## 14. Cadastros [R]
+
+`clinica.json` é lido a cada início para `nome, conselho, token, passo_min, antecedencia_min_horas, janela_dias, confirmacao_horas, retorno_aviso_dias, abandono_faltas, reavaliacao_sessoes, reavaliacao_dias, dor_alerta, lembrete_hora_padrao, feriados, horarios`. Já `profissionais`, `servicos`, `faq` e `exercicios` só **semeiam** o banco na primeira vez (banco vazio); depois o banco é a fonte e se edita pela API.
+
+| Método e rota | Corpo | Resposta |
+|---|---|---|
+| `GET /api/profissionais` | — | 200 `{"profissionais": [{id, nome, servicos, registro, horarios, ativo}]}` (`registro` = CREFITO, pode ser `null`; `horarios` = `null` quando usa o da clínica), ordem de cadastro |
+| `POST /api/profissionais` | `{id, nome, servicos, registro?, horarios?}` | 201; `id` repetido → 409; serviço inexistente → 422 |
+| `PUT /api/profissionais/{id}` | campos parciais | 200 com o registro atualizado; inexistente → 404 |
+| `DELETE /api/profissionais/{id}` | — | 200 `{"ativo": false}`. Inativo some de `/api/horarios`, do chat e não aceita agendamento novo (422); os agendamentos já feitos continuam |
+| `GET /api/servicos` (público) | — | só os ativos |
+| `POST /api/servicos` | `{id, nome, duracao_min}` | 201; `id` repetido → 409 |
+| `PUT /api/servicos/{id}` / `DELETE /api/servicos/{id}` | parcial / — | 200 / 200 `{"ativo": false}` (some da lista pública e do chat) |
+| `GET /api/pacientes?busca=T` | — | 200 `{"pacientes": [{id, nome, telefone, email, nascimento, consentimento_marketing, nao_contatar}]}` ordem de `id`; `busca` casa parte do nome (sem acento, sem caixa) ou dígitos do telefone; sem `busca` = todos |
+| `POST /api/pacientes` | aceita também `email`, `nascimento` (`AAAA-MM-DD`) | igual à seção 5 |
+| `PUT /api/pacientes/{id}` | `{nome?, telefone?, email?, nascimento?, consentimento_marketing?, nao_contatar?}` | 200 com o paciente; telefone inválido → 400; telefone de outro paciente → 409 |
+| `GET /api/faq` | — | 200 `{"faq": [{id, perguntas, resposta}]}` ordem de cadastro |
+| `POST /api/faq` | `{perguntas: [..], resposta}` | 201 `{id}`; o bot passa a usar na hora |
+| `DELETE /api/faq/{id}` | — | 204; o bot para de usar na hora |
+
+Biblioteca de exercícios: seção 21.
+
+## 15. Gestão de agenda [R]
+
+- **Horário por profissional:** `horarios` do profissional (mesmo formato da clínica) substitui o da clínica só para ele. `null` = o da clínica.
+- **Bloqueios** (férias, folga, congresso): `POST /api/bloqueios {profissional, inicio, fim, motivo}` → 201 `{id, conflitos: [ids de agendamentos ativos que caem no bloqueio]}` (não cancela nada sozinho). Horários que sobrepõem `[inicio, fim)` somem de `/api/horarios` e o agendamento neles dá 422. `GET /api/bloqueios?profissional=P` → 200 `{"bloqueios": [{id, profissional, inicio, fim, motivo}]}` ordem de `id`. `DELETE /api/bloqueios/{id}` → 204 e libera.
+- **Listagem por período:** `GET /api/agendamentos?de=AAAA-MM-DD&ate=AAAA-MM-DD[&profissional=P]` (inclusivo nas duas pontas), ordenado por `inicio` e `id`; continua valendo `?data=`.
+
+## 16. Banco de dados
+
+- `./atende backup --dados DIR --saida ARQ` → grava em `ARQ` uma cópia consistente de todo o estado (pode rodar com o servidor ligado). Código 0.
+- `./atende restaurar --dados DIR --entrada ARQ` → com o servidor parado, substitui o estado de `DIR` pelo do backup. Código 0. Ao subir de novo, tudo volta como estava no momento do backup.
+
+## 17. WhatsApp pela Evolution API
+
+Variáveis: `EVOLUTION_URL` (endereço da Evolution; no compose costuma ser o nome do serviço na rede interna), `EVOLUTION_API_KEY`, `EVOLUTION_INSTANCIA`, `WEBHOOK_SEGREDO`, `PUBLIC_URL` (endereço HTTPS público deste sistema, sem barra final; usado só para montar links e `media`). Sem `EVOLUTION_URL` → canal simulado (só caixa de saída, `status: "simulado"`). Nenhum desses valores de exemplo entra no código nem no `.env.exemplo` (lá ficam vazios).
+
+**Entrada** — `POST /webhook/evolution/{WEBHOOK_SEGREDO}` (segredo errado → 404). Formato da Evolution v2:
+```json
+{"event": "messages.upsert", "instance": "clinica",
+ "data": {"key": {"remoteJid": "5541999990001@s.whatsapp.net", "fromMe": false, "id": "ABC123"},
+          "pushName": "Maria", "message": {"conversation": "oi"}, "messageType": "conversation"}}
+```
+- Sempre responde 200. Ignora: `event` diferente de `messages.upsert`, `fromMe: true`, `remoteJid` de grupo (`@g.us`), `key.id` já processado (a Evolution reenvia).
+- Texto = `message.conversation` ou `message.extendedTextMessage.text`. Sem texto (áudio, imagem...) → responde `Por enquanto só consigo ler mensagens de texto.`
+- Telefone = dígitos do `remoteJid` antes do `@`, normalizado como na seção 5. Passa pela mesma conversa da seção 6 (o mesmo paciente, o mesmo estado).
+- Cada resposta da conversa vai por `POST {EVOLUTION_URL}/message/sendText/{EVOLUTION_INSTANCIA}` com header `apikey: {EVOLUTION_API_KEY}` e corpo `{"number": "<dígitos com 55>", "text": "<texto>"}`, na ordem.
+- **Exceção — explicação de exercício prescrito (regra 9):** se existir o arquivo `{EXERCICIOS_MP4_DIR}/{id}.mp4` **e** `PUBLIC_URL` estiver definida, a resposta vai por `POST {EVOLUTION_URL}/message/sendMedia/{EVOLUTION_INSTANCIA}` (mesmo header) com `{"number", "mediatype": "video", "media": "{PUBLIC_URL}/exercicios/{id}.mp4", "caption": "<o mesmo texto da regra 9>"}`; senão vai por `sendText` com o texto (que já traz o link da página). Nos dois casos a mensagem entra na caixa de saída com `tipo: "explicacao"` (nunca `exercicio`, que é só o lembrete diário e vale como pendência da regra 6).
+
+**Saída** (confirmação, espera, retorno, campanha, humano, prescrição, lembrete de exercício): com a Evolution configurada, cada mensagem da caixa de saída é enviada do mesmo jeito. Em `/api/saida` cada mensagem tem `status`: `enviado` (2xx), `pendente` (erro HTTP ou de conexão) ou `simulado`. `POST /api/tarefas/rodar` reenvia as `pendente` e devolve também `"reenviadas": n` (as que viraram `enviado`).
+
+## 18. Atendimento interno pelo Telegram
+
+Variáveis: `TELEGRAM_API_URL`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID` (grupo da equipe), `TELEGRAM_SEGREDO`. Sem elas, nada vai ao Telegram (o resto funciona igual). Envio: `POST {TELEGRAM_API_URL}/bot{TELEGRAM_TOKEN}/sendMessage` com `{"chat_id", "text"[, "reply_to_message_id"]}`; a resposta do Telegram traz `result.message_id`.
+
+**Atendimento humano** (`/api/atendimento-humano` → `{"fila": [{id, telefone, nome, motivo, prioridade, status}]}` só com os `aberto`):
+- Ao abrir (pedido de atendente, emergência, alerta clínico, dor ≥ `dor_alerta`, 2º "não entendi"): manda ao grupo um texto com `#<id>`, telefone, nome (se houver), motivo, a última mensagem do paciente (**texto original**, como recebido, com acentos) e, se `prioridade` for `alta`, a palavra `ALTA`. Guarda o `message_id`.
+- Enquanto o atendimento do telefone estiver `aberto`, o bot **não responde** sozinho (`respostas: []`), exceto regras 1 e 2; cada mensagem do paciente vai ao grupo como `#<id> <nome ou telefone>: <texto>`, em resposta (`reply_to_message_id`) à mensagem de abertura.
+- `POST /webhook/telegram` exige header `X-Telegram-Bot-Api-Secret-Token: {TELEGRAM_SEGREDO}` (senão 401). Só aceita updates de `message.chat.id == TELEGRAM_CHAT_ID` (comparados como texto); os outros são ignorados (200, sem efeito).
+- Mensagem da equipe que é resposta (`reply_to_message.message_id`) a uma mensagem do atendimento `#id` → o texto vai ao paciente (caixa de saída `tipo: "humano"`, e pela Evolution se configurada).
+- Comandos: `/responder <id> <texto>` (o mesmo, sem precisar responder em cima); `/encerrar <id>` → status `encerrado`, o bot volta a responder aquele telefone; `/fila` → o bot manda a lista dos abertos (cada um com `#id`); `/agenda [AAAA-MM-DD]` (padrão: hoje pelo relógio) → manda os agendamentos ativos do dia, uma linha `HH:MM <nome do paciente> — <nome do serviço> (<nome do profissional>)` cada; `/alertas` → manda os alertas `aberto` (seção 24), uma linha `#<id> <tipo> <nome do paciente>: <texto>` cada, ou `Nenhum alerta aberto.`
+- Pela equipe [R]: `POST /api/atendimento-humano/{id}/responder {texto}` e `POST /api/atendimento-humano/{id}/encerrar` fazem o mesmo.
+- **Avisos à equipe:** agendamento feito pelo chat → `Novo agendamento: DD/MM HH:MM <nome> — <serviço> com <profissional>`; cancelamento pelo chat → texto começando com `Cancelado:` e com `DD/MM HH:MM`; alerta novo (seção 24) → `Alerta <tipo> #<id>: <nome do paciente> — <texto>`.
+
+## 19. Docker / VPS
+
+- `Dockerfile` (imagem oficial `python:3-slim` ou similar, **sem `pip install`**) que copia `atende`, `VERSION`, `src/`, `web/`, `exemplos/` e roda `./atende serve --host 0.0.0.0 --porta 8080 --dados /dados`, com `HEALTHCHECK` em `/api/saude` feito com `python3` (sem `curl`). Sobe sem volume (cria `/dados`).
+- `docker-compose.yml` com o serviço `atende`: `build: .`, `restart: unless-stopped`, `env_file: .env`, volume para `/dados`, porta publicada só em `127.0.0.1:8080` (na VPS fica atrás de proxy reverso com HTTPS).
+- `.env.exemplo` com todas as variáveis das seções 17, 18 e 21 (`EVOLUTION_URL, EVOLUTION_API_KEY, EVOLUTION_INSTANCIA, WEBHOOK_SEGREDO, PUBLIC_URL, EXERCICIOS_MP4_DIR, TELEGRAM_API_URL, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_SEGREDO`), todas com valor **vazio** (nenhum segredo, nenhuma palavra `http` no arquivo).
+- `README.md` com as seções **`## Deploy na VPS`** (título H2 exatamente assim; os testes leem **só o corpo dessa seção**, até o próximo título `## `: subir o compose, proxy HTTPS, webhook da Evolution para `/webhook/evolution/<segredo>` com evento `MESSAGES_UPSERT`, webhook do Telegram com `setWebhook` + `secret_token`, backup diário com `./atende backup` no cron, `PUBLIC_URL`, `EXERCICIOS_MP4_DIR` e `tools/render-exercicios` para os MP4) e **Como rodar no seu ambiente** (seção do dono: pré-requisitos, congelar, loop/`/goal`, verificação independente — o implementador **não a reescreve**).
+
+## 20. Planos de tratamento [R]
+
+Um plano é o pacote de sessões que o fisioterapeuta prescreve a um paciente.
+
+| Método e rota | Corpo | Resposta |
+|---|---|---|
+| `POST /api/planos` | `{paciente_id, servico, sessoes_previstas, frequencia_semanal, profissional?, observacao?, servico_avaliacao?}` | 201 com o plano; paciente/serviço/profissional inexistente → 404; `sessoes_previstas` ou `frequencia_semanal` não inteiro ≥ 1 → 422; já existe plano `ativo` do mesmo paciente com o mesmo `servico` → 409 |
+| `GET /api/planos[?paciente_id=P]` | — | 200 `{"planos": [plano, ...]}` ordem de `id` |
+| `GET /api/planos/{id}` | — | 200 plano; inexistente → 404 |
+| `POST /api/planos/{id}/encerrar` | `{motivo}` | 200 plano com `status: "encerrado"`; plano que não está `ativo` → 409 |
+
+Plano = `{id, paciente_id, servico, servico_avaliacao, profissional, sessoes_previstas, frequencia_semanal, observacao, criado_em, status, realizadas, faltas, faltas_seguidas, restantes, ultima_sessao, alerta_abandono, alerta_reavaliacao}`:
+
+- `criado_em` = relógio do processo na criação (`AAAA-MM-DDTHH:MM`); `status` ∈ `ativo, concluido, encerrado`; `servico_avaliacao` padrão `avaliacao` (se existir um serviço com esse id; senão `null` e o plano concluído não gera retorno).
+- `realizadas` = agendamentos vinculados com status `realizado`; `faltas` = vinculados com `falta`; `restantes = max(0, sessoes_previstas − realizadas)`; `ultima_sessao` = `inicio` do último `realizado` (ou `null`).
+- `faltas_seguidas` = faltas vinculadas depois do último `realizado` (ordem de `inicio`); um `realizado` zera a contagem.
+- `realizadas == sessoes_previstas` → `status: "concluido"` na hora da presença, e nasce o retorno da seção 8 (`data = ultima_sessao + reavaliacao_dias`).
+- Vínculo: `POST /api/agendamentos` com `plano_id`, ou automático (seção 5). Agendar com `plano_id` de plano não `ativo`, de outro paciente ou de outro serviço → 422; `plano_id` que não existe → 404 (regra geral da seção 5). Agendamento vinculado continua contando mesmo que o plano seja encerrado depois.
+- `alerta_abandono` / `alerta_reavaliacao` = `AAAA-MM-DDTHH:MM` do último alerta desse tipo (ou `null`) — seção 24.
+
+## 21. Biblioteca de exercícios e páginas
+
+**Catálogo** (semeado por `clinica.json.exercicios`; mínimo de **12** exercícios no exemplo, cobrindo regiões diferentes; ids obrigatórios do exemplo: `ponte`, `alongamento-isquiotibiais`, `rotacao-ombro-bastao`, `pendulo-codman`, `retracao-cervical`, `gato-camelo`, `agachamento-parede`, `elevacao-calcanhar`, `abducao-quadril-deitado`, `prancha-modificada`, `bird-dog`, `mobilidade-tornozelo`).
+
+| Método e rota | Corpo | Resposta |
+|---|---|---|
+| `GET /api/exercicios` (público) | — | 200 `{"exercicios": [{id, nome, apelidos, regiao, passos, erros_comuns, cuidados, contraindicacoes, pare_se, ativo, svg}]}` ordem de cadastro, todos (ativos e inativos); `svg` = `true` se `web/exercicios/<id>.svg` existe |
+| `POST /api/exercicios` [R] | `{id, nome, apelidos?, regiao, passos, erros_comuns?, cuidados?, contraindicacoes?, pare_se?}` | 201; `id` repetido → 409; `passos` vazio ou `id` fora de `[a-z0-9-]+` → 422 |
+| `PUT /api/exercicios/{id}` [R] | parcial | 200 com o exercício; inexistente → 404 |
+| `DELETE /api/exercicios/{id}` [R] | — | 200 `{"ativo": false}`: some do chat (regra 9) e as páginas respondem 404; não pode entrar em prescrição nova |
+
+**Páginas** (públicas, sem dado pessoal):
+- `GET /exercicios/{id}` → 200 HTML com elemento `id="exercicio"`, o `nome`, os `passos` numerados, `erros_comuns`, `cuidados`, `contraindicacoes`, `pare_se` e `<img src="/exercicios/{id}.svg">` (ou o SVG inline). Exercício inexistente ou inativo → 404. Página existe mesmo sem o arquivo SVG.
+- `GET /exercicios/{id}.svg` → 200 com `Content-Type: image/svg+xml` e o conteúdo de `web/exercicios/{id}.svg`; sem arquivo, inexistente ou inativo → 404.
+- `GET /exercicios/{id}.mp4` → 200 `Content-Type: video/mp4` com `{EXERCICIOS_MP4_DIR}/{id}.mp4`; sem arquivo → 404. `EXERCICIOS_MP4_DIR` (variável de ambiente) tem padrão `web/exercicios` relativo à raiz do repo.
+
+**SVG animado** — um arquivo `web/exercicios/<id>.svg` por exercício do exemplo (os 12 do fixture), parte da entrega:
+- XML válido; raiz `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">` (qualquer `viewBox` serve, mas tem de existir); `<title>` em português com o nome do exercício, **filho direto** da raiz `<svg>`.
+- Figura humana esquemática (cabeça em círculo, tronco e membros em linhas/paths) fazendo o movimento do exercício em **loop**.
+- Animação **só por CSS** dentro de `<style>` no próprio SVG: pelo menos um `@keyframes` e pelo menos um elemento com `animation` (ou `animation-name`) aplicada. `animation-duration` de cada animação ∈ {1s, 2s, 4s} (divisor dos 4 s do MP4, seção 25; no atalho `animation:` o primeiro valor de tempo é a duração); `animation-delay` é livre (inclusive negativo) e `animation-iteration-count: infinite` é permitido. **Sem SMIL** (`<animate>`, `<animateTransform>`, `<animateMotion>`, `<set>`): o render só sabe avançar animação CSS. Cada exercício tem movimento próprio: entre os 12 arquivos do exemplo, pelo menos **6 blocos `<style>` diferentes** (o verificador independente confere).
+- **Sem `<script`**, sem `href`/`xlink:href` que não comece por `#`, sem `url(` que não seja `url(#`, sem `@import`, sem `<image`, sem `<foreignObject`, e nenhuma ocorrência de `http` fora de `http://www.w3.org/` (namespaces).
+- Tamanho ≤ 60 KB.
+- Nível 4 (humano): abrindo o SVG num navegador, dois quadros em tempos diferentes têm de ser diferentes (a figura se mexe).
+
+Esqueleto de referência (o implementador cria um por exercício, com movimento próprio):
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <title>Ponte</title>
+  <style>
+    .quadril { transform-origin: 200px 300px; animation: sobe 2s ease-in-out infinite; }
+    @keyframes sobe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-40px); } }
+  </style>
+  <rect width="400" height="400" fill="#fff"/>
+  <line x1="40" y1="330" x2="360" y2="330" stroke="#999" stroke-width="4"/>
+  <circle cx="70" cy="300" r="18" fill="none" stroke="#222" stroke-width="6"/>
+  <g class="quadril" fill="none" stroke="#222" stroke-width="8" stroke-linecap="round">
+    <path d="M 90 300 L 220 300 L 260 250 L 280 320"/>
+  </g>
+</svg>
+```
+
+## 22. Prescrição de exercícios domiciliares e lembretes
+
+| Método e rota | Corpo | Resposta |
+|---|---|---|
+| `POST /api/pacientes/{id}/prescricao` [R] | `{itens: [{exercicio, series, repeticoes, vezes_dia, dias: ["seg", ...], observacao?}], lembrete_hora?}` | 201 com a prescrição; substitui a anterior (que fica inativa); paciente inexistente → 404; `itens` vazio, exercício inexistente/inativo, `series`/`repeticoes`/`vezes_dia` não inteiro ≥ 1, `dias` vazio ou com valor fora de `seg..dom`, `lembrete_hora` fora de `HH:MM` → 422 |
+| `GET /api/pacientes/{id}/prescricao` [R] | — | 200 prescrição ativa; sem prescrição ativa → 404 |
+| `DELETE /api/pacientes/{id}/prescricao` [R] | — | 204; inativa a prescrição e desliga o lembrete |
+| `PUT /api/pacientes/{id}/lembrete` [R] | `{lembrete_hora?, lembrete_ativo?}` | 200 `{lembrete_hora, lembrete_ativo}` (a equipe pode desligar ou mudar a hora; ligar continua sendo escolha do paciente, mas a rota aceita `true`) |
+
+Prescrição = `{id, paciente_id, criado_em, inicio, itens: [{exercicio, nome, series, repeticoes, vezes_dia, dias, observacao}], lembrete_hora, lembrete_ativo, ativo}`:
+- `inicio` = data (`AAAA-MM-DD`) do relógio do processo na criação; `nome` vem do catálogo.
+- `lembrete_hora` e `lembrete_ativo` pertencem ao **paciente** (persistem quando a prescrição é substituída). Todo paciente nasce com `lembrete_ativo: false` e `lembrete_hora = lembrete_hora_padrao` da clínica (é o que `GET .../dados` mostra mesmo sem prescrição); o `lembrete_hora` enviado na prescrição substitui a hora. O paciente liga/desliga pelo chat (regra 7).
+- Ao criar, o sistema manda ao paciente (síncrono, `tipo: "prescricao"`, não para `nao_contatar`) um texto com cada item (`- <nome>: <series> x <repeticoes>, <vezes_dia>x ao dia (<dias separados por ", ">)`), o link de cada exercício e a frase `Para receber lembrete diário, responda LEMBRETE e a hora (ex.: LEMBRETE 19:00).`
+
+**Lembrete diário** (em `POST /api/tarefas/rodar`): para cada paciente com prescrição ativa, `lembrete_ativo: true` e não `nao_contatar`: se a hora de `agora` ≥ `lembrete_hora`, o dia da semana de `agora` está nos `dias` de pelo menos um item e ainda não houve mensagem `tipo: "exercicio"` para o paciente na data de `agora` → cria a mensagem `tipo: "exercicio"` (datada com o `agora` da rodada) com os itens **do dia** (`- <nome>: <series> x <repeticoes>, <vezes_dia>x ao dia` + observação) e a frase `Responda FIZ, NÃO FIZ ou a dor de 0 a 10.` Uma por dia. Dia sem item → nada.
+
+## 23. Adesão e dor
+
+**Registro** (regras 6 e 8 da conversa): um registro por paciente por **dia** (`data` = data do relógio do processo quando a mensagem chegou): `{data, fez, dor, quando}`; `fez` ∈ `true, false, null`; `dor` ∈ `0..10, null`; `quando` = relógio na última alteração. Mensagens no mesmo dia **atualizam** o mesmo registro (último valor de cada campo vence).
+
+`GET /api/pacientes/{id}/adesao?semanas=N` [R] (padrão `N=4`) → 200
+```json
+{"semanas": [{"inicio": "AAAA-MM-DD", "previstos": 4, "feitos": 2, "adesao_pct": 50.0, "dor_media": 4.0}],
+ "registros": [{"data", "fez", "dor", "quando"}]}
+```
+- Semana = segunda a domingo; `inicio` = a segunda. `semanas` lista, em ordem cronológica, as últimas `N` semanas entre a semana de `inicio` da prescrição ativa e a semana de hoje (vazia sem prescrição ativa). `registros` em ordem de `data`.
+- `previstos` = dias da semana que (a) estão nos `dias` de pelo menos um item da prescrição ativa, (b) são ≥ `inicio` da prescrição e (c) são ≤ hoje (relógio do processo), **inclusive hoje**.
+- `feitos` = desses dias, os que têm registro com `fez: true`. Registro `fez: true` em dia não previsto não conta.
+- `adesao_pct = feitos ÷ previstos × 100`, 1 casa; 0 se `previstos = 0`.
+- `dor_media` = média de `dor` dos registros da semana com `dor` não nulo (qualquer dia, previsto ou não), 1 casa; `null` se não houver.
+- Exemplo: prescrição criada ter 06/10/2026 com itens em `seg,qua,sex` e `ter,qui`; registros 06/10 `fiz, dor 3`, 07/10 `nao fiz`, 08/10 `fiz, dor 5`; consulta sex 09/10 → semana `2026-10-05`: `previstos 4` (06, 07, 08, 09), `feitos 2`, `adesao_pct 50.0`, `dor_media 4.0`.
+
+`GET /api/adesao` [R] → 200 `{"pacientes": [{paciente_id, nome, adesao_pct, dor_media, ultima_dor}]}` de todos os pacientes com prescrição ativa, ordem de `paciente_id`, valores da semana atual (`ultima_dor` = `dor` do registro mais recente com dor, ou `null`).
+
+**Dor forte e sinais de alerta:** regra 2 (palavras) e regra 8 (`dor ≥ dor_alerta`) abrem atendimento humano `alta` (seção 18) e nunca respondem com orientação clínica.
+
+## 24. Alertas à equipe
+
+Calculados em `POST /api/tarefas/rodar` (com o `agora` da rodada), idempotentes; cada um vai ao Telegram ao nascer (seção 18). O `quando` do alerta e o `alerta_abandono`/`alerta_reavaliacao` do plano recebem o `agora` da rodada.
+
+| `tipo` | Quando | Texto |
+|---|---|---|
+| `abandono` | plano `ativo` com `faltas_seguidas ≥ abandono_faltas` e `alerta_abandono` nulo **ou** anterior ao `inicio` do último agendamento `realizado` do plano (ou seja, um alerta por sequência de faltas; a sequência recomeça depois de um `realizado`) | `<nome>: <faltas_seguidas> faltas seguidas no plano de <nome do serviço>` |
+| `reavaliacao` | plano `ativo` com `restantes ≤ reavaliacao_sessoes` e `alerta_reavaliacao` nulo (um por plano, inclusive quando o plano já nasce com poucas sessões) | `<nome>: faltam <restantes> sessões do plano de <nome do serviço> — agendar reavaliação` |
+
+`GET /api/alertas` [R] → 200 `{"alertas": [{id, tipo, paciente_id, nome, plano_id, texto, quando, status}]}` só os `aberto`, ordem de `id`. `POST /api/alertas/{id}/resolver` [R] → 200 `{status: "resolvido"}`; inexistente → 404. `alertas` em `tarefas/rodar` = quantos nasceram na rodada.
+
+## 25. Vídeo MP4 do exercício (build do humano, fora do pytest e do loop)
+
+`tools/render-exercicios [--so <id>] [--saida DIR]` (Python 3, biblioteca padrão; chama `npx hyperframes` e `ffprobe`) gera `web/exercicios/<id>.mp4` (ou em `--saida`) a partir de cada `web/exercicios/<id>.svg`:
+
+1. Cria uma pasta temporária com `index.html` = composição HyperFrames **só CSS** (sem GSAP, sem `<script>`, sem referência externa): `<div id="root" data-composition-id="exercicio" data-start="0" data-width="720" data-height="720" data-duration="4">` contendo o SVG inline (`#root svg { position:absolute; inset:0; width:100%; height:100% }`, `body { margin:0; background:#fff }`). A animação CSS do SVG é avançada pelo adaptador `css` do HyperFrames (por isso a seção 21 proíbe SMIL e exige durações de 1, 2 ou 4 s).
+2. Roda `npx hyperframes render <pasta> --output <destino>.mp4 --quality looks --fps 30` (≈ 4 s, 720×720, sem áudio).
+3. Confere com `ffprobe -v error -show_entries format=duration:stream=width,height -of default=nw=1`: duração entre 3,9 e 4,1 s e 720×720; senão sai com código 1 e diz qual exercício falhou.
+4. Imprime uma linha por exercício (`ok <id> <duração>s` ou `falhou <id> <motivo>`); código 0 só se todos passaram.
+
+Requisitos (do humano, não do loop): Node ≥ 22, FFmpeg, Chromium (o `npx hyperframes` baixa o pacote na primeira vez — **precisa de rede**, por isso o agente da execução longa não roda este passo). `verificar-independente.py` renderiza um exercício se o HyperFrames estiver disponível; senão imprime `pulado`. Os MP4 não entram no Git (`.gitignore`); na VPS, rode o `tools/render-exercicios` uma vez (ou copie os arquivos) para `EXERCICIOS_MP4_DIR`.
+
+exec
+/bin/bash -lc 'cat tests/conftest.py tests/fixtures/clinica.json; rg --files src web tools; cat README.md; git status --short' in /home/nmaldaner/projetos/atende-fisioterapia
+ succeeded in 0ms:
+"""Testes de aceitação caixa-preta do atende-fisioterapia (contrato: docs/ESPECIFICACAO.md).
+
+Sobem `./atende serve --porta 0 --dados <tmp>` com relógio fixo e falam só HTTP/CLI,
+então valem para qualquer linguagem de implementação.
+"""
+import json
+import os
+import pathlib
+import shutil
+import signal
+import subprocess
+import threading
+import time
+import unicodedata
+import urllib.error
+import urllib.request
+
+import pytest
+
+RAIZ = pathlib.Path(__file__).resolve().parent.parent
+FIXTURE = pathlib.Path(__file__).resolve().parent / "fixtures" / "clinica.json"
+TOKEN = "segredo-teste"
+AGORA = "2026-10-06T09:00"  # terça-feira (conferido: datetime.date(2026,10,6).weekday() == 1)
+PUBLIC_URL = "https://fisio.exemplo"  # só nos testes; o código nunca traz URL
+
+IDS_OBRIGATORIOS = ["ponte", "alongamento-isquiotibiais", "rotacao-ombro-bastao", "pendulo-codman",
+                    "retracao-cervical", "gato-camelo", "agachamento-parede", "elevacao-calcanhar",
+                    "abducao-quadril-deitado", "prancha-modificada", "bird-dog", "mobilidade-tornozelo"]
+
+
+def norm(s):
+    return "".join(c for c in unicodedata.normalize("NFD", s.lower()) if unicodedata.category(c) != "Mn")
+
+
+class Cliente:
+    def __init__(self, base):
+        self.base = base
+
+    def req(self, metodo, rota, corpo=None, token=TOKEN):
+        dados = None if corpo is None else json.dumps(corpo).encode()
+        r = urllib.request.Request(self.base + rota, data=dados, method=metodo)
+        if dados is not None:
+            r.add_header("Content-Type", "application/json")
+        if token:
+            r.add_header("X-Token", token)
+        try:
+            with urllib.request.urlopen(r, timeout=10) as resp:
+                texto = resp.read().decode()
+                return resp.status, (json.loads(texto) if texto and "json" in resp.headers.get("Content-Type", "") else texto)
+        except urllib.error.HTTPError as e:
+            texto = e.read().decode()
+            try:
+                return e.code, json.loads(texto)
+            except ValueError:
+                return e.code, texto
+
+    def get(self, rota, **kw):
+        return self.req("GET", rota, **kw)
+
+    def post(self, rota, corpo=None, **kw):
+        return self.req("POST", rota, {} if corpo is None else corpo, **kw)
+
+    def put(self, rota, corpo, **kw):
+        return self.req("PUT", rota, corpo, **kw)
+
+    def delete(self, rota, **kw):
+        return self.req("DELETE", rota, **kw)
+
+    def bruto(self, rota):
+        """GET sem decodificar: devolve (status, content-type, bytes)."""
+        try:
+            with urllib.request.urlopen(self.base + rota, timeout=10) as resp:
+                return resp.status, resp.headers.get("Content-Type", ""), resp.read()
+        except urllib.error.HTTPError as e:
+            return e.code, e.headers.get("Content-Type", ""), e.read()
+
+    # atalhos (usam padrões do fixture; no verificar-independente tudo vai explícito)
+    def paciente(self, nome="Maria Silva", telefone="(41) 99999-0001", marketing=False):
+        st, r = self.post("/api/pacientes", {"nome": nome, "telefone": telefone, "consentimento_marketing": marketing})
+        assert st in (200, 201), (st, r)
+        return r["id"]
+
+    def agenda(self, paciente_id, inicio, servico="sessao", profissional=None, plano_id=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "inicio": inicio}
+        if profissional:
+            corpo["profissional"] = profissional
+        if plano_id is not None:
+            corpo["plano_id"] = plano_id
+        return self.post("/api/agendamentos", corpo)
+
+    def presenca(self, ag_id, compareceu):
+        st, r = self.post(f"/api/agendamentos/{ag_id}/presenca", {"compareceu": compareceu})
+        assert st == 200, (st, r)
+        return r
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+        assert st == 201, (st, r)
+        return r
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+        assert st == 201, (st, r)
+        return r
+
+    def msg(self, telefone, texto):
+        st, r = self.post("/api/mensagens", {"telefone": telefone, "texto": texto}, token=None)
+        assert st == 200, (st, r)
+        return "\n".join(r["respostas"])
+
+    def saida(self, tipo=None):
+        st, r = self.get("/api/saida")
+        assert st == 200, (st, r)
+        return [m for m in r["mensagens"] if tipo is None or m["tipo"] == tipo]
+
+    def rodar(self, agora=None):
+        st, r = self.post("/api/tarefas/rodar", {"agora": agora} if agora else {})
+        assert st == 200, (st, r)
+        return r
+
+    def fila(self):
+        st, r = self.get("/api/atendimento-humano")
+        assert st == 200, (st, r)
+        return r["fila"]
+
+
+SERVIDORES = []
+
+
+@pytest.fixture(autouse=True)
+def _parar_servidores():
+    yield
+    while SERVIDORES:
+        SERVIDORES.pop().parar()
+
+
+class Servidor:
+    def __init__(self, dados, agora=AGORA, env=None):
+        SERVIDORES.append(self)  # o teardown autouse para todos, mesmo se o teste falhar
+        self.dados = dados
+        self.agora = agora
+        self.env = env or {}
+        self.proc = None
+
+    def subir(self):
+        exe = RAIZ / "atende"
+        if not exe.exists():
+            pytest.fail("./atende não existe (ponto de entrada da seção 1 da especificação)")
+        env = {k: v for k, v in os.environ.items()
+               if not k.startswith(("EVOLUTION_", "TELEGRAM_", "WEBHOOK_", "EXERCICIOS_", "PUBLIC_URL"))}
+        env.update(ATENDE_AGORA=self.agora, **self.env)
+        self.proc = subprocess.Popen(
+            [str(exe), "serve", "--porta", "0", "--dados", str(self.dados)],
+            cwd=RAIZ, env=env, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True,
+        )
+        linha = {}
+
+        def ler():
+            linha["v"] = self.proc.stdout.readline()
+
+        t = threading.Thread(target=ler, daemon=True)
+        t.start()
+        t.join(15)
+        primeira = (linha.get("v") or "").strip()
+        if not primeira.startswith("PORTA="):
+            self.parar()
+            pytest.fail(f"servidor não imprimiu PORTA=<n> na 1ª linha (veio {primeira!r})")
+        # drena o resto do stdout para o processo não travar com o pipe cheio
+        threading.Thread(target=lambda: [None for _ in self.proc.stdout], daemon=True).start()
+        return Cliente(f"http://127.0.0.1:{int(primeira.split('=', 1)[1])}")
+
+    def parar(self):
+        if self.proc and self.proc.poll() is None:
+            self.proc.send_signal(signal.SIGTERM)
+            try:
+                self.proc.wait(5)
+            except subprocess.TimeoutExpired:
+                self.proc.kill()
+                self.proc.wait(5)
+
+
+@pytest.fixture
+def dados(tmp_path):
+    d = tmp_path / "dados"
+    d.mkdir()
+    shutil.copy(FIXTURE, d / "clinica.json")
+    return d
+
+
+@pytest.fixture
+def servidor(dados):
+    s = Servidor(dados)
+    yield s
+    s.parar()
+
+
+@pytest.fixture
+def api(servidor):
+    return servidor.subir()
+
+
+def com_config(dados, **campos):
+    """Altera campos de clinica.json antes de subir (ex.: conselho, dor_alerta, abandono_faltas)."""
+    cfg = json.loads((dados / "clinica.json").read_text())
+    cfg.update(campos)
+    (dados / "clinica.json").write_text(json.dumps(cfg, ensure_ascii=False))
+
+
+def com_conselho(dados, conselho):
+    com_config(dados, conselho=conselho)
+
+
+class Externo:
+    """Servidor falso local que faz o papel da Evolution API e da API do Telegram. Grava cada pedido."""
+
+    def __init__(self):
+        import http.server
+        self.pedidos = []
+        self.falhas = 0          # quantos próximos pedidos devolvem 500
+        self.prox_msg = 1000
+        self.trava = threading.Lock()
+        externo = self
+
+        class H(http.server.BaseHTTPRequestHandler):
+            def do_POST(self):
+                corpo = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+                try:
+                    dados = json.loads(corpo or b"{}")
+                except ValueError:
+                    dados = {}
+                pedido = {"rota": self.path, "headers": {k.lower(): v for k, v in self.headers.items()}, "json": dados}
+                with externo.trava:
+                    if externo.falhas > 0:
+                        externo.falhas -= 1
+                        pedido["status"] = 500
+                        externo.pedidos.append(pedido)
+                        self.send_response(500)
+                        self.send_header("Content-Length", "0")
+                        self.end_headers()
+                        return
+                    externo.prox_msg += 1
+                    pedido["status"], pedido["message_id"] = 200, externo.prox_msg
+                    externo.pedidos.append(pedido)
+                resp = {"ok": True, "result": {"message_id": pedido["message_id"]}, "key": {"id": f"X{pedido['message_id']}"}}
+                b = json.dumps(resp).encode()
+                self.send_response(201 if "/message/" in self.path else 200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(b)))
+                self.end_headers()
+                self.wfile.write(b)
+
+            def log_message(self, *a):
+                pass
+
+        self.srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), H)
+        self.url = f"http://127.0.0.1:{self.srv.server_address[1]}"
+        threading.Thread(target=self.srv.serve_forever, daemon=True).start()
+
+    def whats(self, ok=True):
+        return [p for p in self.pedidos if p["rota"] == "/message/sendText/clinica" and (not ok or p["status"] == 200)]
+
+    def media(self):
+        return [p for p in self.pedidos if p["rota"] == "/message/sendMedia/clinica" and p["status"] == 200]
+
+    def telegram(self):
+        return [p for p in self.pedidos if p["rota"] == "/botTOKEN123/sendMessage" and p["status"] == 200]
+
+    def fechar(self):
+        self.srv.shutdown()
+        self.srv.server_close()
+
+
+SEGREDO_WH = "wh-segredo"
+CHAT_EQUIPE = -100777
+SEGREDO_TG = "tg-segredo"
+
+
+def env_integracoes(externo, **extra):
+    env = {
+        "EVOLUTION_URL": externo.url, "EVOLUTION_API_KEY": "chave-evo", "EVOLUTION_INSTANCIA": "clinica",
+        "WEBHOOK_SEGREDO": SEGREDO_WH, "PUBLIC_URL": PUBLIC_URL,
+        "TELEGRAM_API_URL": externo.url, "TELEGRAM_TOKEN": "TOKEN123", "TELEGRAM_CHAT_ID": str(CHAT_EQUIPE),
+        "TELEGRAM_SEGREDO": SEGREDO_TG,
+    }
+    env.update(extra)
+    return env
+
+
+@pytest.fixture
+def externo():
+    e = Externo()
+    yield e
+    e.fechar()
+
+
+@pytest.fixture
+def api_int(dados, externo):
+    """Servidor com Evolution e Telegram apontando para o falso local."""
+    s = Servidor(dados, env=env_integracoes(externo))
+    yield s.subir()
+    s.parar()
+
+
+def esperar(cond, segundos=5):
+    fim = time.time() + segundos
+    while time.time() < fim:
+        if cond():
+            return True
+        time.sleep(0.05)
+    return cond()
+{
+  "nome": "Fisio Movimento Teste",
+  "conselho": "coffito",
+  "token": "segredo-teste",
+  "passo_min": 30,
+  "antecedencia_min_horas": 2,
+  "janela_dias": 14,
+  "confirmacao_horas": 48,
+  "retorno_aviso_dias": 7,
+  "abandono_faltas": 2,
+  "reavaliacao_sessoes": 2,
+  "reavaliacao_dias": 30,
+  "dor_alerta": 7,
+  "lembrete_hora_padrao": "19:00",
+  "feriados": ["2026-10-12"],
+  "horarios": {
+    "seg": [["08:00", "12:00"], ["14:00", "18:00"]],
+    "ter": [["08:00", "12:00"], ["14:00", "18:00"]],
+    "qua": [["08:00", "12:00"], ["14:00", "18:00"]],
+    "qui": [["08:00", "12:00"], ["14:00", "18:00"]],
+    "sex": [["08:00", "12:00"], ["14:00", "18:00"]],
+    "sab": [["08:00", "12:00"]],
+    "dom": []
+  },
+  "profissionais": [
+    {"id": "carla", "nome": "Carla Souza", "servicos": ["avaliacao", "sessao", "rpg"]},
+    {"id": "diego", "nome": "Diego Lima", "servicos": ["avaliacao", "sessao"]}
+  ],
+  "servicos": [
+    {"id": "avaliacao", "nome": "Avaliação fisioterapêutica", "duracao_min": 60},
+    {"id": "sessao", "nome": "Sessão de fisioterapia", "duracao_min": 30},
+    {"id": "rpg", "nome": "RPG", "duracao_min": 60}
+  ],
+  "faq": [
+    {"id": "convenios", "perguntas": ["vocês aceitam convênio", "quais convênios atendem"], "resposta": "Atendemos Unimed e particular."},
+    {"id": "endereco", "perguntas": ["qual o endereço da clínica", "onde fica a clínica"], "resposta": "Rua das Flores, 100, sala 5, Batel, Curitiba."},
+    {"id": "estacionamento", "perguntas": ["tem estacionamento"], "resposta": "Temos convênio com o estacionamento ao lado (1 hora grátis)."}
+  ],
+  "exercicios": [
+    {
+      "id": "ponte", "nome": "Ponte", "apelidos": ["ponte de glúteo", "elevação de quadril"], "regiao": "lombar e quadril",
+      "passos": ["Deite de costas, joelhos dobrados e pés apoiados na largura do quadril.", "Contraia o abdômen e os glúteos.", "Levante o quadril até alinhar joelhos, quadril e ombros.", "Segure 2 segundos e desça devagar."],
+      "erros_comuns": ["Arquear demais a lombar no topo.", "Empurrar o chão com os braços."],
+      "cuidados": ["Suba só até onde não houver dor na lombar."],
+      "contraindicacoes": ["Dor lombar aguda com irradiação para a perna.", "Pós-operatório de quadril ou coluna sem liberação do fisioterapeuta."],
+      "pare_se": ["Dor aguda na lombar.", "Formigamento ou dormência na perna."]
+    },
+    {
+      "id": "alongamento-isquiotibiais", "nome": "Alongamento de isquiotibiais", "apelidos": ["alongamento da parte de trás da coxa", "alongamento de posterior de coxa", "isquiotibiais"], "regiao": "posterior da coxa",
+      "passos": ["Sente na beira de uma cadeira firme e estique uma perna à frente, calcanhar no chão e ponta do pé para cima.", "Mantenha as costas retas e incline o tronco à frente a partir do quadril.", "Sinta o alongamento atrás da coxa e segure 20 a 30 segundos.", "Troque de perna."],
+      "erros_comuns": ["Curvar as costas em vez de inclinar pelo quadril.", "Forçar até sentir dor."],
+      "cuidados": ["Alongue até uma tensão confortável, sem balançar."],
+      "contraindicacoes": ["Lesão muscular recente na coxa.", "Ciática em fase aguda."],
+      "pare_se": ["Dor aguda ou pontada atrás da coxa.", "Dor que desce pela perna até o pé."]
+    },
+    {
+      "id": "rotacao-ombro-bastao", "nome": "Rotação de ombro com bastão", "apelidos": ["rotação externa com bastão", "exercício do bastão", "cabo de vassoura"], "regiao": "ombro",
+      "passos": ["Em pé ou sentado, segure um bastão (cabo de vassoura) com as duas mãos, cotovelos colados ao corpo e dobrados a 90 graus.", "Com o braço bom, empurre o bastão para o lado, girando o braço em tratamento para fora.", "Vá até onde não houver dor e segure 2 segundos.", "Volte devagar ao centro."],
+      "erros_comuns": ["Afastar o cotovelo do corpo.", "Girar o tronco para compensar."],
+      "cuidados": ["O braço em tratamento fica relaxado; quem faz força é o outro."],
+      "contraindicacoes": ["Luxação de ombro recente.", "Pós-operatório sem liberação para rotação."],
+      "pare_se": ["Dor aguda no ombro.", "Sensação de que o ombro vai sair do lugar."]
+    },
+    {
+      "id": "pendulo-codman", "nome": "Pêndulo de Codman", "apelidos": ["pêndulo", "exercício do pêndulo", "codman"], "regiao": "ombro",
+      "passos": ["Apoie a mão boa numa mesa e incline o tronco à frente.", "Deixe o braço em tratamento pendurado, relaxado.", "Balance o corpo devagar para o braço desenhar círculos pequenos.", "Faça 10 círculos para cada lado."],
+      "erros_comuns": ["Usar a força do ombro para girar o braço.", "Fazer círculos grandes demais."],
+      "cuidados": ["O movimento vem do corpo, não do ombro."],
+      "contraindicacoes": ["Fratura de ombro ou braço não consolidada.", "Tontura ao inclinar o tronco."],
+      "pare_se": ["Dor aguda no ombro.", "Tontura ou enjoo."]
+    },
+    {
+      "id": "retracao-cervical", "nome": "Retração cervical", "apelidos": ["queixo para dentro", "retração do pescoço", "chin tuck"], "regiao": "cervical",
+      "passos": ["Sente com as costas apoiadas e olhe para a frente.", "Leve o queixo para trás, como se fizesse papada, sem inclinar a cabeça.", "Segure 3 segundos.", "Relaxe e repita."],
+      "erros_comuns": ["Inclinar a cabeça para baixo.", "Levantar os ombros."],
+      "cuidados": ["Movimento pequeno e suave."],
+      "contraindicacoes": ["Dor cervical aguda com dormência nos braços.", "Instabilidade cervical diagnosticada."],
+      "pare_se": ["Dor que irradia para o braço.", "Tontura ou visão turva."]
+    },
+    {
+      "id": "gato-camelo", "nome": "Gato-camelo", "apelidos": ["gato e camelo", "gato camelo", "mobilidade de coluna de quatro apoios"], "regiao": "coluna",
+      "passos": ["Fique de quatro apoios, mãos sob os ombros e joelhos sob o quadril.", "Solte o ar e arredonde as costas para cima, olhando para o umbigo (gato).", "Puxe o ar e deixe a barriga descer, levantando o olhar (camelo).", "Alterne devagar."],
+      "erros_comuns": ["Movimento rápido demais.", "Dobrar os cotovelos."],
+      "cuidados": ["Vá só até o limite confortável em cada direção."],
+      "contraindicacoes": ["Dor aguda em punhos ou joelhos que impeça os quatro apoios.", "Hérnia de disco em fase aguda com dor na perna."],
+      "pare_se": ["Dor aguda na coluna.", "Dormência em braços ou pernas."]
+    },
+    {
+      "id": "agachamento-parede", "nome": "Agachamento na parede", "apelidos": ["agachamento isométrico", "cadeirinha", "agachamento"], "regiao": "joelho e quadril",
+      "passos": ["Encoste as costas na parede, pés afastados dela e na largura do quadril.", "Deslize o corpo para baixo até os joelhos dobrarem, no máximo 90 graus.", "Mantenha os joelhos alinhados com os pés.", "Segure o tempo indicado e suba devagar."],
+      "erros_comuns": ["Joelhos ultrapassando a ponta dos pés.", "Descer além de 90 graus."],
+      "cuidados": ["Comece com pouco tempo e aumente aos poucos."],
+      "contraindicacoes": ["Dor aguda no joelho com inchaço.", "Pós-operatório de joelho sem liberação de carga."],
+      "pare_se": ["Dor aguda no joelho.", "Sensação de falseio ou instabilidade."]
+    },
+    {
+      "id": "elevacao-calcanhar", "nome": "Elevação de calcanhar", "apelidos": ["ponta de pé", "elevação de panturrilha", "panturrilha"], "regiao": "tornozelo e panturrilha",
+      "passos": ["Em pé, apoie as mãos numa parede ou cadeira.", "Suba na ponta dos pés devagar.", "Segure 2 segundos no alto.", "Desça devagar até o calcanhar tocar o chão."],
+      "erros_comuns": ["Subir e descer rápido.", "Desviar o peso para fora do pé."],
+      "cuidados": ["Use o apoio só para equilíbrio, não para empurrar."],
+      "contraindicacoes": ["Ruptura do tendão de Aquiles em recuperação sem liberação.", "Fratura de tornozelo não consolidada."],
+      "pare_se": ["Dor aguda no tendão de Aquiles ou na panturrilha.", "Perda de equilíbrio."]
+    },
+    {
+      "id": "abducao-quadril-deitado", "nome": "Abdução de quadril deitado", "apelidos": ["elevação lateral da perna", "abdução de quadril", "perna de lado"], "regiao": "quadril",
+      "passos": ["Deite de lado, pernas esticadas e alinhadas com o tronco.", "Contraia o abdômen.", "Levante a perna de cima devagar, até uns 30 centímetros, sem girar o quadril.", "Desça devagar."],
+      "erros_comuns": ["Girar o quadril para trás.", "Levantar a perna com impulso."],
+      "cuidados": ["A ponta do pé aponta para a frente, não para cima."],
+      "contraindicacoes": ["Pós-operatório de quadril sem liberação.", "Dor aguda na lateral do quadril (bursite em crise)."],
+      "pare_se": ["Dor aguda no quadril.", "Dor que desce pela perna."]
+    },
+    {
+      "id": "prancha-modificada", "nome": "Prancha modificada", "apelidos": ["prancha de joelhos", "prancha com joelhos apoiados", "prancha"], "regiao": "abdômen e core",
+      "passos": ["Apoie antebraços e joelhos no chão, cotovelos sob os ombros.", "Contraia o abdômen e alinhe ombros, quadril e joelhos.", "Segure o tempo indicado respirando normalmente.", "Descanse e repita."],
+      "erros_comuns": ["Deixar o quadril cair ou subir demais.", "Prender a respiração."],
+      "cuidados": ["Pare antes de perder o alinhamento."],
+      "contraindicacoes": ["Dor lombar aguda.", "Gestação avançada ou diástase sem orientação."],
+      "pare_se": ["Dor na lombar.", "Tremor que impeça manter o alinhamento."]
+    },
+    {
+      "id": "bird-dog", "nome": "Bird-dog", "apelidos": ["bird dog", "cão pássaro", "cachorro pássaro", "braço e perna opostos"], "regiao": "coluna e core",
+      "passos": ["Fique de quatro apoios, mãos sob os ombros e joelhos sob o quadril.", "Contraia o abdômen e estique o braço direito à frente e a perna esquerda atrás, sem girar o tronco.", "Segure 3 segundos.", "Volte e troque o lado."],
+      "erros_comuns": ["Levantar o braço ou a perna acima da linha do tronco.", "Girar o quadril."],
+      "cuidados": ["Se perder o equilíbrio, faça só o braço ou só a perna."],
+      "contraindicacoes": ["Dor aguda em punhos ou joelhos.", "Dor lombar aguda com irradiação."],
+      "pare_se": ["Dor na lombar.", "Dormência ou formigamento."]
+    },
+    {
+      "id": "mobilidade-tornozelo", "nome": "Mobilidade de tornozelo", "apelidos": ["alfabeto com o pé", "círculos com o tornozelo", "tornozelo"], "regiao": "tornozelo",
+      "passos": ["Sente com a perna apoiada e o pé solto no ar.", "Desenhe círculos grandes com a ponta do pé, movendo só o tornozelo.", "Faça 10 círculos para cada lado.", "Depois, aponte o pé para cima e para baixo 10 vezes."],
+      "erros_comuns": ["Mover a perna inteira em vez do tornozelo.", "Forçar além do limite de dor."],
+      "cuidados": ["Movimento lento e completo."],
+      "contraindicacoes": ["Fratura de tornozelo não consolidada.", "Entorse grave nos primeiros dias sem liberação."],
+      "pare_se": ["Dor aguda no tornozelo.", "Inchaço que aumenta durante o exercício."]
+    }
+  ]
+}
+rg: tools: No such file or directory (os error 2)
+src/backup.py
+src/integracoes.py
+src/core.py
+src/server.py
+src/exercicios.py
+src/cadastros.py
+src/conversa.py
+src/prescricoes.py
+src/planos.py
+src/gestao.py
+web/recepcao.html
+web/exercicio.html
+web/exercicio.css
+web/chat.js
+web/index.html
+web/style.css
+web/recepcao.js
+web/exercicios/elevacao-calcanhar.svg
+web/exercicios/retracao-cervical.svg
+web/exercicios/prancha-modificada.svg
+web/exercicios/agachamento-parede.svg
+web/exercicios/abducao-quadril-deitado.svg
+web/exercicios/ponte.svg
+web/exercicios/bird-dog.svg
+web/exercicios/alongamento-isquiotibiais.svg
+web/exercicios/rotacao-ombro-bastao.svg
+web/exercicios/mobilidade-tornozelo.svg
+web/exercicios/pendulo-codman.svg
+web/exercicios/gato-camelo.svg
+# atende-fisioterapia
+
+**🇧🇷 [Português](README.md) · 🇺🇸 [English](README.en.md) · 🇪🇸 [Español](README.es.md)**
+
+[![Atende Fisioterapia](guia/assets/banner.jpg)](https://inematds.github.io/atende-fisioterapia/guia/)
+
+## 📖 Guia de uso
+
+Landing e guia passo a passo (PT/EN/ES): **https://inematds.github.io/atende-fisioterapia/guia/** · [English](https://inematds.github.io/atende-fisioterapia/guia/en/) · [Español](https://inematds.github.io/atende-fisioterapia/guia/es/)
+
+Atendimento ao paciente de **uma clínica de fisioterapia**, em Python 3 só com a biblioteca padrão e SQLite: agenda de avaliação e sessões, confirmação automática, lista de espera, **plano de tratamento** (sessões previstas × realizadas, alerta de abandono e de reavaliação), **exercícios domiciliares prescritos** com biblioteca de 12 exercícios animados (SVG; MP4 pelo HyperFrames para o WhatsApp), lembrete diário opt-in, registro de **adesão e dor** com alerta clínico, FAQ, fila humana, emergência (192), campanhas com trava do COFFITO e LGPD de dado de saúde, cadastros, gestão de agenda, backup, WhatsApp pela Evolution API, equipe pelo Telegram, exportação para o Painel de Recuperação do Raio-X de Margem e entrega em Docker para VPS.
+
+O contrato completo está em `docs/ESPECIFICACAO.md`. O chat do paciente fica em `/`, a página da equipe em `/equipe` e cada exercício em `/exercicios/<id>`. O bot nunca dá orientação clínica: explica só o que o fisioterapeuta prescreveu e passa o resto para a equipe.
+
+Projeto irmão (molde): [`atende-clinica`](../atende-clinica). Diferenças resumidas no início da especificação.
+
+## Estrutura
+
+```
+docs/ESPECIFICACAO.md      contrato congelado (seções 0–25)
+docs/DECISOES-ABERTAS.md   propostas padrão + perguntas que só o dono responde
+docs/MAPA-RAIO-X.md        vazamento do Raio-X → peça do sistema
+tests/                     98 testes caixa-preta (pytest) + fixtures/clinica.json
+exemplos/clinica.json      clínica de exemplo (token TROQUE-ESTE-TOKEN; 12 exercícios)
+longrun/2026-10-05-fisio-v1/   goal, loop.env, prompts, congelar.sh, verificar-limites.sh, verificar-independente.py
+FALHAS.md                  uma linha por falha (data, o que quebrou, menor correção, prompt|infra)
+```
+
+A implementação (`atende`, `src/`, `web/`, `tools/`, `Dockerfile`, `docker-compose.yml`, `.env.exemplo`) é produzida pela execução longa descrita abaixo.
+
+## Como rodar no seu ambiente
+
+Esta seção é do dono do projeto; o implementador acrescenta as dele (Executar localmente, Deploy na VPS) sem reescrevê-la.
+
+**Pré-requisitos:** Python 3.10+ e `pytest` (`python3 -m pytest --version`); `git`; para o loop headless, o Codex CLI logado pela assinatura e `~/projetos/execucao-longa` (método, `tools/loop-longrun.sh`); para a verificação final, Docker e, opcionalmente, Chromium/Playwright e Node ≥ 22 + FFmpeg (HyperFrames).
+
+1. **Responder as decisões** em `docs/DECISOES-ABERTAS.md` (um "ok em tudo" vale). Se mudar algo marcado ⚠, ajuste `docs/ESPECIFICACAO.md` e `tests/` antes do passo 2 e confira `python3 -m pytest -q --collect-only | tail -1`.
+2. **Congelar o contrato:** `git status` limpo, depois `bash longrun/2026-10-05-fisio-v1/congelar.sh` (grava `hash-congelado.txt` com o hash de `tests/`, `pytest.ini`, da spec e dos verificadores, e faz o commit).
+3. **Executar** por um dos três caminhos:
+   - **Loop headless (recomendado):** `~/projetos/execucao-longa/tools/loop-longrun.sh longrun/2026-10-05-fisio-v1` — lê `loop.env` (Codex `gpt-6-astra`, 20 ciclos × 30 min, 8 G, estagnação 3, `CODEX_ARGS` com `network_access=true` porque os testes sobem servidor em 127.0.0.1), reverte ciclo que toque arquivo protegido e faz o commit de checkpoint.
+   - **`/goal` no Claude Code:** siga `longrun/2026-10-05-fisio-v1/prompt-goal-claude.md` (sessão nova aberta nesta pasta).
+   - **`/goal` no Codex TUI:** `codex -c sandbox_workspace_write.network_access=true` nesta pasta e cole `longrun/2026-10-05-fisio-v1/prompt-goal-codex.md`.
+4. **Acompanhar:** `tail -f longrun/2026-10-05-fisio-v1/loop.log` (headless) e os arquivos `state.md`, `progress.md`, `failures.md`; `git log --oneline` mostra os checkpoints. Critério de pronto: `python3 -m pytest -q tests/` → **98 passed** e `bash longrun/2026-10-05-fisio-v1/verificar-limites.sh` → **LIMITES OK**. O loop para sozinho por estagnação (3 ciclos sem avanço) ou teto.
+5. **Verificação independente (nível 4), depois do "concluído":** `python3 longrun/2026-10-05-fisio-v1/verificar-independente.py` → `INDEPENDENTE OK`. Ela sobe uma clínica nunca vista, procura valores do fixture no código, abre 3 SVGs num Chromium para provar que se mexem (e confere que os 12 têm animações próprias), renderiza um MP4 pelo HyperFrames e faz `docker build` + healthcheck. Sem Chromium/Playwright ou sem HyperFrames, as etapas saem como `PULADO` (nunca como OK) — instale e rode de novo se quiser a prova completa; Docker é obrigatório. O Chromium do snap serve (os quadros são gravados dentro do repo, porque o snap não enxerga `/tmp`). Resultado da validação independente do plano: `docs/VALIDACAO.md`. Abra também `/`, `/equipe` e `/exercicios/ponte` no navegador.
+6. **Vídeos MP4 dos exercícios** (passo humano; precisa de rede, Node ≥ 22, FFmpeg e Chromium): `python3 tools/render-exercicios` gera `web/exercicios/<id>.mp4` (4 s, 720×720, sem áudio) a partir de cada SVG — ver seção 25 da spec. Os MP4 não entram no Git; na VPS, rode o comando uma vez ou copie os arquivos para a pasta de `EXERCICIOS_MP4_DIR`.
+7. **Revisão clínica:** os 12 exercícios do exemplo (passos, erros comuns, cuidados, contraindicações, "pare se") e a lista de palavras de alerta da spec (§6, regra 2) são um ponto de partida — um fisioterapeuta revisa antes de usar com paciente real.
+
+Toda falha real vai para `FALHAS.md` (uma linha: data, o que quebrou, menor correção, prompt|infra).
+
+## Deploy na VPS
+
+(Seção escrita pelo implementador conforme a seção 19 da especificação: compose, proxy HTTPS, registro dos webhooks da Evolution e do Telegram com os segredos, backup diário no cron, endereço público e pasta dos vídeos.)
+ M longrun/2026-10-05-fisio-v1/loop.log
+ M longrun/2026-10-05-fisio-v1/teste-final.log
+?? longrun/2026-10-05-fisio-v1/ciclo-6.log
+
+exec
+/bin/bash -lc "sed -n '120,310p' docs/ESPECIFICACAO.md" in /home/nmaldaner/projetos/atende-fisioterapia
+ succeeded in 0ms:
+
+O texto é normalizado (minúsculas, sem acento, pontuação trocada por espaço) antes de decidir. "Contém X" = X aparece como **sequência de palavras inteiras** no texto normalizado (`fiz` não casa `fizemos`; `dor 7` exige as duas palavras seguidas, então `minha dor hoje e 7` não casa), **exceto** na regra 1, que usa substring como no atende-clinica. Ordem de decisão (a primeira que casa decide):
+
+1. **Emergência** — o texto contém (substring) um destes: `dor no peito`, `falta de ar`, `desmaio`, `desmaiou`, `sangramento`, `sangrando`, `convulsao`, `suicidio`, `me matar`, `avc`, `infarto`. Resposta contém `192` e `pronto-socorro`; entra na fila humana com `prioridade: "alta"` e `motivo: "emergencia"`. Não agenda nem registra nada.
+2. **Alerta clínico** — palavras inteiras: `dormencia`, `dormente`, `formigamento`, `perda de forca`, `sem forca`, `perdi a forca`, `febre`, `irradia`, `irradiando`, `queda`, `caiu`, `tombo`, `inchaco`, `inchou`, `inchado`, `nao consigo andar`, `nao consigo mexer`, `perdi o controle`. Resposta contém `fisioterapeuta` e `192` e **não** contém orientação (nada de "faça", "tome", "alongue"); fila humana `prioridade: "alta"`, `motivo: "alerta clinico"`. Nada mais é registrado.
+3. **Parar** — texto igual a `parar`, `sair` ou `pare`: paciente fica `nao_contatar`; resposta contém `não vai mais receber`. Nenhuma mensagem de saída (confirmação, retorno, campanha, espera, prescrição, lembrete de exercício) vai mais para esse telefone.
+4. **Humano** — contém `atendente`, `humano` ou `falar com alguem`: fila humana `prioridade: "normal"`; resposta contém `atendente`.
+5. **Fluxo em andamento** (agendamento pelo chat, abaixo) consome a mensagem.
+6. **Resposta a pendência** — vale a **última mensagem da caixa de saída** (`/api/saida`) para o telefone, **se ela for de um dos três tipos abaixo** e ainda estiver **sem resposta** (`prescricao`, `explicacao`, `humano`, `campanha` e `retorno` não são pendência: uma delas por último = sem pendência). "Sem resposta" quer dizer: `confirmacao` → o agendamento ainda está `agendado`; `espera` → o pedido ainda está `ofertado`; `exercicio` → ainda não há registro com `dor` para o paciente na data da mensagem. O texto normalizado é comparado por **igualdade**; texto que não casa nenhuma opção segue para as regras seguintes (a pendência continua):
+   - `confirmacao`: igual a `1`, `sim` ou `confirmo` → status `confirmado`, resposta contém `confirmad`; igual a `2`, `cancelar` ou `nao` → `cancelado` (dispara espera), resposta contém `cancelad`.
+   - `espera`: igual a `1` ou `sim` → agenda **exatamente o par (`inicio`, `profissional`) ofertado** (seção 7) se esse profissional ainda estiver livre nesse horário (resposta contém `agendad`; o pedido vira `atendido`); senão resposta contém `ocupado` — **mesmo que outro profissional esteja livre** no mesmo horário.
+   - `exercicio` (lembrete, seção 22): texto que é só um número inteiro de `0` a `10` → registra **dor** desse valor **com os mesmos efeitos da regra 8** (resposta contém `registrad`; se `N ≥ dor_alerta`, fila humana `alta` com `motivo: "dor N"` e resposta com `fisioterapeuta` e `192`). `fiz` / `nao fiz` / `dor N` seguem a regra 8.
+7. **Lembrete** — paciente com prescrição ativa e texto que contém a palavra `lembrete`: se contém `sem lembrete` → desliga (`lembrete_ativo: false`); senão → liga na hora `\d{1,2}:\d{2}` lida do **texto original** (antes de normalizar; a primeira ocorrência), ou em `lembrete_hora_padrao` se o texto não traz hora (`lembrete` sozinho). Hora válida = `00 ≤ HH ≤ 23` e `00 ≤ MM ≤ 59`, guardada com dois dígitos (`7:30` → `07:30`); hora inválida (ex.: `25:99`) → resposta contém `lembrete` e nada muda. Resposta contém `lembrete` e, ao ligar, a hora `HH:MM`. Sem prescrição ativa → cai na regra 12.
+8. **Adesão e dor** — paciente cadastrado (telefone conhecido): `nao fiz` ou `nao consegui` → `fez: false`; senão `fiz` → `fez: true` (**`nao fiz` tem precedência**: `nao fiz tudo` é `fez: false`, apesar de conter `fiz`); os dois exigem prescrição ativa (sem ela → regra 12). `dor N` (N inteiro 0–10, as duas palavras seguidas) → `dor: N` (não exige prescrição). Um texto pode trazer os dois (`fiz, dor 3`). Tudo no **dia do relógio do processo** (seção 23). Resposta contém `registrad`. Se `N ≥ dor_alerta`: fila humana `prioridade: "alta"`, `motivo: "dor N"`, e a resposta contém também `fisioterapeuta` e `192`. Telefone desconhecido → regra 12.
+9. **Exercício** — o texto contém o `nome` ou um `apelido` (com a mesma normalização do texto: `Bird-dog` casa `bird dog`) de um exercício **ativo** do catálogo; mais de um casa → o de maior número de palavras no termo casado, empate → o primeiro na ordem do catálogo. Se o exercício está na **prescrição ativa** do paciente: resposta com o nome, os `passos` numerados (`1. ...`), a linha `Pare se: <pare_se separados por "; ">` e o link `<PUBLIC_URL>/exercicios/<id>` (sem `PUBLIC_URL`, só `/exercicios/<id>`); essa resposta **também entra na caixa de saída** como `tipo: "explicacao"` (`status: "simulado"` sem Evolution; com Evolution, seção 17). Se não está prescrito (ou o telefone não tem cadastro/prescrição): resposta contém `fale com seu fisioterapeuta` e `atendente`, **sem** passos. Texto com a palavra `exercicio`/`exercicios` sem casar nome: lista os exercícios prescritos (`- <nome> — <link>`), ou a mesma resposta de "não prescrito".
+10. **Agendar** — contém `agendar`, `marcar` ou `consulta`: inicia o fluxo.
+11. **FAQ** — palavras significativas de alguma pergunta do FAQ (palavras normalizadas com ≥ 3 letras, fora desta lista **fechada**, a mesma do molde: `que qual quais como onde para por com sem uma uns umas dos das seu sua seus suas voce voces vcs nos eles elas tem`): se ≥ 60 % delas aparecem no texto, responde **exatamente** a `resposta` daquele item (só ela, uma mensagem). Mais de um item casa → o de maior %; empate → o primeiro do FAQ.
+12. **Não entendi** — resposta contém `não entendi` e oferece `atendente`. Na **segunda** seguida sem entender, entra na fila humana (`normal`) automaticamente.
+
+**Fluxo de agendamento pelo chat** (estado por telefone, persistido):
+- telefone sem paciente → pergunta o nome (resposta contém `nome`); a próxima mensagem vira o nome e o paciente é criado (`consentimento_marketing: false`). Paciente conhecido não ouve pergunta de nome.
+- lista os serviços ativos numerados `1 - <nome>` na ordem de cadastro;
+- escolhido o número, oferece os **3 primeiros** horários livres a partir de `agora + antecedencia_min_horas`, dentro de `janela_dias`, em todos os profissionais, ordem da seção 5; cada linha `N) DD/MM HH:MM com <nome do profissional>`;
+- escolhido o número, cria o agendamento (vinculado ao plano ativo do serviço, se houver); resposta contém `agendad`, `DD/MM` e `HH:MM`.
+- número inválido em qualquer passo → repete as opções. `cancelar` dentro do fluxo → sai do fluxo.
+- O bot **nunca** inventa preço, diagnóstico, remédio ou exercício: fora do FAQ e da prescrição cai na regra 12.
+
+Enquanto um atendimento humano do telefone estiver `aberto` (seção 18), o bot não responde (`respostas: []`), exceto as regras 1 e 2 — que respondem normalmente, **não abrem um segundo atendimento** (há no máximo um `aberto` por telefone), elevam a `prioridade` do aberto para `alta` e repassam a mensagem ao grupo (seção 18).
+
+## 7. Lista de espera
+
+Ao cancelar (pela API ou pela conversa), o primeiro pedido de espera ainda não atendido com o mesmo `servico` e a mesma `data` do horário liberado (ordem de criação), cujo paciente não esteja `nao_contatar`, recebe mensagem `tipo: "espera"` contendo `HH:MM` do horário e `1`. A oferta é o par (`inicio`, `profissional`) do agendamento cancelado e fica guardada com o pedido, que passa a `ofertado` (não recebe outra oferta do mesmo horário); aceitar (regra 6 da seção 6) agenda esse par exato, e o pedido vira `atendido`.
+
+## 8. Confirmação e retorno (`POST /api/tarefas/rodar`)
+
+- **Confirmação:** todo agendamento `agendado` com `agora < inicio ≤ agora + confirmacao_horas` que ainda não recebeu confirmação → mensagem `tipo: "confirmacao"` com `agendamento_id`. Texto contém o nome do serviço, `DD/MM`, `HH:MM`, `1` (confirmar) e `2` (cancelar). **Não contém valor em R$.**
+- **Retorno (reavaliação):** quando um plano fica `concluido` (seção 20) nasce um retorno com `servico: "avaliacao"` (o serviço de avaliação do plano, campo `servico_avaliacao` do plano; padrão `avaliacao`) e `data = data da última sessão realizada + reavaliacao_dias`. Quando a **data** de `agora` ≥ `data − retorno_aviso_dias` e ainda não avisado → mensagem `tipo: "retorno"` com a palavra `reavalia` e o nome do serviço. Uma vez só.
+- Paciente `nao_contatar` nunca recebe (a mensagem **não é criada**). Lembrete, retorno e prescrição **não** dependem de `consentimento_marketing` (LGPD art. 11, II, f — tutela da saúde).
+- `enviadas` conta as mensagens **criadas** nesta rodada (confirmação, retorno, lembrete de exercício), mesmo que o envio pela Evolution falhe (`pendente`).
+
+## 9. Campanhas e trava de conselho
+
+`POST /api/campanhas {texto}` envia só para pacientes com `consentimento_marketing: true` e sem `nao_contatar` (LGPD art. 11, I — consentimento específico). Antes de enviar, valida o texto em minúsculas e sem acento (**pontuação mantida**, para `r$` e `100%`). O `422` lista **todos** os códigos violados. Qualquer violação → 422 e nada é enviado.
+
+| Código | Detecta | cfm | cfo | coffito | estetica |
+|---|---|---|---|---|---|
+| `promessa_resultado` | `garantido`, `garantia de resultado`, `100%`, `resultado garantido` | ✔ | ✔ | ✔ | ✔ |
+| `melhor_profissional` | `melhor medico`, `melhor dentista`, `melhor fisioterapeuta`, `melhor clinica` | ✔ | ✔ | ✔ | — |
+| `sorteio_brinde` | `sorteio`, `brinde`, `premio`, `premiacao` | ✔ | ✔ | — | — |
+| `antes_depois` | `antes e depois` | ✔ | ✔ | — | — |
+| `consorcio` | `consorcio` | ✔ | — | — | — |
+| `preco` | `r$`, `reais` | — | ✔ | ✔ | — |
+| `parcelamento` | `parcela`, `parcelamento`, `sem juros`, `10x` (qualquer `<n>x`) | — | ✔ | — | — |
+| `gratuito` | `gratis`, `gratuito`, `gratuita` | — | ✔ | ✔ | — |
+| `promocao` | `promocao`, `desconto`, `oferta` | — | — | ✔ | — |
+| `depoimento` | `depoimento`, `carta de agradecimento`, `agradecimento de paciente` | — | — | ✔ | — |
+
+Bases: CFM 2.336/2023 arts. 9º e 11; CFO 118/2012 art. 44 + 196/2019 + 271/2025; COFFITO 424/2013 arts. 10 (V), 39 e 40. Fonte e leitura em `raio-x-margem/docs/setores/servicos-pesquisa-2026-10.md`.
+
+## 10. Exportação para o Raio-X (Painel de Recuperação)
+
+`GET /api/raiox?mes=AAAA-MM` → `{"pacote": "clinica", "mes": "AAAA-MM", "valores": {...}}`, números com 1 casa decimal (os testes toleram ±0,06):
+
+- `atendimentos_mes` = agendamentos `realizado` com `inicio` no mês (inteiro);
+- `falta_pct` = `falta ÷ (realizado + falta) × 100` (0 se não houver);
+- `ocupacao_pct` = minutos de agendamentos ativos no mês ÷ minutos disponíveis no mês (todas as janelas de todos os profissionais ativos, menos feriados) × 100;
+- `clientes_novos_mes` = pacientes cujo **primeiro** `realizado` cai no mês;
+- `retorno_atual_pct` = dos retornos com `data` no mês, % cujo paciente tem agendamento `realizado` do mesmo serviço entre `data − 30 dias` e `data + 30 dias` (0 se não houver retornos);
+- `atendimentos_mes_recorrente` = `atendimentos_mes ÷ pacientes distintos com realizado no mês` (0 se não houver);
+- `orcamentos_mes` = planos de tratamento **criados** no mês (inteiro; qualquer status);
+- `aprovacao_atual_pct` = desses planos, % com pelo menos uma sessão `realizado` vinculada (0 se não houver planos).
+
+`./atende raiox --dados DIR --mes M --acompanhamento ARQ`: lê `ARQ` (formato do `raio-x-margem/app/painel-motor.js`: `{tipo: "acompanhamento", pacote, cliente, base: {data, valores}, meses: [{mes, valores, obs}]}`), insere ou substitui o mês `M` com `valores` = os da rota acima **mesclados** sobre os valores do mês anterior (a entrada de `meses` com o maior `mes < M`; se não houver, `base.valores`) e `obs: "atende-fisioterapia"`, e grava de volta. Campos que o sistema não mede (ex.: `ticket_medio`, `glosa_pct`) ficam como estavam. Sai com código 0.
+
+## 11. LGPD
+
+- `GET /api/pacientes/{id}/dados` devolve tudo o que há do paciente: `paciente` `{id, nome, telefone, consentimento_marketing, nao_contatar, lembrete_hora, lembrete_ativo}`, `agendamentos` (formato da listagem), `mensagens` = recebidas e enviadas, cada uma `{direcao: "entrada" | "saida", texto, quando}`, `planos` (formato da seção 20), `prescricao` (a ativa, formato da seção 22, ou `null`) e `registros` (seção 23).
+- `DELETE /api/pacientes/{id}`: nome vira `removido`, telefone vira `null`, agendamentos `agendado`/`confirmado` viram `cancelado` (os `realizado`/`falta` ficam), textos de mensagens dele viram `""`, planos `ativo` viram `encerrado`, a prescrição fica inativa (`prescricao: null`, lembrete desligado) e os `registros` são apagados (`[]`). Depois disso, mensagens ao telefone antigo são tratadas como de telefone desconhecido. Números agregados do `/api/raiox` continuam contando os atendimentos e planos passados.
+
+## 12. Fora do v1 (não implementar; portão humano ou próxima versão)
+
+WhatsApp Cloud API oficial da Meta (v1 usa a Evolution), SMS/e-mail, deploy na VPS (é do humano: README explica), cobrança/pacote pago por Pix e planos/assinatura (PSP), prontuário e evolução clínica, convênio/glosa/TISS, várias clínicas no mesmo servidor, login por usuário, LLM nas respostas (pode entrar depois atrás de uma opção desligada por padrão; os testes nunca a usam), interface EN/ES, vídeo com pessoa real, geração automática dos SVGs por IA, envio de foto/vídeo pelo paciente.
+
+## 13. Páginas
+
+- `GET /` → HTML do chat do paciente, com elemento `id="chat"`, que usa `/api/mensagens`.
+- `GET /equipe` → HTML da equipe com elementos `id="agenda"`, `id="fila-humano"`, `id="saida"`, `id="pacientes"`, `id="planos"`, `id="prescricoes"`, `id="adesao"`, `id="biblioteca"` e `id="alertas"`; pede o token e usa as rotas [R] (cadastros, agenda, planos, prescrição por paciente, adesão e dor por paciente, biblioteca de exercícios, alertas, fila humana com responder/encerrar).
+- `GET /exercicios/{id}` e `GET /exercicios/{id}.svg` → seção 21.
+
+## 14. Cadastros [R]
+
+`clinica.json` é lido a cada início para `nome, conselho, token, passo_min, antecedencia_min_horas, janela_dias, confirmacao_horas, retorno_aviso_dias, abandono_faltas, reavaliacao_sessoes, reavaliacao_dias, dor_alerta, lembrete_hora_padrao, feriados, horarios`. Já `profissionais`, `servicos`, `faq` e `exercicios` só **semeiam** o banco na primeira vez (banco vazio); depois o banco é a fonte e se edita pela API.
+
+| Método e rota | Corpo | Resposta |
+|---|---|---|
+| `GET /api/profissionais` | — | 200 `{"profissionais": [{id, nome, servicos, registro, horarios, ativo}]}` (`registro` = CREFITO, pode ser `null`; `horarios` = `null` quando usa o da clínica), ordem de cadastro |
+| `POST /api/profissionais` | `{id, nome, servicos, registro?, horarios?}` | 201; `id` repetido → 409; serviço inexistente → 422 |
+| `PUT /api/profissionais/{id}` | campos parciais | 200 com o registro atualizado; inexistente → 404 |
+| `DELETE /api/profissionais/{id}` | — | 200 `{"ativo": false}`. Inativo some de `/api/horarios`, do chat e não aceita agendamento novo (422); os agendamentos já feitos continuam |
+| `GET /api/servicos` (público) | — | só os ativos |
+| `POST /api/servicos` | `{id, nome, duracao_min}` | 201; `id` repetido → 409 |
+| `PUT /api/servicos/{id}` / `DELETE /api/servicos/{id}` | parcial / — | 200 / 200 `{"ativo": false}` (some da lista pública e do chat) |
+| `GET /api/pacientes?busca=T` | — | 200 `{"pacientes": [{id, nome, telefone, email, nascimento, consentimento_marketing, nao_contatar}]}` ordem de `id`; `busca` casa parte do nome (sem acento, sem caixa) ou dígitos do telefone; sem `busca` = todos |
+| `POST /api/pacientes` | aceita também `email`, `nascimento` (`AAAA-MM-DD`) | igual à seção 5 |
+| `PUT /api/pacientes/{id}` | `{nome?, telefone?, email?, nascimento?, consentimento_marketing?, nao_contatar?}` | 200 com o paciente; telefone inválido → 400; telefone de outro paciente → 409 |
+| `GET /api/faq` | — | 200 `{"faq": [{id, perguntas, resposta}]}` ordem de cadastro |
+| `POST /api/faq` | `{perguntas: [..], resposta}` | 201 `{id}`; o bot passa a usar na hora |
+| `DELETE /api/faq/{id}` | — | 204; o bot para de usar na hora |
+
+Biblioteca de exercícios: seção 21.
+
+## 15. Gestão de agenda [R]
+
+- **Horário por profissional:** `horarios` do profissional (mesmo formato da clínica) substitui o da clínica só para ele. `null` = o da clínica.
+- **Bloqueios** (férias, folga, congresso): `POST /api/bloqueios {profissional, inicio, fim, motivo}` → 201 `{id, conflitos: [ids de agendamentos ativos que caem no bloqueio]}` (não cancela nada sozinho). Horários que sobrepõem `[inicio, fim)` somem de `/api/horarios` e o agendamento neles dá 422. `GET /api/bloqueios?profissional=P` → 200 `{"bloqueios": [{id, profissional, inicio, fim, motivo}]}` ordem de `id`. `DELETE /api/bloqueios/{id}` → 204 e libera.
+- **Listagem por período:** `GET /api/agendamentos?de=AAAA-MM-DD&ate=AAAA-MM-DD[&profissional=P]` (inclusivo nas duas pontas), ordenado por `inicio` e `id`; continua valendo `?data=`.
+
+## 16. Banco de dados
+
+- `./atende backup --dados DIR --saida ARQ` → grava em `ARQ` uma cópia consistente de todo o estado (pode rodar com o servidor ligado). Código 0.
+- `./atende restaurar --dados DIR --entrada ARQ` → com o servidor parado, substitui o estado de `DIR` pelo do backup. Código 0. Ao subir de novo, tudo volta como estava no momento do backup.
+
+## 17. WhatsApp pela Evolution API
+
+Variáveis: `EVOLUTION_URL` (endereço da Evolution; no compose costuma ser o nome do serviço na rede interna), `EVOLUTION_API_KEY`, `EVOLUTION_INSTANCIA`, `WEBHOOK_SEGREDO`, `PUBLIC_URL` (endereço HTTPS público deste sistema, sem barra final; usado só para montar links e `media`). Sem `EVOLUTION_URL` → canal simulado (só caixa de saída, `status: "simulado"`). Nenhum desses valores de exemplo entra no código nem no `.env.exemplo` (lá ficam vazios).
+
+**Entrada** — `POST /webhook/evolution/{WEBHOOK_SEGREDO}` (segredo errado → 404). Formato da Evolution v2:
+```json
+{"event": "messages.upsert", "instance": "clinica",
+ "data": {"key": {"remoteJid": "5541999990001@s.whatsapp.net", "fromMe": false, "id": "ABC123"},
+          "pushName": "Maria", "message": {"conversation": "oi"}, "messageType": "conversation"}}
+```
+- Sempre responde 200. Ignora: `event` diferente de `messages.upsert`, `fromMe: true`, `remoteJid` de grupo (`@g.us`), `key.id` já processado (a Evolution reenvia).
+- Texto = `message.conversation` ou `message.extendedTextMessage.text`. Sem texto (áudio, imagem...) → responde `Por enquanto só consigo ler mensagens de texto.`
+- Telefone = dígitos do `remoteJid` antes do `@`, normalizado como na seção 5. Passa pela mesma conversa da seção 6 (o mesmo paciente, o mesmo estado).
+- Cada resposta da conversa vai por `POST {EVOLUTION_URL}/message/sendText/{EVOLUTION_INSTANCIA}` com header `apikey: {EVOLUTION_API_KEY}` e corpo `{"number": "<dígitos com 55>", "text": "<texto>"}`, na ordem.
+- **Exceção — explicação de exercício prescrito (regra 9):** se existir o arquivo `{EXERCICIOS_MP4_DIR}/{id}.mp4` **e** `PUBLIC_URL` estiver definida, a resposta vai por `POST {EVOLUTION_URL}/message/sendMedia/{EVOLUTION_INSTANCIA}` (mesmo header) com `{"number", "mediatype": "video", "media": "{PUBLIC_URL}/exercicios/{id}.mp4", "caption": "<o mesmo texto da regra 9>"}`; senão vai por `sendText` com o texto (que já traz o link da página). Nos dois casos a mensagem entra na caixa de saída com `tipo: "explicacao"` (nunca `exercicio`, que é só o lembrete diário e vale como pendência da regra 6).
+
+**Saída** (confirmação, espera, retorno, campanha, humano, prescrição, lembrete de exercício): com a Evolution configurada, cada mensagem da caixa de saída é enviada do mesmo jeito. Em `/api/saida` cada mensagem tem `status`: `enviado` (2xx), `pendente` (erro HTTP ou de conexão) ou `simulado`. `POST /api/tarefas/rodar` reenvia as `pendente` e devolve também `"reenviadas": n` (as que viraram `enviado`).
+
+## 18. Atendimento interno pelo Telegram
+
+Variáveis: `TELEGRAM_API_URL`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID` (grupo da equipe), `TELEGRAM_SEGREDO`. Sem elas, nada vai ao Telegram (o resto funciona igual). Envio: `POST {TELEGRAM_API_URL}/bot{TELEGRAM_TOKEN}/sendMessage` com `{"chat_id", "text"[, "reply_to_message_id"]}`; a resposta do Telegram traz `result.message_id`.
+
+**Atendimento humano** (`/api/atendimento-humano` → `{"fila": [{id, telefone, nome, motivo, prioridade, status}]}` só com os `aberto`):
+- Ao abrir (pedido de atendente, emergência, alerta clínico, dor ≥ `dor_alerta`, 2º "não entendi"): manda ao grupo um texto com `#<id>`, telefone, nome (se houver), motivo, a última mensagem do paciente (**texto original**, como recebido, com acentos) e, se `prioridade` for `alta`, a palavra `ALTA`. Guarda o `message_id`.
+- Enquanto o atendimento do telefone estiver `aberto`, o bot **não responde** sozinho (`respostas: []`), exceto regras 1 e 2; cada mensagem do paciente vai ao grupo como `#<id> <nome ou telefone>: <texto>`, em resposta (`reply_to_message_id`) à mensagem de abertura.
+- `POST /webhook/telegram` exige header `X-Telegram-Bot-Api-Secret-Token: {TELEGRAM_SEGREDO}` (senão 401). Só aceita updates de `message.chat.id == TELEGRAM_CHAT_ID` (comparados como texto); os outros são ignorados (200, sem efeito).
+- Mensagem da equipe que é resposta (`reply_to_message.message_id`) a uma mensagem do atendimento `#id` → o texto vai ao paciente (caixa de saída `tipo: "humano"`, e pela Evolution se configurada).
+- Comandos: `/responder <id> <texto>` (o mesmo, sem precisar responder em cima); `/encerrar <id>` → status `encerrado`, o bot volta a responder aquele telefone; `/fila` → o bot manda a lista dos abertos (cada um com `#id`); `/agenda [AAAA-MM-DD]` (padrão: hoje pelo relógio) → manda os agendamentos ativos do dia, uma linha `HH:MM <nome do paciente> — <nome do serviço> (<nome do profissional>)` cada; `/alertas` → manda os alertas `aberto` (seção 24), uma linha `#<id> <tipo> <nome do paciente>: <texto>` cada, ou `Nenhum alerta aberto.`
+- Pela equipe [R]: `POST /api/atendimento-humano/{id}/responder {texto}` e `POST /api/atendimento-humano/{id}/encerrar` fazem o mesmo.
+- **Avisos à equipe:** agendamento feito pelo chat → `Novo agendamento: DD/MM HH:MM <nome> — <serviço> com <profissional>`; cancelamento pelo chat → texto começando com `Cancelado:` e com `DD/MM HH:MM`; alerta novo (seção 24) → `Alerta <tipo> #<id>: <nome do paciente> — <texto>`.
+
+## 19. Docker / VPS
+
+- `Dockerfile` (imagem oficial `python:3-slim` ou similar, **sem `pip install`**) que copia `atende`, `VERSION`, `src/`, `web/`, `exemplos/` e roda `./atende serve --host 0.0.0.0 --porta 8080 --dados /dados`, com `HEALTHCHECK` em `/api/saude` feito com `python3` (sem `curl`). Sobe sem volume (cria `/dados`).
+- `docker-compose.yml` com o serviço `atende`: `build: .`, `restart: unless-stopped`, `env_file: .env`, volume para `/dados`, porta publicada só em `127.0.0.1:8080` (na VPS fica atrás de proxy reverso com HTTPS).
+- `.env.exemplo` com todas as variáveis das seções 17, 18 e 21 (`EVOLUTION_URL, EVOLUTION_API_KEY, EVOLUTION_INSTANCIA, WEBHOOK_SEGREDO, PUBLIC_URL, EXERCICIOS_MP4_DIR, TELEGRAM_API_URL, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_SEGREDO`), todas com valor **vazio** (nenhum segredo, nenhuma palavra `http` no arquivo).
+- `README.md` com as seções **`## Deploy na VPS`** (título H2 exatamente assim; os testes leem **só o corpo dessa seção**, até o próximo título `## `: subir o compose, proxy HTTPS, webhook da Evolution para `/webhook/evolution/<segredo>` com evento `MESSAGES_UPSERT`, webhook do Telegram com `setWebhook` + `secret_token`, backup diário com `./atende backup` no cron, `PUBLIC_URL`, `EXERCICIOS_MP4_DIR` e `tools/render-exercicios` para os MP4) e **Como rodar no seu ambiente** (seção do dono: pré-requisitos, congelar, loop/`/goal`, verificação independente — o implementador **não a reescreve**).
+
+## 20. Planos de tratamento [R]
+
+Um plano é o pacote de sessões que o fisioterapeuta prescreve a um paciente.
+
+| Método e rota | Corpo | Resposta |
+|---|---|---|
+| `POST /api/planos` | `{paciente_id, servico, sessoes_previstas, frequencia_semanal, profissional?, observacao?, servico_avaliacao?}` | 201 com o plano; paciente/serviço/profissional inexistente → 404; `sessoes_previstas` ou `frequencia_semanal` não inteiro ≥ 1 → 422; já existe plano `ativo` do mesmo paciente com o mesmo `servico` → 409 |
+| `GET /api/planos[?paciente_id=P]` | — | 200 `{"planos": [plano, ...]}` ordem de `id` |
+| `GET /api/planos/{id}` | — | 200 plano; inexistente → 404 |
+| `POST /api/planos/{id}/encerrar` | `{motivo}` | 200 plano com `status: "encerrado"`; plano que não está `ativo` → 409 |
+
+Plano = `{id, paciente_id, servico, servico_avaliacao, profissional, sessoes_previstas, frequencia_semanal, observacao, criado_em, status, realizadas, faltas, faltas_seguidas, restantes, ultima_sessao, alerta_abandono, alerta_reavaliacao}`:
+
+- `criado_em` = relógio do processo na criação (`AAAA-MM-DDTHH:MM`); `status` ∈ `ativo, concluido, encerrado`; `servico_avaliacao` padrão `avaliacao` (se existir um serviço com esse id; senão `null` e o plano concluído não gera retorno).
+- `realizadas` = agendamentos vinculados com status `realizado`; `faltas` = vinculados com `falta`; `restantes = max(0, sessoes_previstas − realizadas)`; `ultima_sessao` = `inicio` do último `realizado` (ou `null`).
+- `faltas_seguidas` = faltas vinculadas depois do último `realizado` (ordem de `inicio`); um `realizado` zera a contagem.
+- `realizadas == sessoes_previstas` → `status: "concluido"` na hora da presença, e nasce o retorno da seção 8 (`data = ultima_sessao + reavaliacao_dias`).
+- Vínculo: `POST /api/agendamentos` com `plano_id`, ou automático (seção 5). Agendar com `plano_id` de plano não `ativo`, de outro paciente ou de outro serviço → 422; `plano_id` que não existe → 404 (regra geral da seção 5). Agendamento vinculado continua contando mesmo que o plano seja encerrado depois.
+- `alerta_abandono` / `alerta_reavaliacao` = `AAAA-MM-DDTHH:MM` do último alerta desse tipo (ou `null`) — seção 24.
+
+## 21. Biblioteca de exercícios e páginas
+
+**Catálogo** (semeado por `clinica.json.exercicios`; mínimo de **12** exercícios no exemplo, cobrindo regiões diferentes; ids obrigatórios do exemplo: `ponte`, `alongamento-isquiotibiais`, `rotacao-ombro-bastao`, `pendulo-codman`, `retracao-cervical`, `gato-camelo`, `agachamento-parede`, `elevacao-calcanhar`, `abducao-quadril-deitado`, `prancha-modificada`, `bird-dog`, `mobilidade-tornozelo`).
+
+| Método e rota | Corpo | Resposta |
+|---|---|---|
+| `GET /api/exercicios` (público) | — | 200 `{"exercicios": [{id, nome, apelidos, regiao, passos, erros_comuns, cuidados, contraindicacoes, pare_se, ativo, svg}]}` ordem de cadastro, todos (ativos e inativos); `svg` = `true` se `web/exercicios/<id>.svg` existe |
+| `POST /api/exercicios` [R] | `{id, nome, apelidos?, regiao, passos, erros_comuns?, cuidados?, contraindicacoes?, pare_se?}` | 201; `id` repetido → 409; `passos` vazio ou `id` fora de `[a-z0-9-]+` → 422 |
+| `PUT /api/exercicios/{id}` [R] | parcial | 200 com o exercício; inexistente → 404 |
+| `DELETE /api/exercicios/{id}` [R] | — | 200 `{"ativo": false}`: some do chat (regra 9) e as páginas respondem 404; não pode entrar em prescrição nova |
+
+
+exec
+/bin/bash -lc "sed -n '310,500p' docs/ESPECIFICACAO.md; cat tests/conftest.py" in /home/nmaldaner/projetos/atende-fisioterapia
+ succeeded in 0ms:
+
+**Páginas** (públicas, sem dado pessoal):
+- `GET /exercicios/{id}` → 200 HTML com elemento `id="exercicio"`, o `nome`, os `passos` numerados, `erros_comuns`, `cuidados`, `contraindicacoes`, `pare_se` e `<img src="/exercicios/{id}.svg">` (ou o SVG inline). Exercício inexistente ou inativo → 404. Página existe mesmo sem o arquivo SVG.
+- `GET /exercicios/{id}.svg` → 200 com `Content-Type: image/svg+xml` e o conteúdo de `web/exercicios/{id}.svg`; sem arquivo, inexistente ou inativo → 404.
+- `GET /exercicios/{id}.mp4` → 200 `Content-Type: video/mp4` com `{EXERCICIOS_MP4_DIR}/{id}.mp4`; sem arquivo → 404. `EXERCICIOS_MP4_DIR` (variável de ambiente) tem padrão `web/exercicios` relativo à raiz do repo.
+
+**SVG animado** — um arquivo `web/exercicios/<id>.svg` por exercício do exemplo (os 12 do fixture), parte da entrega:
+- XML válido; raiz `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">` (qualquer `viewBox` serve, mas tem de existir); `<title>` em português com o nome do exercício, **filho direto** da raiz `<svg>`.
+- Figura humana esquemática (cabeça em círculo, tronco e membros em linhas/paths) fazendo o movimento do exercício em **loop**.
+- Animação **só por CSS** dentro de `<style>` no próprio SVG: pelo menos um `@keyframes` e pelo menos um elemento com `animation` (ou `animation-name`) aplicada. `animation-duration` de cada animação ∈ {1s, 2s, 4s} (divisor dos 4 s do MP4, seção 25; no atalho `animation:` o primeiro valor de tempo é a duração); `animation-delay` é livre (inclusive negativo) e `animation-iteration-count: infinite` é permitido. **Sem SMIL** (`<animate>`, `<animateTransform>`, `<animateMotion>`, `<set>`): o render só sabe avançar animação CSS. Cada exercício tem movimento próprio: entre os 12 arquivos do exemplo, pelo menos **6 blocos `<style>` diferentes** (o verificador independente confere).
+- **Sem `<script`**, sem `href`/`xlink:href` que não comece por `#`, sem `url(` que não seja `url(#`, sem `@import`, sem `<image`, sem `<foreignObject`, e nenhuma ocorrência de `http` fora de `http://www.w3.org/` (namespaces).
+- Tamanho ≤ 60 KB.
+- Nível 4 (humano): abrindo o SVG num navegador, dois quadros em tempos diferentes têm de ser diferentes (a figura se mexe).
+
+Esqueleto de referência (o implementador cria um por exercício, com movimento próprio):
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <title>Ponte</title>
+  <style>
+    .quadril { transform-origin: 200px 300px; animation: sobe 2s ease-in-out infinite; }
+    @keyframes sobe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-40px); } }
+  </style>
+  <rect width="400" height="400" fill="#fff"/>
+  <line x1="40" y1="330" x2="360" y2="330" stroke="#999" stroke-width="4"/>
+  <circle cx="70" cy="300" r="18" fill="none" stroke="#222" stroke-width="6"/>
+  <g class="quadril" fill="none" stroke="#222" stroke-width="8" stroke-linecap="round">
+    <path d="M 90 300 L 220 300 L 260 250 L 280 320"/>
+  </g>
+</svg>
+```
+
+## 22. Prescrição de exercícios domiciliares e lembretes
+
+| Método e rota | Corpo | Resposta |
+|---|---|---|
+| `POST /api/pacientes/{id}/prescricao` [R] | `{itens: [{exercicio, series, repeticoes, vezes_dia, dias: ["seg", ...], observacao?}], lembrete_hora?}` | 201 com a prescrição; substitui a anterior (que fica inativa); paciente inexistente → 404; `itens` vazio, exercício inexistente/inativo, `series`/`repeticoes`/`vezes_dia` não inteiro ≥ 1, `dias` vazio ou com valor fora de `seg..dom`, `lembrete_hora` fora de `HH:MM` → 422 |
+| `GET /api/pacientes/{id}/prescricao` [R] | — | 200 prescrição ativa; sem prescrição ativa → 404 |
+| `DELETE /api/pacientes/{id}/prescricao` [R] | — | 204; inativa a prescrição e desliga o lembrete |
+| `PUT /api/pacientes/{id}/lembrete` [R] | `{lembrete_hora?, lembrete_ativo?}` | 200 `{lembrete_hora, lembrete_ativo}` (a equipe pode desligar ou mudar a hora; ligar continua sendo escolha do paciente, mas a rota aceita `true`) |
+
+Prescrição = `{id, paciente_id, criado_em, inicio, itens: [{exercicio, nome, series, repeticoes, vezes_dia, dias, observacao}], lembrete_hora, lembrete_ativo, ativo}`:
+- `inicio` = data (`AAAA-MM-DD`) do relógio do processo na criação; `nome` vem do catálogo.
+- `lembrete_hora` e `lembrete_ativo` pertencem ao **paciente** (persistem quando a prescrição é substituída). Todo paciente nasce com `lembrete_ativo: false` e `lembrete_hora = lembrete_hora_padrao` da clínica (é o que `GET .../dados` mostra mesmo sem prescrição); o `lembrete_hora` enviado na prescrição substitui a hora. O paciente liga/desliga pelo chat (regra 7).
+- Ao criar, o sistema manda ao paciente (síncrono, `tipo: "prescricao"`, não para `nao_contatar`) um texto com cada item (`- <nome>: <series> x <repeticoes>, <vezes_dia>x ao dia (<dias separados por ", ">)`), o link de cada exercício e a frase `Para receber lembrete diário, responda LEMBRETE e a hora (ex.: LEMBRETE 19:00).`
+
+**Lembrete diário** (em `POST /api/tarefas/rodar`): para cada paciente com prescrição ativa, `lembrete_ativo: true` e não `nao_contatar`: se a hora de `agora` ≥ `lembrete_hora`, o dia da semana de `agora` está nos `dias` de pelo menos um item e ainda não houve mensagem `tipo: "exercicio"` para o paciente na data de `agora` → cria a mensagem `tipo: "exercicio"` (datada com o `agora` da rodada) com os itens **do dia** (`- <nome>: <series> x <repeticoes>, <vezes_dia>x ao dia` + observação) e a frase `Responda FIZ, NÃO FIZ ou a dor de 0 a 10.` Uma por dia. Dia sem item → nada.
+
+## 23. Adesão e dor
+
+**Registro** (regras 6 e 8 da conversa): um registro por paciente por **dia** (`data` = data do relógio do processo quando a mensagem chegou): `{data, fez, dor, quando}`; `fez` ∈ `true, false, null`; `dor` ∈ `0..10, null`; `quando` = relógio na última alteração. Mensagens no mesmo dia **atualizam** o mesmo registro (último valor de cada campo vence).
+
+`GET /api/pacientes/{id}/adesao?semanas=N` [R] (padrão `N=4`) → 200
+```json
+{"semanas": [{"inicio": "AAAA-MM-DD", "previstos": 4, "feitos": 2, "adesao_pct": 50.0, "dor_media": 4.0}],
+ "registros": [{"data", "fez", "dor", "quando"}]}
+```
+- Semana = segunda a domingo; `inicio` = a segunda. `semanas` lista, em ordem cronológica, as últimas `N` semanas entre a semana de `inicio` da prescrição ativa e a semana de hoje (vazia sem prescrição ativa). `registros` em ordem de `data`.
+- `previstos` = dias da semana que (a) estão nos `dias` de pelo menos um item da prescrição ativa, (b) são ≥ `inicio` da prescrição e (c) são ≤ hoje (relógio do processo), **inclusive hoje**.
+- `feitos` = desses dias, os que têm registro com `fez: true`. Registro `fez: true` em dia não previsto não conta.
+- `adesao_pct = feitos ÷ previstos × 100`, 1 casa; 0 se `previstos = 0`.
+- `dor_media` = média de `dor` dos registros da semana com `dor` não nulo (qualquer dia, previsto ou não), 1 casa; `null` se não houver.
+- Exemplo: prescrição criada ter 06/10/2026 com itens em `seg,qua,sex` e `ter,qui`; registros 06/10 `fiz, dor 3`, 07/10 `nao fiz`, 08/10 `fiz, dor 5`; consulta sex 09/10 → semana `2026-10-05`: `previstos 4` (06, 07, 08, 09), `feitos 2`, `adesao_pct 50.0`, `dor_media 4.0`.
+
+`GET /api/adesao` [R] → 200 `{"pacientes": [{paciente_id, nome, adesao_pct, dor_media, ultima_dor}]}` de todos os pacientes com prescrição ativa, ordem de `paciente_id`, valores da semana atual (`ultima_dor` = `dor` do registro mais recente com dor, ou `null`).
+
+**Dor forte e sinais de alerta:** regra 2 (palavras) e regra 8 (`dor ≥ dor_alerta`) abrem atendimento humano `alta` (seção 18) e nunca respondem com orientação clínica.
+
+## 24. Alertas à equipe
+
+Calculados em `POST /api/tarefas/rodar` (com o `agora` da rodada), idempotentes; cada um vai ao Telegram ao nascer (seção 18). O `quando` do alerta e o `alerta_abandono`/`alerta_reavaliacao` do plano recebem o `agora` da rodada.
+
+| `tipo` | Quando | Texto |
+|---|---|---|
+| `abandono` | plano `ativo` com `faltas_seguidas ≥ abandono_faltas` e `alerta_abandono` nulo **ou** anterior ao `inicio` do último agendamento `realizado` do plano (ou seja, um alerta por sequência de faltas; a sequência recomeça depois de um `realizado`) | `<nome>: <faltas_seguidas> faltas seguidas no plano de <nome do serviço>` |
+| `reavaliacao` | plano `ativo` com `restantes ≤ reavaliacao_sessoes` e `alerta_reavaliacao` nulo (um por plano, inclusive quando o plano já nasce com poucas sessões) | `<nome>: faltam <restantes> sessões do plano de <nome do serviço> — agendar reavaliação` |
+
+`GET /api/alertas` [R] → 200 `{"alertas": [{id, tipo, paciente_id, nome, plano_id, texto, quando, status}]}` só os `aberto`, ordem de `id`. `POST /api/alertas/{id}/resolver` [R] → 200 `{status: "resolvido"}`; inexistente → 404. `alertas` em `tarefas/rodar` = quantos nasceram na rodada.
+
+## 25. Vídeo MP4 do exercício (build do humano, fora do pytest e do loop)
+
+`tools/render-exercicios [--so <id>] [--saida DIR]` (Python 3, biblioteca padrão; chama `npx hyperframes` e `ffprobe`) gera `web/exercicios/<id>.mp4` (ou em `--saida`) a partir de cada `web/exercicios/<id>.svg`:
+
+1. Cria uma pasta temporária com `index.html` = composição HyperFrames **só CSS** (sem GSAP, sem `<script>`, sem referência externa): `<div id="root" data-composition-id="exercicio" data-start="0" data-width="720" data-height="720" data-duration="4">` contendo o SVG inline (`#root svg { position:absolute; inset:0; width:100%; height:100% }`, `body { margin:0; background:#fff }`). A animação CSS do SVG é avançada pelo adaptador `css` do HyperFrames (por isso a seção 21 proíbe SMIL e exige durações de 1, 2 ou 4 s).
+2. Roda `npx hyperframes render <pasta> --output <destino>.mp4 --quality looks --fps 30` (≈ 4 s, 720×720, sem áudio).
+3. Confere com `ffprobe -v error -show_entries format=duration:stream=width,height -of default=nw=1`: duração entre 3,9 e 4,1 s e 720×720; senão sai com código 1 e diz qual exercício falhou.
+4. Imprime uma linha por exercício (`ok <id> <duração>s` ou `falhou <id> <motivo>`); código 0 só se todos passaram.
+
+Requisitos (do humano, não do loop): Node ≥ 22, FFmpeg, Chromium (o `npx hyperframes` baixa o pacote na primeira vez — **precisa de rede**, por isso o agente da execução longa não roda este passo). `verificar-independente.py` renderiza um exercício se o HyperFrames estiver disponível; senão imprime `pulado`. Os MP4 não entram no Git (`.gitignore`); na VPS, rode o `tools/render-exercicios` uma vez (ou copie os arquivos) para `EXERCICIOS_MP4_DIR`.
+"""Testes de aceitação caixa-preta do atende-fisioterapia (contrato: docs/ESPECIFICACAO.md).
+
+Sobem `./atende serve --porta 0 --dados <tmp>` com relógio fixo e falam só HTTP/CLI,
+então valem para qualquer linguagem de implementação.
+"""
+import json
+import os
+import pathlib
+import shutil
+import signal
+import subprocess
+import threading
+import time
+import unicodedata
+import urllib.error
+import urllib.request
+
+import pytest
+
+RAIZ = pathlib.Path(__file__).resolve().parent.parent
+FIXTURE = pathlib.Path(__file__).resolve().parent / "fixtures" / "clinica.json"
+TOKEN = "segredo-teste"
+AGORA = "2026-10-06T09:00"  # terça-feira (conferido: datetime.date(2026,10,6).weekday() == 1)
+PUBLIC_URL = "https://fisio.exemplo"  # só nos testes; o código nunca traz URL
+
+IDS_OBRIGATORIOS = ["ponte", "alongamento-isquiotibiais", "rotacao-ombro-bastao", "pendulo-codman",
+                    "retracao-cervical", "gato-camelo", "agachamento-parede", "elevacao-calcanhar",
+                    "abducao-quadril-deitado", "prancha-modificada", "bird-dog", "mobilidade-tornozelo"]
+
+
+def norm(s):
+    return "".join(c for c in unicodedata.normalize("NFD", s.lower()) if unicodedata.category(c) != "Mn")
+
+
+class Cliente:
+    def __init__(self, base):
+        self.base = base
+
+    def req(self, metodo, rota, corpo=None, token=TOKEN):
+        dados = None if corpo is None else json.dumps(corpo).encode()
+        r = urllib.request.Request(self.base + rota, data=dados, method=metodo)
+        if dados is not None:
+            r.add_header("Content-Type", "application/json")
+        if token:
+            r.add_header("X-Token", token)
+        try:
+            with urllib.request.urlopen(r, timeout=10) as resp:
+                texto = resp.read().decode()
+                return resp.status, (json.loads(texto) if texto and "json" in resp.headers.get("Content-Type", "") else texto)
+        except urllib.error.HTTPError as e:
+            texto = e.read().decode()
+            try:
+                return e.code, json.loads(texto)
+            except ValueError:
+                return e.code, texto
+
+    def get(self, rota, **kw):
+        return self.req("GET", rota, **kw)
+
+    def post(self, rota, corpo=None, **kw):
+        return self.req("POST", rota, {} if corpo is None else corpo, **kw)
+
+    def put(self, rota, corpo, **kw):
+        return self.req("PUT", rota, corpo, **kw)
+
+    def delete(self, rota, **kw):
+        return self.req("DELETE", rota, **kw)
+
+    def bruto(self, rota):
+        """GET sem decodificar: devolve (status, content-type, bytes)."""
+        try:
+            with urllib.request.urlopen(self.base + rota, timeout=10) as resp:
+                return resp.status, resp.headers.get("Content-Type", ""), resp.read()
+        except urllib.error.HTTPError as e:
+            return e.code, e.headers.get("Content-Type", ""), e.read()
+
+    # atalhos (usam padrões do fixture; no verificar-independente tudo vai explícito)
+    def paciente(self, nome="Maria Silva", telefone="(41) 99999-0001", marketing=False):
+        st, r = self.post("/api/pacientes", {"nome": nome, "telefone": telefone, "consentimento_marketing": marketing})
+        assert st in (200, 201), (st, r)
+        return r["id"]
+
+    def agenda(self, paciente_id, inicio, servico="sessao", profissional=None, plano_id=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "inicio": inicio}
+        if profissional:
+            corpo["profissional"] = profissional
+        if plano_id is not None:
+            corpo["plano_id"] = plano_id
+        return self.post("/api/agendamentos", corpo)
+
+    def presenca(self, ag_id, compareceu):
+        st, r = self.post(f"/api/agendamentos/{ag_id}/presenca", {"compareceu": compareceu})
+        assert st == 200, (st, r)
+        return r
+
+    def plano(self, paciente_id, servico="sessao", sessoes=10, frequencia=2, profissional=None):
+        corpo = {"paciente_id": paciente_id, "servico": servico, "sessoes_previstas": sessoes, "frequencia_semanal": frequencia}
+        if profissional:
+            corpo["profissional"] = profissional
+        st, r = self.post("/api/planos", corpo)
+        assert st == 201, (st, r)
+        return r
+
+    def prescricao(self, paciente_id, itens=None, lembrete_hora=None):
+        if itens is None:
+            itens = [{"exercicio": "ponte", "series": 3, "repeticoes": 10, "vezes_dia": 2, "dias": ["seg", "qua", "sex"]},
+                     {"exercicio": "retracao-cervical", "series": 2, "repeticoes": 10, "vezes_dia": 1, "dias": ["ter", "qui"]}]
+        corpo = {"itens": itens}
+        if lembrete_hora:
+            corpo["lembrete_hora"] = lembrete_hora
+        st, r = self.post(f"/api/pacientes/{paciente_id}/prescricao", corpo)
+        assert st == 201, (st, r)
+        return r
+
+    def msg(self, telefone, texto):
+        st, r = self.post("/api/mensagens", {"telefone": telefone, "texto": texto}, token=None)
+        assert st == 200, (st, r)
+        return "\n".join(r["respostas"])
+
+    def saida(self, tipo=None):
+        st, r = self.get("/api/saida")
+        assert st == 200, (st, r)
+        return [m for m in r["mensagens"] if tipo is None or m["tipo"] == tipo]
+
+    def rodar(self, agora=None):
+        st, r = self.post("/api/tarefas/rodar", {"agora": agora} if agora else {})
+        assert st == 200, (st, r)
+        return r
+
+    def fila(self):
+        st, r = self.get("/api/atendimento-humano")
+        assert st == 200, (st, r)
+        return r["fila"]
+
+
+SERVIDORES = []
+
+
+@pytest.fixture(autouse=True)
+def _parar_servidores():
+    yield
+    while SERVIDORES:
+        SERVIDORES.pop().parar()
+
+
+class Servidor:
+    def __init__(self, dados, agora=AGORA, env=None):
+        SERVIDORES.append(self)  # o teardown autouse para todos, mesmo se o teste falhar
+        self.dados = dados
+        self.agora = agora
+        self.env = env or {}
+        self.proc = None
+
+    def subir(self):
+        exe = RAIZ / "atende"
+        if not exe.exists():
+            pytest.fail("./atende não existe (ponto de entrada da seção 1 da especificação)")
+        env = {k: v for k, v in os.environ.items()
+               if not k.startswith(("EVOLUTION_", "TELEGRAM_", "WEBHOOK_", "EXERCICIOS_", "PUBLIC_URL"))}
+        env.update(ATENDE_AGORA=self.agora, **self.env)
+        self.proc = subprocess.Popen(
+            [str(exe), "serve", "--porta", "0", "--dados", str(self.dados)],
+            cwd=RAIZ, env=env, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True,
+        )
+        linha = {}
+
+        def ler():
+            linha["v"] = self.proc.stdout.readline()
+
+        t = threading.Thread(target=ler, daemon=True)
+        t.start()
+        t.join(15)
+        primeira = (linha.get("v") or "").strip()
+        if not primeira.startswith("PORTA="):
+            self.parar()
+            pytest.fail(f"servidor não imprimiu PORTA=<n> na 1ª linha (veio {primeira!r})")
+        # drena o resto do stdout para o processo não travar com o pipe cheio
+        threading.Thread(target=lambda: [None for _ in self.proc.stdout], daemon=True).start()
+        return Cliente(f"http://127.0.0.1:{int(primeira.split('=', 1)[1])}")
+
+    def parar(self):
+        if self.proc and self.proc.poll() is None:
+            self.proc.send_signal(signal.SIGTERM)
+            try:
+                self.proc.wait(5)
+            except subprocess.TimeoutExpired:
+                self.proc.kill()
+                self.proc.wait(5)
+
+
+@pytest.fixture
+def dados(tmp_path):
+    d = tmp_path / "dados"
+    d.mkdir()
+    shutil.copy(FIXTURE, d / "clinica.json")
+    return d
+
+
+@pytest.fixture
+def servidor(dados):
+    s = Servidor(dados)
+    yield s
+    s.parar()
+
+
+@pytest.fixture
+def api(servidor):
+    return servidor.subir()
+
+
+def com_config(dados, **campos):
+    """Altera campos de clinica.json antes de subir (ex.: conselho, dor_alerta, abandono_faltas)."""
+    cfg = json.loads((dados / "clinica.json").read_text())
+    cfg.update(campos)
+    (dados / "clinica.json").write_text(json.dumps(cfg, ensure_ascii=False))
+
+
+def com_conselho(dados, conselho):
+    com_config(dados, conselho=conselho)
+
+
+class Externo:
+    """Servidor falso local que faz o papel da Evolution API e da API do Telegram. Grava cada pedido."""
+
+    def __init__(self):
+        import http.server
+        self.pedidos = []
+        self.falhas = 0          # quantos próximos pedidos devolvem 500
+        self.prox_msg = 1000
+        self.trava = threading.Lock()
+        externo = self
+
+        class H(http.server.BaseHTTPRequestHandler):
+            def do_POST(self):
+                corpo = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+                try:
+                    dados = json.loads(corpo or b"{}")
+                except ValueError:
+                    dados = {}
+                pedido = {"rota": self.path, "headers": {k.lower(): v for k, v in self.headers.items()}, "json": dados}
+                with externo.trava:
+                    if externo.falhas > 0:
+                        externo.falhas -= 1
+                        pedido["status"] = 500
+                        externo.pedidos.append(pedido)
+                        self.send_response(500)
+                        self.send_header("Content-Length", "0")
+                        self.end_headers()
+                        return
+                    externo.prox_msg += 1
+                    pedido["status"], pedido["message_id"] = 200, externo.prox_msg
+                    externo.pedidos.append(pedido)
+                resp = {"ok": True, "result": {"message_id": pedido["message_id"]}, "key": {"id": f"X{pedido['message_id']}"}}
+                b = json.dumps(resp).encode()
+                self.send_response(201 if "/message/" in self.path else 200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(b)))
+                self.end_headers()
+                self.wfile.write(b)
+
+            def log_message(self, *a):
+                pass
+
+        self.srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), H)
+        self.url = f"http://127.0.0.1:{self.srv.server_address[1]}"
+        threading.Thread(target=self.srv.serve_forever, daemon=True).start()
+
+    def whats(self, ok=True):
+        return [p for p in self.pedidos if p["rota"] == "/message/sendText/clinica" and (not ok or p["status"] == 200)]
+
+    def media(self):
+        return [p for p in self.pedidos if p["rota"] == "/message/sendMedia/clinica" and p["status"] == 200]
+
+    def telegram(self):
+        return [p for p in self.pedidos if p["rota"] == "/botTOKEN123/sendMessage" and p["status"] == 200]
+
+    def fechar(self):
+        self.srv.shutdown()
+        self.srv.server_close()
+
+
+SEGREDO_WH = "wh-segredo"
+CHAT_EQUIPE = -100777
+SEGREDO_TG = "tg-segredo"
+
+
+def env_integracoes(externo, **extra):
+    env = {
+        "EVOLUTION_URL": externo.url, "EVOLUTION_API_KEY": "chave-evo", "EVOLUTION_INSTANCIA": "clinica",
+        "WEBHOOK_SEGREDO": SEGREDO_WH, "PUBLIC_URL": PUBLIC_URL,
+        "TELEGRAM_API_URL": externo.url, "TELEGRAM_TOKEN": "TOKEN123", "TELEGRAM_CHAT_ID": str(CHAT_EQUIPE),
+        "TELEGRAM_SEGREDO": SEGREDO_TG,
+    }
+    env.update(extra)
+    return env
+
+
+@pytest.fixture
+def externo():
+    e = Externo()
+    yield e
+    e.fechar()
+
+
+@pytest.fixture
+def api_int(dados, externo):
+    """Servidor com Evolution e Telegram apontando para o falso local."""
+    s = Servidor(dados, env=env_integracoes(externo))
+    yield s.subir()
+    s.parar()
+
+
+def esperar(cond, segundos=5):
+    fim = time.time() + segundos
+    while time.time() < fim:
+        if cond():
+            return True
+        time.sleep(0.05)
+    return cond()
+
+exec
+/bin/bash -lc 'cat tests/test_entrega.py; cat atende; cat .gitignore; cat longrun/2026-10-05-fisio-v1/verificar-limites.sh' in /home/nmaldaner/projetos/atende-fisioterapia
+ succeeded in 0ms:
+cat: tests/test_entrega.py: No such file or directory
+#!/usr/bin/env python3
+from src.server import main
+
+if __name__ == '__main__':
+    main()
+__pycache__/
+*.pyc
+*.db
+*.sqlite*
+/dados/
+.loop.lock
+.env
+/backups/
+*.mp4
+/node_modules/
+#!/usr/bin/env bash
+# Camada "limite" do goal.md. Imprime LIMITES OK ou o primeiro problema (código ≠ 0).
+set -uo pipefail
+cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
+D=longrun/2026-10-05-fisio-v1
+falha() { echo "LIMITE VIOLADO: $*"; exit 1; }
+[ -f $D/hash-congelado.txt ] || falha "contrato não congelado (rode $D/congelar.sh)"
+source $D/hash-congelado.txt
+h=$(cat $(git ls-files tests pytest.ini docs/ESPECIFICACAO.md $D/verificar-limites.sh $D/verificar-independente.py | sort) | sha256sum | cut -c1-16)
+[ "$h" = "$HASH" ] || falha "hash do contrato mudou ($h ≠ $HASH)"
+git diff --quiet -- tests pytest.ini docs/ESPECIFICACAO.md $D/verificar-independente.py || falha "contrato alterado no working tree"
+n=$(python3 -m pytest --collect-only -q 2>/dev/null | grep -oE '^[0-9]+ tests? collected' | grep -oE '^[0-9]+')
+[ "$n" = "$TESTES" ] || falha "nº de testes coletados $n ≠ $TESTES"
+fora=$( { git diff --name-only "$BASE"; git ls-files --others --exclude-standard; } | sort -u \
+  | grep -vE "^($D/|atende$|src/|web/|tools/|exemplos/|README\.md$|VERSION$|Dockerfile$|docker-compose\.yml$|\.env\.exemplo$|\.dockerignore$|\.gitignore$|CLAUDE\.md$|FALHAS\.md$)" )
+[ -z "$fora" ] || falha "arquivos fora do escopo: $(echo $fora)"
+codigo=$(ls -d atende src web tools 2>/dev/null)
+[ -n "$codigo" ] || falha "não há implementação (atende/src/web/tools)"
+grep -q "Como rodar no seu ambiente" README.md || falha "README perdeu a seção do dono (Como rodar no seu ambiente)"
+# credencial e host externo são barrados também nos arquivos de entrega (Dockerfile, compose, .env.exemplo, .dockerignore)
+entrega=$(ls Dockerfile docker-compose.yml .env.exemplo .dockerignore 2>/dev/null)
+grep -rnE '^\s*(import|from)\s+(requests|httpx|aiohttp|urllib3|flask|fastapi|django|openai|anthropic|groq|playwright|selenium)\b' $codigo && falha "dependência externa ou SDK de API"
+grep -rnE '(OPENAI|ANTHROPIC|GROQ|OPENROUTER)_?API_KEY|sk-[A-Za-z0-9]{20,}|[0-9]{8,10}:[A-Za-z0-9_-]{30,}|graph\.facebook|api\.telegram\.org' $codigo $entrega && falha "chave/credencial ou API externa no código ou na entrega"
+grep -rnP 'https?://(?!127\.0\.0\.1|localhost|www\.w3\.org)' $codigo $entrega && falha "URL externa no código ou na entrega"
+grep -rn '0\.0\.0\.0' $codigo && falha "bind em 0.0.0.0 no código (só o comando do container pode passar --host)"
+grep -rniE '<(script|animate|animateTransform|animateMotion|set)\b' web/exercicios/*.svg 2>/dev/null && falha "SVG com script ou SMIL (seção 21: só animação CSS)"
+echo "LIMITES OK (hash $HASH, $TESTES testes, escopo ok, sem API/rede)"
+
+codex
+O ciclo anterior terminou com 93 testes aprovados e 5 falhas. Vou completar neste ciclo a entrega Docker, o arquivo de ambiente e as instruções de VPS; depois rodarei a suíte inteira. A página `/equipe` e o utilitário de renderização continuam pendentes.
+
+exec
+/bin/bash -lc "rg --files tests; rg -n 'docker|Deploy|env.exemplo|HEALTHCHECK' tests; cat src/backup.py; tail -n 12 FALHAS.md; cat VERSION" in /home/nmaldaner/projetos/atende-fisioterapia
+ succeeded in 0ms:
+tests/test_campanhas.py
+tests/test_planos.py
+tests/test_cadastros.py
+tests/test_prescricao.py
+tests/test_integracoes.py
+tests/test_lgpd_raiox.py
+tests/test_basico.py
+tests/test_conversa.py
+tests/test_docker.py
+tests/conftest.py
+tests/test_exercicios.py
+tests/test_lembretes.py
+tests/test_agenda.py
+tests/fixtures/clinica.json
+tests/test_docker.py:16:def test_dockerfile():
+tests/test_docker.py:21:    assert "HEALTHCHECK" in d and "/api/saude" in d
+tests/test_docker.py:26:    c = ler("docker-compose.yml")
+tests/test_docker.py:31:def test_env_exemplo_tem_todas_as_variaveis_sem_segredo_real():
+tests/test_docker.py:32:    e = ler(".env.exemplo")
+tests/test_docker.py:42:    # só o corpo da seção "## Deploy na VPS" (até o próximo "## "): a seção do dono já cita PUBLIC_URL etc.
+tests/test_docker.py:43:    m = re.search(r"^##\s+Deploy na VPS\s*$(.*?)(?=^##\s|\Z)", r, re.M | re.S)
+tests/test_docker.py:44:    assert m, "falta a seção '## Deploy na VPS' (seção 19)"
+"""Arquivo portátil com configuração e snapshot consistente do SQLite."""
+import json
+import os
+from pathlib import Path
+import sqlite3
+import tempfile
+import zipfile
+
+
+def copiar(dados, saida):
+    dados, saida = Path(dados), Path(saida)
+    if saida.resolve() in ((dados / 'estado.sqlite3').resolve(), (dados / 'clinica.json').resolve()):
+        raise ValueError('O backup não pode sobrescrever o estado')
+    with tempfile.TemporaryDirectory(dir=saida.parent) as tmp:
+        snapshot = Path(tmp) / 'estado.sqlite3'
+        origem = sqlite3.connect((dados / 'estado.sqlite3').resolve().as_uri() + '?mode=ro', uri=True)
+        destino = sqlite3.connect(snapshot)
+        try:
+            origem.backup(destino)
+        finally:
+            destino.close()
+            origem.close()
+        arquivo = Path(tmp) / 'backup.zip'
+        with zipfile.ZipFile(arquivo, 'w', zipfile.ZIP_DEFLATED) as z:
+            z.write(snapshot, 'estado.sqlite3')
+            z.write(dados / 'clinica.json', 'clinica.json')
+        os.replace(arquivo, saida)
+
+
+def restaurar(dados, entrada):
+    dados = Path(dados)
+    dados.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=dados) as tmp:
+        with zipfile.ZipFile(entrada) as z:
+            config = z.read('clinica.json')
+            json.loads(config)
+            banco = Path(tmp) / 'estado.sqlite3'
+            banco.write_bytes(z.read('estado.sqlite3'))
+        db = sqlite3.connect(banco)
+        try:
+            if db.execute('PRAGMA integrity_check').fetchone()[0] != 'ok':
+                raise ValueError('Backup inválido')
+            db.execute('SELECT chave FROM meta LIMIT 1')
+        finally:
+            db.close()
+        cfg = Path(tmp) / 'clinica.json'
+        cfg.write_bytes(config)
+        # Restauração exige servidor parado, conforme contrato.
+        for sufixo in ('-wal', '-shm', '-journal'):
+            (dados / ('estado.sqlite3' + sufixo)).unlink(missing_ok=True)
+        os.replace(banco, dados / 'estado.sqlite3')
+        os.replace(cfg, dados / 'clinica.json')
+| 2026-10-19 | Prescrição, opt-in e registros domiciliares ausentes causavam 12 falhas de aceitação | adicionar módulo persistente, rotas e regras 6–8; completar exportação/remoção LGPD | infra |
+| 2026-10-19 | Biblioteca e páginas inexistentes deixavam 7 testes de catálogo/recursos falhando | adicionar módulo de biblioteca, rotas públicas e 12 SVGs; reutilizar catálogo persistido | infra |
+| 2026-10-19 | Agenda rejeitava todo plano e tarefas não geravam alertas/retorno de conclusão | adicionar módulo de planos, vínculo e transição de presença; derivar contagens da agenda e marcar sequência alertada | infra |
+| 2026-10-19 | Molde aceitava presença repetida e gerava retorno por serviço, incompatíveis com fisioterapia | guard 409 na presença e remover geração por retorno_dias; retorno de plano fica para próxima etapa | prompt |
+| 2026-10-05 | validação independente: §6 regra 6 (`exercicio`) dizia só "registra dor" — número puro ≥ `dor_alerta` não abria fila alta nem citava fisioterapeuta/192, e `test_dor_forte_abre_fila_alta_e_numero_puro_so_com_pendencia` exige os dois; "sem resposta" da pendência não estava definido | regra 6: número puro "com os mesmos efeitos da regra 8"; "sem resposta" definido por tipo (`agendado` / `ofertado` / sem registro de dor no dia) | prompt |
+| 2026-10-05 | validação independente: regra 8 sem precedência — `não fiz tudo, dor 2` contém `fiz` e `nao fiz`; `test_registro_fiz_nao_fiz_e_dor_no_dia` espera `fez: false` | regra 8: `nao fiz`/`nao consegui` decidem antes de `fiz` | prompt |
+| 2026-10-05 | validação independente: §7 e regra 6 não diziam que a oferta de espera é o par (`inicio`, `profissional`); `test_espera_horario_ja_ocupado` espera `ocupado` com Diego livre no mesmo horário — implementador que agenda "o primeiro livre" responderia `agendad` | §7 e regra 6: oferta = par do agendamento cancelado; aceitar agenda esse par exato ou responde `ocupado` | prompt |
+| 2026-10-05 | validação independente: `verificar-independente.py` com o chromium do snap gravava screenshot em `/tmp` (tmp privado do snap) → PNG vazio → "SVG não se mexe" (falha falsa em vez de "pulado"); o `chrome-headless-shell` do Playwright dá quadros iguais com `--virtual-time-budget`; `docker`/`npx`/`ffprobe` ausentes ou `subir()` falhando viravam traceback | quadros numa pasta dentro do repo; só `chrome` completo; `shutil.which` antes de chamar; `subir()` em try → linha de falha; funções importáveis + `main()`; checagem de ≥ 6 `<style>` distintos | infra |
+| 2026-10-05 | validação independente: `test_readme_explica_deploy...` aceitava `PUBLIC_URL`, `EXERCICIOS_MP4_DIR` e `render-exercicios` da seção do dono (já presentes antes da implementação) | o teste lê só o corpo de `## Deploy na VPS`; §19 fixa o título H2 | prompt |
+| 2026-10-05 | validação independente: ambiguidades menores — hora do lembrete (precedência de `sem lembrete`, 2 dígitos, faixa), stopwords do FAQ sem lista, texto original na abertura do Telegram, data do lembrete e dos alertas = `agora` da rodada, "mês anterior" do CLI raiox, comparação por data no retorno, regras 1/2 com atendimento já aberto | spec §6 (regras 7, 9, 11 e fim), §8, §10, §18, §22, §24 explicitadas; nenhum teste mudou de número (98) | prompt |
+| 2026-10-05 | validação do plano: §17 mandava a explicação de exercício para a caixa de saída sem `tipo` próprio; o único próximo (`exercicio`) é a pendência da regra 6 — implementador honesto passaria em `test_exercicio_com_mp4_vai_por_sendmedia` e faria "7" depois de "como faço a ponte?" virar dor 7 + fila alta | `tipo: "explicacao"` no enum da §5, na regra 9 e na §17; regra 6 enumera as 3 pendências que contam | prompt |
+| 2026-10-05 | validação do plano: cabeçalho da §6 trocava pontuação por espaço, então `lembrete 20:30` virava `lembrete 20 30` e `test_lembrete_opt_in_pelo_chat` cobra `"20:30"` | regra 7: hora lida do texto original por `\d{1,2}:\d{2}` | prompt |
+0.5.0
+
+exec
+/bin/bash -lc "cat tests/test_docker.py; sed -n '1,80p' src/server.py; head -n 7 FALHAS.md" in /home/nmaldaner/projetos/atende-fisioterapia
+ succeeded in 0ms:
+"""Seção 19: entrega em Docker para a VPS (checagem estática; o build real fica no verificar-independente)."""
+import re
+
+from conftest import RAIZ
+
+VARIAVEIS = ("EVOLUTION_URL", "EVOLUTION_API_KEY", "EVOLUTION_INSTANCIA", "WEBHOOK_SEGREDO", "PUBLIC_URL",
+             "EXERCICIOS_MP4_DIR", "TELEGRAM_API_URL", "TELEGRAM_TOKEN", "TELEGRAM_CHAT_ID", "TELEGRAM_SEGREDO")
+
+
+def ler(nome):
+    p = RAIZ / nome
+    assert p.exists(), f"falta {nome}"
+    return p.read_text()
+
+
+def test_dockerfile():
+    d = ler("Dockerfile")
+    assert re.search(r"^FROM\s+python:3", d, re.M)
+    assert "pip install" not in d and "curl" not in d
+    assert re.search(r"serve.*--host.*0\.0\.0\.0.*--porta.*8080.*--dados.*/dados", d.replace("\n", " ").replace('"', "").replace(",", " "))
+    assert "HEALTHCHECK" in d and "/api/saude" in d
+    assert re.search(r"^COPY\s+.*web/", d, re.M)
+
+
+def test_compose():
+    c = ler("docker-compose.yml")
+    for trecho in ("atende:", "build: .", "unless-stopped", "env_file", ".env", "/dados", "127.0.0.1:8080:8080"):
+        assert trecho in c, trecho
+
+
+def test_env_exemplo_tem_todas_as_variaveis_sem_segredo_real():
+    e = ler(".env.exemplo")
+    for var in VARIAVEIS:
+        assert re.search(rf"^{var}=\s*$", e, re.M), var          # presente e vazia
+    assert "http" not in e
+    assert not re.search(r"\d{8,10}:[A-Za-z0-9_-]{30,}", e)       # formato de token real do Telegram
+
+
+def test_readme_explica_deploy_e_mantem_a_secao_do_dono():
+    r = ler("README.md")
+    assert "Como rodar no seu ambiente" in r
+    # só o corpo da seção "## Deploy na VPS" (até o próximo "## "): a seção do dono já cita PUBLIC_URL etc.
+    m = re.search(r"^##\s+Deploy na VPS\s*$(.*?)(?=^##\s|\Z)", r, re.M | re.S)
+    assert m, "falta a seção '## Deploy na VPS' (seção 19)"
+    deploy = m.group(1)
+    for trecho in ("/webhook/evolution/", "MESSAGES_UPSERT", "setWebhook", "secret_token", "./atende backup",
+                   "PUBLIC_URL", "EXERCICIOS_MP4_DIR", "render-exercicios"):
+        assert trecho in deploy, trecho
+"""CLI e transporte HTTP; cada requisição de domínio é uma transação."""
+import argparse
+import hmac
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import json
+import re
+import sys
+from urllib.parse import parse_qs, urlsplit
+
+from .core import Clinica, Erro, ROOT
+from . import conversa, gestao, cadastros, backup, integracoes, planos, exercicios, prescricoes
+
+
+def rotear(c, metodo, rota, q, b):
+    if metodo == 'GET' and rota == '/api/adesao':
+        return 200, {'pacientes': prescricoes.geral(c)}
+    m = re.fullmatch(r'/api/pacientes/(\d+)/(prescricao|lembrete|adesao)', rota)
+    if m:
+        pid, recurso = int(m[1]), m[2]
+        c.paciente(pid)
+        if recurso == 'prescricao':
+            if metodo == 'POST':
+                return 201, prescricoes.criar(c, pid, b)
+            if metodo == 'GET':
+                resultado = prescricoes.obter(c, pid)
+                if resultado is None:
+                    raise Erro(404, 'Sem prescrição ativa')
+                return 200, resultado
+            if metodo == 'DELETE':
+                prescricoes.remover(c, pid)
+                return 204, None
+        if recurso == 'lembrete' and metodo == 'PUT':
+            return 200, prescricoes.preferencias(c, pid, b)
+        if recurso == 'adesao' and metodo == 'GET':
+            return 200, prescricoes.adesao(c, pid, q.get('semanas', 4))
+    m = re.fullmatch(r'/api/exercicios(?:/([^/]+))?', rota)
+    if m:
+        ident = m[1]
+        if metodo == 'GET' and ident is None:
+            return 200, {'exercicios': exercicios.listar(c)}
+        if metodo == 'POST' and ident is None:
+            return 201, exercicios.salvar(c, b)
+        if metodo == 'PUT' and ident is not None:
+            return 200, exercicios.salvar(c, b, ident)
+        if metodo == 'DELETE' and ident is not None:
+            exercicios.salvar(c, {'ativo': False}, ident)
+            return 200, {'ativo': False}
+    if rota == '/api/planos':
+        if metodo == 'POST':
+            return 201, planos.criar(c, b)
+        if metodo == 'GET':
+            return 200, {'planos': planos.listar(c, q.get('paciente_id'))}
+    m = re.fullmatch(r'/api/planos/(\d+)(/encerrar)?', rota)
+    if m:
+        if metodo == 'GET' and not m[2]:
+            return 200, planos.obter(c, int(m[1]))
+        if metodo == 'POST' and m[2]:
+            return 200, planos.encerrar(c, int(m[1]), b.get('motivo'))
+    if metodo == 'GET' and rota == '/api/alertas':
+        return 200, {'alertas': planos.listar_alertas(c)}
+    m = re.fullmatch(r'/api/alertas/(\d+)/resolver', rota)
+    if metodo == 'POST' and m:
+        return 200, planos.resolver(c, int(m[1]))
+    if metodo == 'POST' and rota.startswith('/webhook/evolution/'):
+        integracoes.evolution(c, b)
+        return 200, {'ok': True}
+    if metodo == 'POST' and rota == '/webhook/telegram':
+        integracoes.receber_telegram(c, b)
+        return 200, {'ok': True}
+    m = re.fullmatch(r'/api/atendimento-humano/(\d+)/(responder|encerrar)', rota)
+    if metodo == 'POST' and m:
+        return 200, integracoes.humano(c, int(m[1]), m[2], b.get('texto'))
+    if metodo == 'GET' and rota == '/api/pacientes':
+        return 200, {'pacientes': cadastros.pacientes(c, q.get('busca', ''))}
+    m = re.fullmatch(r'/api/pacientes/(\d+)', rota)
+    if metodo == 'PUT' and m:
+        return 200, cadastros.editar_paciente(c, int(m[1]), b)
+    m = re.fullmatch(r'/api/(profissionais|servicos|faq)(?:/([^/]+))?', rota)
+    if m:
+        tipo, ident = m.groups()
+# FALHAS
+
+| data | o que quebrou | menor correção | prompt \| infra |
+|---|---|---|---|
+| 2026-10-19 14:08 | Exercício prescrito caía no não entendi e sendMedia não existia | regra 9 antes de agendar; ID persistido na saída e transporte compartilhado sem duplicação | infra |
+| 2026-10-19 | Prescrição, opt-in e registros domiciliares ausentes causavam 12 falhas de aceitação | adicionar módulo persistente, rotas e regras 6–8; completar exportação/remoção LGPD | infra |
+| 2026-10-19 | Biblioteca e páginas inexistentes deixavam 7 testes de catálogo/recursos falhando | adicionar módulo de biblioteca, rotas públicas e 12 SVGs; reutilizar catálogo persistido | infra |
+
+apply patch
+patch: completed
+/home/nmaldaner/projetos/atende-fisioterapia/.dockerignore
+/home/nmaldaner/projetos/atende-fisioterapia/.env.exemplo
+/home/nmaldaner/projetos/atende-fisioterapia/Dockerfile
+/home/nmaldaner/projetos/atende-fisioterapia/VERSION
+/home/nmaldaner/projetos/atende-fisioterapia/docker-compose.yml
+diff --git a/.dockerignore b/.dockerignore
+new file mode 100644
+index 0000000000000000000000000000000000000000..e1e43e7d1a5ac6b0668e23fb39997376441a846d
+--- /dev/null
++++ b/.dockerignore
+@@ -0,0 +1,15 @@
++.git
++.env
++.env.*
++dados
++backups
++longrun
++tests
++docs
++guia
++__pycache__
++**/__pycache__
++*.pyc
++*.sqlite*
++*.db
++node_modules
+diff --git a/.env.exemplo b/.env.exemplo
+new file mode 100644
+index 0000000000000000000000000000000000000000..74d786f3937e0bf7a70acc4129af81132d347dfb
+--- /dev/null
++++ b/.env.exemplo
+@@ -0,0 +1,10 @@
++EVOLUTION_URL=
++EVOLUTION_API_KEY=
++EVOLUTION_INSTANCIA=
++WEBHOOK_SEGREDO=
++PUBLIC_URL=
++EXERCICIOS_MP4_DIR=
++TELEGRAM_API_URL=
++TELEGRAM_TOKEN=
++TELEGRAM_CHAT_ID=
++TELEGRAM_SEGREDO=
+diff --git a/Dockerfile b/Dockerfile
+new file mode 100644
+index 0000000000000000000000000000000000000000..7db347e543b550fb8c58b904b1c8782cceede28e
+--- /dev/null
++++ b/Dockerfile
+@@ -0,0 +1,11 @@
++FROM python:3-slim
++WORKDIR /app
++ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
++COPY atende VERSION ./
++COPY src/ ./src/
++COPY web/ ./web/
++COPY exemplos/ ./exemplos/
++RUN chmod +x /app/atende && mkdir -p /dados
++EXPOSE 8080
++HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD python3 -c "import json, urllib.request; r = urllib.request.urlopen('http://127.0.0.1:8080/api/saude', timeout=3); assert json.load(r)['ok'] is True"
++CMD ["./atende", "serve", "--host", "0.0.0.0", "--porta", "8080", "--dados", "/dados"]
+diff --git a/VERSION b/VERSION
+index 8f0916f768f0487bcf8d33827ce2c8dcecb645c1..a918a2aa18d5bec6a8bb93891a7a63c243111796
+--- a/VERSION
++++ b/VERSION
+@@ -1 +1 @@
+-0.5.0
++0.6.0
+diff --git a/docker-compose.yml b/docker-compose.yml
+new file mode 100644
+index 0000000000000000000000000000000000000000..b149415188a8d9e55740e8ca4440245034d931ac
+--- /dev/null
++++ b/docker-compose.yml
+@@ -0,0 +1,11 @@
++services:
++  atende:
++    build: .
++    restart: unless-stopped
++    env_file: .env
++    ports:
++      - "127.0.0.1:8080:8080"
++    volumes:
++      - ./dados:/dados
++      - ./backups:/backups
++      - ./web/exercicios:/app/web/exercicios:ro
+
+hook: PostToolUse
+hook: PostToolUse Completed
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('README.md')
+s=p.read_text()
+s=s.replace('(Seção escrita pelo implementador conforme a seção 19 da especificação: compose, proxy HTTPS, registro dos webhooks da Evolution e do Telegram com os segredos, backup diário no cron, endereço público e pasta dos vídeos.)', '''Os comandos desta seção são passos do operador na VPS. Docker, registro de webhooks e renderização não são executados pelo loop de desenvolvimento.
+
+1. Copie "'`.env.exemplo` para `.env` e mantenha esse arquivo privado (`chmod 600 .env`). Crie `dados/` e `backups/`; copie `exemplos/clinica.json` para `dados/clinica.json`, ajuste a clínica e troque o token antes de iniciar. O compose persiste o banco e a configuração em `./dados`.
+2. Preencha somente as integrações que deseja habilitar. Evolution usa `EVOLUTION_URL`, `EVOLUTION_API_KEY`, `EVOLUTION_INSTANCIA` e `WEBHOOK_SEGREDO`. Telegram usa `TELEGRAM_API_URL`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID` e `TELEGRAM_SEGREDO`. Sem configuração, a saída é simulada. Não use `ATENDE_AGORA` em produção.
+3. Execute `docker compose up -d --build`. Confira `docker compose ps` e `docker compose logs atende`. O HEALTHCHECK consulta `/api/saude` com Python. A publicação fica somente em `127.0.0.1:8080`; o processo dentro do container aceita conexões da rede do container.
+4. Configure seu proxy reverso (Nginx ou Caddy) para encaminhar o domínio à porta local 8080, preservando caminho, corpo e headers, com certificado HTTPS. Defina `PUBLIC_URL` como a origem pública HTTPS, sem barra final. Acesse `/api/saude`, `/`, `/equipe` e `/exercicios/ponte`. Recrie o serviço após mudanças de ambiente: `docker compose up -d --force-recreate`.
+5. Na configuração da instância Evolution, registre o destino formado por `PUBLIC_URL` + `/webhook/evolution/<segredo>` (substitua `<segredo>` pelo `WEBHOOK_SEGREDO`) e selecione o evento `MESSAGES_UPSERT`. A instância deve ser a mesma de `EVOLUTION_INSTANCIA`. Não exponha a chave no navegador.
+6. Para o Telegram, o operador registra o webhook usando o método `setWebhook` na base `TELEGRAM_API_URL`, no caminho `/bot<TELEGRAM_TOKEN>/setWebhook`, com os campos `url` (formado por `PUBLIC_URL` + `/webhook/telegram`) e `secret_token` igual a `TELEGRAM_SEGREDO`. O proxy deve preservar `X-Telegram-Bot-Api-Secret-Token`. Use o grupo configurado em `TELEGRAM_CHAT_ID`; comandos disponíveis: `/fila`, `/agenda`, `/alertas`, `/responder` e `/encerrar`.
+
+Para vídeos, `tools/render-exercicios` ainda é uma entrega pendente deste desenvolvimento. Quando implementado, o operador poderá rodar `python3 tools/render-exercicios` fora do container (Node ≥ 22, FFmpeg, Chromium e rede) ou copiar MP4 já renderizados para `web/exercicios/`. O compose monta essa pasta em `/app/web/exercicios`, somente para leitura. Defina `EXERCICIOS_MP4_DIR=/app/web/exercicios` no `.env`; se usar outra pasta, ajuste também o volume. Os MP4 ficam fora do Git. Sem MP4 ou sem `PUBLIC_URL`, a explicação segue como texto com link.
+
+Backup diário: crie `backups/`, restrinja seu acesso e acrescente no crontab do operador (troque `/caminho/atende-fisioterapia` pelo diretório instalado):
+
+```cron
+0 2 * * * cd /caminho/atende-fisioterapia && docker compose exec -T atende ./atende backup --dados /dados --saida /backups/clinica-$(date +'"\\\\%F).zip >> backups/cron.log 2>&1
+"'```
+
+O backup inclui configuração e snapshot consistente do SQLite, mesmo com o servidor ligado. Copie os arquivos para armazenamento protegido fora da VPS e defina retenção conforme a política da clínica. Para restaurar, pare o serviço, restaure e reinicie:
+
+```sh
+docker compose stop atende
+docker compose run --rm --no-deps atende ./atende restaurar --dados /dados --entrada /backups/clinica-AAAA-MM-DD.zip
+docker compose up -d atende
+```
+
+Confirmações, lembretes, alertas e reenvios dependem de chamadas periódicas a `POST /api/tarefas/rodar` com `X-Token`; não existe agendador automático no servidor. Configure um agendador interno autenticado para essa rota. O token da equipe está em `dados/clinica.json`.
+
+## Executar localmente
+
+```sh
+./atende serve --porta 8080 --dados ./dados
+```
+
+O servidor imprime `PORTA=8080` e escuta somente em `127.0.0.1` por padrão; `--porta 0` escolhe uma porta livre. Python 3 e biblioteca padrão são suficientes. Sem configuração prévia, `exemplos/clinica.json` é copiado para a pasta de dados; personalize-o e altere o token antes de uso real. Integrações são opcionais e lidas do ambiente do processo; `.env` é carregado pelo compose, não automaticamente pelo CLI.
+
+Versão 0.6.0: adicionados Dockerfile, compose com volumes persistentes, modelo de ambiente vazio e instruções de operação. A página `/equipe` e o renderizador ainda estão pendentes.'"''')
+p.write_text(s)
+PY
+python3 -m pytest -q tests/ > longrun/2026-10-05-fisio-v1/pytest-ciclo-6.log 2>&1; tail -30 longrun/2026-10-05-fisio-v1/pytest-ciclo-6.log" in /home/nmaldaner/projetos/atende-fisioterapia
+exec
+/bin/bash -lc "bash longrun/2026-10-05-fisio-v1/verificar-limites.sh; git diff --check; python3 - <<'PY'
+import pathlib, subprocess
+p='README.md'
+before=subprocess.check_output(['git','show','HEAD:'+p],text=True)
+after=pathlib.Path(p).read_text()
+def owner(s):
+    return s.split('## Como rodar no seu ambiente\\n',1)[1].split('\\n## ',1)[0]
+assert owner(before)==owner(after)
+print('Seção do dono preservada byte a byte: OK')
+PY" in /home/nmaldaner/projetos/atende-fisioterapia
+ succeeded in 188ms:
+LIMITES OK (hash 381b6510e90832d5, 98 testes, escopo ok, sem API/rede)
+Seção do dono preservada byte a byte: OK
+
+codex
+Os arquivos de entrega e as instruções de VPS estão escritos. O verificador retornou `LIMITES OK`, e confirmei que a seção “Como rodar no seu ambiente” foi preservada byte a byte. A suíte completa ainda está rodando; o build Docker ficará para a validação humana, conforme a restrição deste ciclo.
+
+exec
+/bin/bash -lc "date '+%Y-%m-%d %H:%M'; cat longrun/2026-10-05-fisio-v1/decisions.md" in /home/nmaldaner/projetos/atende-fisioterapia
+ succeeded in 0ms:
+2026-10-19 14:11
+# Decisões (só acrescentar)
+
+| data | decisão | motivo | alternativa descartada |
+|---|---|---|---|
+| 2026-10-19 13:50 | Reutilizar módulos do atende-clinica e banco SQLite sob RLock/transação por requisição; backlog HTTP 64 | base comum da spec e concorrência local | reescrever base inteira |
+| 2026-10-19 13:54 | Contagens de plano calculadas da agenda; índice SQLite único para plano ativo; retorno criado na transição de conclusão | evitar contadores divergentes e duplicação de retornos | contadores incrementais separados |
+| 2026-10-19 13:54 | Guardar última sessão realizada da sequência alertada além do timestamp exigido | presença pode ser futura em relação ao relógio; preservar idempotência por sequência | comparar somente timestamps e repetir alerta a cada rodada |
+| 2026-10-19 13:58 | Biblioteca em módulo independente reutiliza catalogo SQLite e lock do servidor; HTML em template web com escape de conteúdo | preservar ordem/persistência e impedir conteúdo de cadastro virar marcação executável | HTML montado sem escape ou catálogo duplicado |
+| 2026-10-19 13:58 | SVGs com movimentos próprios por transformação/CSS d, durações 2/4 s e pausa por movimento reduzido; MP4 só lido do diretório configurado | contrato de animação local, acessibilidade e build humano posterior | SMIL, scripts, render ou download no servidor |
+| 2026-10-19 14:02 | Preferências de lembrete em pacientes; prescrições versionadas em tabela com índice único parcial para ativa; itens guardam nome da criação | substituição preserva opt-in/hora e histórico da prescrição | preferências copiadas a cada prescrição |
+| 2026-10-19 14:02 | Registro diário único por paciente/data com atualização independente de fez/dor; agregados derivados da prescrição ativa | mensagens no mesmo dia não duplicam nem apagam campo omitido | contadores de adesão incrementais |
+| 2026-10-19 14:02 | enviar/registrar aceitam instante opcional usado pelo lembrete; resposta do paciente usa relógio do processo | idempotência por data da rodada e histórico coerente; contrato distingue os dois relógios | datar lembrete com relógio fixo do processo |
+| 2026-10-19 14:08 | Coluna migrada saida.exercicio_id; entrega e reenvio escolhem sendMedia pelo arquivo e PUBLIC_URL; respostas processadas são informadas ao webhook | preservar reenvio após reinício, evitar envio duplo e respeitar nao_contatar; histórico fica com conversar | inferir ID pelo texto ou enviar novamente no webhook |
+
+ succeeded in 37589ms:
+...............F........................................................ [ 73%]
+..........................                                               [100%]
+=================================== FAILURES ===================================
+_________________________________ test_paginas _________________________________
+
+api = <conftest.Cliente object at 0xf484a12da8d0>
+
+    def test_paginas(api):
+        st, html = api.get("/", token=None)
+        assert st == 200 and 'id="chat"' in html
+        st, html = api.get("/equipe", token=None)
+>       assert st == 200
+E       assert 401 == 200
+
+tests/test_basico.py:37: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_basico.py::test_paginas - assert 401 == 200
+1 failed, 97 passed in 37.40s
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('CLAUDE.md')
+s=p.read_text().replace('## Lessons\\n','## Lessons\\n- Antes de ler um arquivo de teste por tema, localizar o caminho com "'`rg --files tests`; a entrega Docker está em tests/test_docker.py.'"\\n')
+p.write_text(s)
+p=Path('FALHAS.md')
+s=p.read_text().replace('|---|---|---|---|\\n','|---|---|---|---|\\n| 2026-10-19 14:11 | Arquivos Docker/env e instruções operacionais ausentes | adicionar entrega estática conforme §19, preservando a seção do dono; build reservado ao humano | infra |\\n| 2026-10-19 14:11 | Leitura presumiu tests/test_entrega.py e pasta tools existentes | localizar arquivos com rg --files antes de ler; tools ainda pendente | prompt |\\n',1)
+p.write_text(s)
+PY" in /home/nmaldaner/projetos/atende-fisioterapia
+ succeeded in 0ms:
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+root=Path('longrun/2026-10-05-fisio-v1')
+p=root/'state.md'
+s=p.read_text()
+s=s.replace('atualizado 2026-10-19 14:08','atualizado 2026-10-19 14:11')
+start=s.index('- VERSION 0.5.0.')
+end=s.index('\\n## Falta',start)
+s=s[:start]+'''- Entrega §19: Dockerfile Python padrão com HEALTHCHECK, compose com dados/backups persistentes e vídeos montados somente para leitura, .env.exemplo com 10 variáveis vazias, .dockerignore e README operacional. Seção do dono preservada byte a byte. Build Docker não executado (restrição do ciclo).
+- VERSION 0.6.0. Suíte completa: **97 passed / 1 failed**, 37,40 s; log "'`longrun/2026-10-05-fisio-v1/pytest-ciclo-6.log`. Única falha: test_paginas, /equipe responde 401.
+- **LIMITES OK**, hash 381b6510e90832d5, 98 testes; git diff --check OK. Sem chamadas externas, Docker, render ou commit.
+'"''' + s[end:]
+s=s[:s.index('## Falta')]+'''## Falta
+- /equipe pública, dados autenticados e ações reais (única falha); /recepcao ainda vem do molde.
+- Escrever tools/render-exercicios conforme §25; NÃO executar. Não está coberto pela suíte de 98 testes, mas faz parte do resultado.
+- Atualizar os avisos de pendência no README quando equipe/renderizador forem implementados.
+- Revisão visual/clínica e build Docker continuam sendo validação humana de nível 4. Nenhum conflito teste/especificação identificado.
+
+## Como retomar
+1. Ler goal → state → plan → canal → fins progress/failures. Especificação inteira, conftest e fixture lidos neste ciclo.
+2. Implementar /equipe conforme §13–15 e §20–24: rota pública e operações autenticadas nas APIs existentes. Não basta adicionar os IDs ao HTML.
+3. Escrever tools/render-exercicios (§25), sem executar; remover os avisos de pendência correspondentes no README.
+4. Rodar suíte inteira e limites; só marcar concluído com 98 passed, LIMITES OK e toda a spec implementada. Atualizar registros; sem commits nem rede externa. ciclo-6.log, loop.log e teste-final.log pertencem ao loop externo; não editar.
+'''
+p.write_text(s)
+(root/'plan.md').write_text('''# Plano
+
+## Estratégia atual
+97/98 testes aprovados. Entrega Docker/env/README escrita e validada estaticamente. Restam interface da equipe e renderizador de build humano.
+
+## Próximos 3 passos
+1. Implementar /equipe pública com token, agenda/cadastros, planos, prescrições, adesão/dor, biblioteca, alertas e atendimento humano, com ações reais nas APIs existentes.
+2. Escrever tools/render-exercicios conforme §25 sem executar; atualizar README removendo pendências resolvidas.
+3. Rodar pytest completo e limites; atualizar registros e marcar concluído somente com 98 passed, LIMITES OK e resultado completo. Build Docker/render e revisão clínica/visual ficam para humano.
+''')
+for name,line in {
+'progress.md':'| 2026-10-19 14:11 | Dockerfile/compose/env/dockerignore e README operacional; VERSION 0.6.0; pytest 97 passed / 1 failed (37,40 s); LIMITES OK; seção do dono preservada | sem commit (loop externo) | parcial | — | 0 |',
+'failures.md':'| 2026-10-19 14:11 | 5 falhas anteriores → completar entrega §19 → 97 passed / 1 failed (test_paginas: /equipe retorna 401) | Docker/env/README; nenhum conflito de contrato | avanço de 4 testes; LIMITES OK | infra |\\n| 2026-10-19 14:11 | Leitura presumiu tests/test_entrega.py e tools existentes → localizar com rg --files → tests/test_docker.py lido; tools pendente | corrigir descoberta e registrar lição | resolvido | prompt |',
+'decisions.md':'| 2026-10-19 14:11 | Compose usa bind mounts dados/backups e web/exercicios somente leitura; Dockerfile cria /dados e usa healthcheck Python | persistência, backup por cron e MP4 copiados sem rebuild; sem dependências Python | dados efêmeros ou instalação de curl |',
+'canal.md':'- 2026-10-19 14:11 · fato · Ciclo 6: 97 passed / 1 failed (37,40 s), LIMITES OK. Só falha test_paginas: /equipe responde 401. Docker/env/README escritos; build não executado. Seção do dono comparada byte a byte com HEAD e preservada.\\n- 2026-10-19 14:11 · armadilha · README sinaliza equipe/renderizador pendentes em dois pontos; atualizar ao implementá-los. Compose monta web/exercicios em /app/web/exercicios; EXERCICIOS_MP4_DIR é caminho dentro do container. Tarefas exigem agendador externo autenticado.'
+}.items():
+    with (root/name).open('a') as f: f.write('\\n'+line+'\\n')
+PY
+bash longrun/2026-10-05-fisio-v1/verificar-limites.sh; git diff --check" in /home/nmaldaner/projetos/atende-fisioterapia
+ succeeded in 182ms:
+LIMITES OK (hash 381b6510e90832d5, 98 testes, escopo ok, sem API/rede)
+
+codex
+Ciclo registrado: entrega Docker, compose, `.env.exemplo` e README implementados; versão 0.6.0.
+
+- Pytest: **97 passed / 1 failed**.
+- Verificador: **LIMITES OK**.
+- Falha restante: `/equipe` retorna 401.
+- Também falta escrever `tools/render-exercicios`.
+
+Estado, plano e registros atualizados. Sem commit, rede externa ou execução de Docker/render.
+hook: Stop
+hook: Stop Completed
+tokens used
+78,609
+Ciclo registrado: entrega Docker, compose, `.env.exemplo` e README implementados; versão 0.6.0.
+
+- Pytest: **97 passed / 1 failed**.
+- Verificador: **LIMITES OK**.
+- Falha restante: `/equipe` retorna 401.
+- Também falta escrever `tools/render-exercicios`.
+
+Estado, plano e registros atualizados. Sem commit, rede externa ou execução de Docker/render.

@@ -17,6 +17,7 @@ Sistema de atendimento ao paciente para uma clínica de fisioterapia: agenda, co
 When I correct you, or you catch yourself making a mistake: before continuing, add the lesson as a one-line rule under ## Lessons, so it never happens again.
 
 ## Lessons
+- Antes de ler um arquivo de teste por tema, localizar o caminho com `rg --files tests`; a entrega Docker está em tests/test_docker.py.
 - Em leituras de vários arquivos com tail, usar `tail -n N arquivo1 arquivo2` para evitar ambiguidade de opções.
 - Toda data/valor esperado num teste tem a conta num comentário e foi conferido com `python3 -c` (dia da semana, soma de dias, minutos disponíveis).
 - Chromium do snap (`/snap/bin/chromium`) não grava em `/tmp` (tmp privado): screenshot do verificador vai numa pasta dentro do repo. O `chrome-headless-shell` do Playwright não avança animação CSS com `--virtual-time-budget` (quadros iguais) — só o `chrome` completo. Medido em 05/10/2026. (05/10/2026)

@@ -2,6 +2,8 @@
 
 | data | o que quebrou | menor correção | prompt \| infra |
 |---|---|---|---|
+| 2026-10-19 14:11 | Arquivos Docker/env e instruções operacionais ausentes | adicionar entrega estática conforme §19, preservando a seção do dono; build reservado ao humano | infra |
+| 2026-10-19 14:11 | Leitura presumiu tests/test_entrega.py e pasta tools existentes | localizar arquivos com rg --files antes de ler; tools ainda pendente | prompt |
 | 2026-10-19 14:08 | Exercício prescrito caía no não entendi e sendMedia não existia | regra 9 antes de agendar; ID persistido na saída e transporte compartilhado sem duplicação | infra |
 | 2026-10-19 | Prescrição, opt-in e registros domiciliares ausentes causavam 12 falhas de aceitação | adicionar módulo persistente, rotas e regras 6–8; completar exportação/remoção LGPD | infra |
 | 2026-10-19 | Biblioteca e páginas inexistentes deixavam 7 testes de catálogo/recursos falhando | adicionar módulo de biblioteca, rotas públicas e 12 SVGs; reutilizar catálogo persistido | infra |

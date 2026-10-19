@@ -20,3 +20,6 @@ Formato: `- AAAA-MM-DD HH:MM · fato|aprendizado|glossário|armadilha · texto`
 - 2026-10-19 14:08 · fato · Regra 9 em exercicios.conversar, entre prescricoes.conversar e agendamento; enviar aceita exercicio_id e historico=False. conversar mantém histórico único. Lista processadas impede webhook de repetir explicação já tentada ou bloqueada.
 - 2026-10-19 14:08 · armadilha · saida.exercicio_id exige migração via PRAGMA em conversa.iniciar; reenviar reaproveita entregar e resolve MP4/PUBLIC_URL no momento do envio. Não converter explicacao em exercicio: número puro depois dela não é dor.
 - 2026-10-19 14:08 · fato · Ciclo 5: 93 passed / 5 failed; LIMITES OK. Validação complementar local reproduzível em validar-explicacao.py. Restam /equipe, entrega Docker/README e render-exercicios (escrever, nunca executar no loop).
+
+- 2026-10-19 14:11 · fato · Ciclo 6: 97 passed / 1 failed (37,40 s), LIMITES OK. Só falha test_paginas: /equipe responde 401. Docker/env/README escritos; build não executado. Seção do dono comparada byte a byte com HEAD e preservada.
+- 2026-10-19 14:11 · armadilha · README sinaliza equipe/renderizador pendentes em dois pontos; atualizar ao implementá-los. Compose monta web/exercicios em /app/web/exercicios; EXERCICIOS_MP4_DIR é caminho dentro do container. Tarefas exigem agendador externo autenticado.

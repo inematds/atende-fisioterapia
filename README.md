@@ -49,4 +49,39 @@ Toda falha real vai para `FALHAS.md` (uma linha: data, o que quebrou, menor corr
 
 ## Deploy na VPS
 
-(Seção escrita pelo implementador conforme a seção 19 da especificação: compose, proxy HTTPS, registro dos webhooks da Evolution e do Telegram com os segredos, backup diário no cron, endereço público e pasta dos vídeos.)
+Os comandos desta seção são passos do operador na VPS. Docker, registro de webhooks e renderização não são executados pelo loop de desenvolvimento.
+
+1. Copie `.env.exemplo` para `.env` e mantenha esse arquivo privado (`chmod 600 .env`). Crie `dados/` e `backups/`; copie `exemplos/clinica.json` para `dados/clinica.json`, ajuste a clínica e troque o token antes de iniciar. O compose persiste o banco e a configuração em `./dados`.
+2. Preencha somente as integrações que deseja habilitar. Evolution usa `EVOLUTION_URL`, `EVOLUTION_API_KEY`, `EVOLUTION_INSTANCIA` e `WEBHOOK_SEGREDO`. Telegram usa `TELEGRAM_API_URL`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID` e `TELEGRAM_SEGREDO`. Sem configuração, a saída é simulada. Não use `ATENDE_AGORA` em produção.
+3. Execute `docker compose up -d --build`. Confira `docker compose ps` e `docker compose logs atende`. O HEALTHCHECK consulta `/api/saude` com Python. A publicação fica somente em `127.0.0.1:8080`; o processo dentro do container aceita conexões da rede do container.
+4. Configure seu proxy reverso (Nginx ou Caddy) para encaminhar o domínio à porta local 8080, preservando caminho, corpo e headers, com certificado HTTPS. Defina `PUBLIC_URL` como a origem pública HTTPS, sem barra final. Acesse `/api/saude`, `/`, `/equipe` e `/exercicios/ponte`. Recrie o serviço após mudanças de ambiente: `docker compose up -d --force-recreate`.
+5. Na configuração da instância Evolution, registre o destino formado por `PUBLIC_URL` + `/webhook/evolution/<segredo>` (substitua `<segredo>` pelo `WEBHOOK_SEGREDO`) e selecione o evento `MESSAGES_UPSERT`. A instância deve ser a mesma de `EVOLUTION_INSTANCIA`. Não exponha a chave no navegador.
+6. Para o Telegram, o operador registra o webhook usando o método `setWebhook` na base `TELEGRAM_API_URL`, no caminho `/bot<TELEGRAM_TOKEN>/setWebhook`, com os campos `url` (formado por `PUBLIC_URL` + `/webhook/telegram`) e `secret_token` igual a `TELEGRAM_SEGREDO`. O proxy deve preservar `X-Telegram-Bot-Api-Secret-Token`. Use o grupo configurado em `TELEGRAM_CHAT_ID`; comandos disponíveis: `/fila`, `/agenda`, `/alertas`, `/responder` e `/encerrar`.
+
+Para vídeos, `tools/render-exercicios` ainda é uma entrega pendente deste desenvolvimento. Quando implementado, o operador poderá rodar `python3 tools/render-exercicios` fora do container (Node ≥ 22, FFmpeg, Chromium e rede) ou copiar MP4 já renderizados para `web/exercicios/`. O compose monta essa pasta em `/app/web/exercicios`, somente para leitura. Defina `EXERCICIOS_MP4_DIR=/app/web/exercicios` no `.env`; se usar outra pasta, ajuste também o volume. Os MP4 ficam fora do Git. Sem MP4 ou sem `PUBLIC_URL`, a explicação segue como texto com link.
+
+Backup diário: crie `backups/`, restrinja seu acesso e acrescente no crontab do operador (troque `/caminho/atende-fisioterapia` pelo diretório instalado):
+
+```cron
+0 2 * * * cd /caminho/atende-fisioterapia && docker compose exec -T atende ./atende backup --dados /dados --saida /backups/clinica-$(date +\%F).zip >> backups/cron.log 2>&1
+```
+
+O backup inclui configuração e snapshot consistente do SQLite, mesmo com o servidor ligado. Copie os arquivos para armazenamento protegido fora da VPS e defina retenção conforme a política da clínica. Para restaurar, pare o serviço, restaure e reinicie:
+
+```sh
+docker compose stop atende
+docker compose run --rm --no-deps atende ./atende restaurar --dados /dados --entrada /backups/clinica-AAAA-MM-DD.zip
+docker compose up -d atende
+```
+
+Confirmações, lembretes, alertas e reenvios dependem de chamadas periódicas a `POST /api/tarefas/rodar` com `X-Token`; não existe agendador automático no servidor. Configure um agendador interno autenticado para essa rota. O token da equipe está em `dados/clinica.json`.
+
+## Executar localmente
+
+```sh
+./atende serve --porta 8080 --dados ./dados
+```
+
+O servidor imprime `PORTA=8080` e escuta somente em `127.0.0.1` por padrão; `--porta 0` escolhe uma porta livre. Python 3 e biblioteca padrão são suficientes. Sem configuração prévia, `exemplos/clinica.json` é copiado para a pasta de dados; personalize-o e altere o token antes de uso real. Integrações são opcionais e lidas do ambiente do processo; `.env` é carregado pelo compose, não automaticamente pelo CLI.
+
+Versão 0.6.0: adicionados Dockerfile, compose com volumes persistentes, modelo de ambiente vazio e instruções de operação. A página `/equipe` e o renderizador ainda estão pendentes.
