@@ -8,6 +8,8 @@
 
 Landing page and step-by-step guide (PT/EN/ES): **https://inematds.github.io/atende-fisioterapia/guia/** · [English](https://inematds.github.io/atende-fisioterapia/guia/en/) · [Español](https://inematds.github.io/atende-fisioterapia/guia/es/)
 
+🎬 Video: https://www.youtube.com/watch?v=Pir0ezbdVgk
+
 Patient service for **a physiotherapy clinic**, in Python 3 using only the standard library and SQLite: evaluation and session scheduling, automatic confirmation, waiting list, **treatment plan** (planned × completed sessions, dropout and reassessment alerts), **prescribed home exercises** with a library of 12 animated exercises (SVG; MP4 via HyperFrames for WhatsApp), opt-in daily reminder, **adherence and pain** logging with clinical alert, FAQ, human queue, emergency (192), campaigns with the COFFITO lock and LGPD handling of health data, registrations, schedule management, backup, WhatsApp through the Evolution API, staff via Telegram, export to the Recovery Dashboard of the Margin X-Ray (Raio-X de Margem), and Docker delivery for a VPS.
 
 The full contract is in `docs/ESPECIFICACAO.md`. The patient chat lives at `/`, the staff page at `/equipe`, and each exercise at `/exercicios/<id>`. The bot never gives clinical guidance: it only explains what the physiotherapist prescribed and hands everything else to the staff.

@@ -8,6 +8,8 @@
 
 Landing y guía paso a paso (PT/EN/ES): **https://inematds.github.io/atende-fisioterapia/guia/** · [English](https://inematds.github.io/atende-fisioterapia/guia/en/) · [Español](https://inematds.github.io/atende-fisioterapia/guia/es/)
 
+🎬 Video: https://www.youtube.com/watch?v=Pir0ezbdVgk
+
 Atención al paciente de **una clínica de fisioterapia**, en Python 3 solo con la biblioteca estándar y SQLite: agenda de evaluación y sesiones, confirmación automática, lista de espera, **plan de tratamiento** (sesiones previstas × realizadas, alerta de abandono y de reevaluación), **ejercicios domiciliarios prescritos** con una biblioteca de 12 ejercicios animados (SVG; MP4 mediante HyperFrames para WhatsApp), recordatorio diario opt-in, registro de **adherencia y dolor** con alerta clínica, FAQ, cola humana, emergencia (192), campañas con la restricción del COFFITO y LGPD para datos de salud, registros, gestión de agenda, copia de seguridad, WhatsApp mediante la Evolution API, equipo por Telegram, exportación al Panel de Recuperación de Raio-X de Margem y entrega en Docker para VPS.
 
 El contrato completo está en `docs/ESPECIFICACAO.md`. El chat del paciente está en `/`, la página del equipo en `/equipe` y cada ejercicio en `/exercicios/<id>`. El bot nunca da orientación clínica: explica solo lo que el fisioterapeuta prescribió y pasa el resto al equipo.
